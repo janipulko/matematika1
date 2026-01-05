@@ -98,8 +98,30 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker registriran!', reg))
+          .then(reg => {
+            console.log('Service Worker registriran!', reg);
+
+            // Preveri za posodobitve ob nalaganju
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // Nova vsebina je na voljo, osveži stran
+                  window.location.reload();
+                }
+              });
+            });
+          })
           .catch(err => console.error('Napaka pri registraciji SW:', err));
+      });
+
+      // Poslušaj za spremembe v kontrolerju (ko novi SW prevzame nadzor)
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          window.location.reload();
+          refreshing = true;
+        }
       });
     }
   </script>
