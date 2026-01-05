@@ -66,7 +66,7 @@ class ControlsBar extends HTMLElement {
     // Dodaj "=" gumb
     this.equalBtn = document.createElement('button');
     this.equalBtn.className = 'btn equal';
-    this.equalBtn.textContent = '= je enako';
+    this.equalBtn.textContent = '=';
     this.equalBtn.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('confirm', { bubbles: true, composed: true }));
     });
@@ -101,50 +101,68 @@ class ControlsBar extends HTMLElement {
           align-items: center;
           justify-content: center;
           gap: 10px;
-          flex-wrap: wrap;
-          margin-top: 8px;
-          padding-bottom: 4px;
+          margin-top: 20px;
+          padding-bottom: 10px;
+          width: 100%;
         }
         .btn {
           appearance: none;
           border: none;
           outline: none;
-          padding: clamp(8px, 1.5vh, 12px) clamp(14px, 2.5vw, 18px);
-          border-radius: 999px;
+          flex: 1;
+          min-width: 50px;
+          max-width: 120px;
+          aspect-ratio: 1 / 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
           background: var(--primary);
           color: #08323c;
-          font-weight: 800;
-          font-size: clamp(14px, 2vh, 18px);
+          font-weight: 900;
+          font-size: clamp(20px, 4vw, 36px);
           letter-spacing: .2px;
           cursor: pointer;
-          box-shadow: 0 4px 12px rgba(38,198,218,0.2);
-          transition: transform .08s ease, filter .12s ease, background .2s ease;
+          box-shadow: 0 6px 16px rgba(38,198,218,0.3);
+          transition: transform .1s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter .12s ease, background .2s ease, box-shadow .2s ease;
           user-select: none;
         }
-        .btn:hover { filter: brightness(1.03); }
-        .btn:active { transform: translateY(1px) scale(0.99); }
+        .btn:hover { 
+          filter: brightness(1.05);
+          transform: scale(1.05);
+          box-shadow: 0 8px 20px rgba(38,198,218,0.4);
+        }
+        .btn:active { 
+          transform: scale(0.95);
+          box-shadow: 0 2px 8px rgba(38,198,218,0.3);
+        }
 
         .btn.neg {
           background: #FFCDD2;
           color: #7a1c1c;
-          box-shadow: 0 4px 12px rgba(239,83,80,0.18);
+          box-shadow: 0 6px 16px rgba(239,83,80,0.25);
         }
+        .btn.neg:hover { box-shadow: 0 8px 20px rgba(239,83,80,0.35); }
+        
         .btn.pos {
           background: #C8E6C9;
           color: #194d23;
-          box-shadow: 0 4px 12px rgba(102,187,106,0.18);
+          box-shadow: 0 6px 16px rgba(102,187,106,0.25);
         }
+        .btn.pos:hover { box-shadow: 0 8px 20px rgba(102,187,106,0.35); }
+
         .btn.equal {
           background: var(--accent);
           color: #5a4605;
-          box-shadow: 0 4px 12px rgba(255,213,79,0.2);
-          padding: clamp(8px, 1.5vh, 12px) clamp(18px, 3vw, 22px);
+          box-shadow: 0 6px 16px rgba(255,213,79,0.3);
+          font-size: clamp(28px, 6vw, 48px);
         }
+        .btn.equal:hover { box-shadow: 0 8px 20px rgba(255,213,79,0.4); }
         .btn.active-kbd {
           outline: 4px solid #FF5252;
-          outline-offset: 2px;
-          box-shadow: 0 0 15px rgba(255, 82, 82, 0.6);
-          transform: scale(1.05);
+          outline-offset: 4px;
+          box-shadow: 0 0 20px rgba(255, 82, 82, 0.7);
+          transform: scale(1.1);
           z-index: 5;
         }
         .flash {

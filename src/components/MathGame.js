@@ -112,7 +112,10 @@ class MathGame extends HTMLElement {
     this.sum = 0;
     this.clicks = 0;
     this.sound = sound;
-    this.showActiveIndicator = true;
+    
+    // Privzeto: indikator tipkovnice izključen na touch zaslonih, vključen drugje
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+    this.showActiveIndicator = !isTouch;
 
     this.render();
     this._attachEventListeners();
