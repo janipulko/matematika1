@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vesela matematika</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#26C6DA">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    /* ===========================
+       Globalni stili in barvna paleta
+       =========================== */
+    :root{
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --ink: #223;
+      --muted: #6b7280;
+      --primary: #26C6DA;     /* turkizna */
+      --primary-d: #1aa7b7;
+      --accent: #FFD54F;       /* rumena */
+      --accent-d: #f4c02e;
+      --ok: #66BB6A;           /* zelena */
+      --warn: #FFA726;         /* oranžna */
+      --danger: #EF5350;       /* rdeča */
+      --gold: #F2C94C;
+      --gold-d: #D4A017;
+      --bubble: #e5eef6;
+      --grid-stroke: #dfe7ef;
+      --grid-fill: #FFE082;    /* mehka rumena */
+      --shadow: 0 8px 20px rgba(0,0,0,0.08);
+      --radius: 16px;
+      --radius-sm: 12px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink);
+      background: radial-gradient(circle at 20% 10%, #fdf7e3, transparent 40%),
+                  radial-gradient(circle at 80% 0%, #e6fbff, transparent 40%),
+                  var(--bg);
+    }
+
+    .app{
+      max-width: 920px;
+      margin: 12px auto;
+      padding: 16px;
+      height: calc(100vh - 24px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .badge{
+      padding:6px 10px;
+      border-radius: 999px;
+      background: #e9fbff;
+      color: var(--primary-d);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: .3px;
+    }
+
+    .footer-note{
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: auto;
+      padding-top: 10px;
+      flex-shrink: 0;
+    }
+  </style>
+  <script type="module" src="components/MathGame.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <span class="badge">Vesela matematika</span>
+    </div>
+
+    <math-game></math-game>
+
+    <div class="footer-note">Namig: Uporabi parametre URL, npr. <code>?num=1,5,10</code> ali <code>?num=-2,5,10</code></div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registriran!', reg))
+          .catch(err => console.error('Napaka pri registraciji SW:', err));
+      });
+    }
+  </script>
+</body>
+</html>

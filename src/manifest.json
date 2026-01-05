@@ -1,0 +1,17 @@
+{
+  "name": "Vesela matematika",
+  "short_name": "Matematika",
+  "description": "Zabavna matematična igra za otroke",
+  "start_url": "play.html",
+  "display": "standalone",
+  "background_color": "#f7fafc",
+  "theme_color": "#26C6DA",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
