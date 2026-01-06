@@ -38,26 +38,32 @@ class ScoreGrid extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         :host {
-          display: block;
+          display: flex;
           flex: 1;
           min-height: 0;
-          display: flex;
           align-items: center;
           justify-content: center;
+          width: 100%;
+          overflow: hidden;
         }
         .grid-wrap {
-          margin: 4px auto;
-          padding: 8px;
+          padding: clamp(4px, 1vh, 12px);
           background: linear-gradient(180deg, #fff, #f9fbff);
           border-radius: var(--radius);
           border: 1px solid #eef2f7;
-          width: 100%;
-          max-width: 42vh; /* Širina prilagojena višini zaslona */
+          height: 100%;
+          aspect-ratio: 1/1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
         }
         .grid {
           display: grid;
           grid-template-columns: repeat(10, 1fr);
-          gap: clamp(2px, 0.5vh, 6px);
+          gap: clamp(1px, 0.4vh, 6px);
+          width: 100%;
+          height: 100%;
         }
         .cell {
           aspect-ratio: 1/1;

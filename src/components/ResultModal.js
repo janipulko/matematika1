@@ -44,7 +44,12 @@ class ResultModal extends HTMLElement {
     content.innerHTML = '';
 
     if (isSuccess) {
-      this.renderSuccess(content, stars);
+      // Posodobi skupno število zvezdic v localStorage
+      const currentTotal = parseInt(localStorage.getItem('math-game-total-stars') || '0', 10);
+      const newTotal = currentTotal + stars;
+      localStorage.setItem('math-game-total-stars', newTotal);
+
+      this.renderSuccess(content, stars, newTotal);
     } else {
       this.renderFailure(content);
     }
@@ -52,7 +57,7 @@ class ResultModal extends HTMLElement {
     this.dialog.showModal();
   }
 
-  renderSuccess(container, starsCount) {
+  renderSuccess(container, starsCount, totalStars) {
     const title = document.createElement('h2');
     title.textContent = 'Bravo! Odlično ti gre!';
     container.appendChild(title);
@@ -70,6 +75,19 @@ class ResultModal extends HTMLElement {
     }
     
     container.appendChild(starsContainer);
+
+    // Prikaz skupnega seštevka zvezdic
+    const totalContainer = document.createElement('div');
+    totalContainer.className = 'total-stars';
+    totalContainer.innerHTML = `Skupaj: <span>${totalStars}</span> ★`;
+    container.appendChild(totalContainer);
+
+    const rewardBtn = document.createElement('button');
+    rewardBtn.className = 'btn-reward';
+    rewardBtn.textContent = 'Posebno presenečenje 🎁';
+    rewardBtn.disabled = totalStars < 30;
+    rewardBtn.onclick = () => location.href = 'unlock.html';
+    container.appendChild(rewardBtn);
 
     const btn = document.createElement('button');
     btn.className = 'btn-next';
@@ -164,6 +182,18 @@ class ResultModal extends HTMLElement {
           transform: scale(1.2);
           text-shadow: 0 0 10px rgba(242, 201, 76, 0.5);
         }
+        .total-stars {
+          font-size: clamp(20px, 4vw, 32px);
+          color: var(--primary);
+          background: #f8fafc;
+          padding: 10px 24px;
+          border-radius: var(--radius-sm);
+          font-weight: bold;
+          margin-top: -10px;
+        }
+        .total-stars span {
+          color: var(--gold);
+        }
         button {
           padding: 16px 32px;
           font-size: clamp(18px, 4vw, 24px);
@@ -179,6 +209,17 @@ class ResultModal extends HTMLElement {
         .btn-next {
           background: var(--ok);
           color: white;
+        }
+        .btn-reward {
+          background: var(--gold);
+          color: white;
+          margin-top: -20px;
+        }
+        .btn-reward:disabled {
+          background: #e2e8f0;
+          color: #94a3b8;
+          cursor: not-allowed;
+          transform: none;
         }
         .btn-retry {
           background: var(--primary);

@@ -14,18 +14,23 @@ function parseNumsFromURL() {
   const params = new URLSearchParams(location.search);
   const raw = params.get('num');
   if (!raw) return null;
-  const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+
+  // regex najde pare (crka)(stevilka)
+  const regex = /([pmts])(\d+)/g;
   const nums = [];
-  const seen = new Set();
-  for (const p of parts) {
-    const v = Number(p);
-    if (!Number.isFinite(v)) continue;
-    if (v === 0) continue;
-    if (seen.has(v)) continue;
-    seen.add(v);
-    nums.push(v);
-    if (nums.length >= 4) break;
+  let match;
+  while ((match = regex.exec(raw)) !== null) {
+    const op = match[1];
+    const value = parseInt(match[2], 10);
+    if (isNaN(value) || value === 0) continue;
+    
+    // Preprečimo dvojnike (ista operacija in vrednost)
+    if (nums.some(n => n.op === op && n.val === value)) continue;
+    
+    nums.push({ op, val: value });
+    if (nums.length >= 5) break; // Povečano na 5 gumbov, če je treba
   }
+
   if (nums.length < 2) return null;
   return nums;
 }
@@ -36,7 +41,7 @@ function ensureNumsInURL() {
   const nums = parseNumsFromURL();
   if (!nums) {
     const params = new URLSearchParams(location.search);
-    params.set('num', '1,5,10');
+    params.set('num', 'p1p5p10');
     const newURL = `${location.pathname}?${params.toString()}${location.hash}`;
     location.assign(newURL);
     return null;
@@ -53,7 +58,15 @@ function bfsMinClicks(nums) {
   while (q.length) {
     const u = q.shift();
     for (const step of nums) {
-      const v = u + step;
+      let v;
+      if (step.op === 'p') v = u + step.val;
+      else if (step.op === 'm') v = u - step.val;
+      else if (step.op === 't') v = u * step.val;
+      else if (step.op === 's') {
+        if (u % step.val !== 0) continue; // Le celoštevilsko deljenje brez ostanka
+        v = u / step.val;
+      }
+
       if (v < 0 || v > MAX) continue;
       if (dist[v] !== Infinity) continue;
       dist[v] = dist[u] + 1;
@@ -63,7 +76,7 @@ function bfsMinClicks(nums) {
   return dist;
 }
 
-function pickRandomTarget(dist, minK = 4, maxK = 7) {
+function pickRandomTarget(dist, minK = 4, maxK = 10) {
   const candidates = [];
   for (let t = 1; t <= 100; t++) {
     if (dist[t] >= minK && dist[t] <= maxK) candidates.push(t);
@@ -102,9 +115,10 @@ class MathGame extends HTMLElement {
     this.nums = parsed;
 
     this.dist = bfsMinClicks(this.nums);
-    this.target = pickRandomTarget(this.dist, 4, 7);
+    this.target = pickRandomTarget(this.dist, 3, 10);
     if (this.target === null) {
-      this.shadowRoot.innerHTML = `<p>Konfiguracija <code>?num=${encodeURIComponent(this.nums.join(','))}</code> ne omogoča doseči nobenega cilja v [0..100]. Spremeni parametre.</p>`;
+      const urlHint = this.nums.map(n => n.op + n.val).join('');
+      this.shadowRoot.innerHTML = `<p>Konfiguracija <code>?num=${urlHint}</code> ne omogoča doseči nobenega cilja v [0..100]. Spremeni parametre.</p>`;
       return;
     }
     this.minSteps = this.dist[this.target];
@@ -113,9 +127,14 @@ class MathGame extends HTMLElement {
     this.clicks = 0;
     this.sound = sound;
     
-    // Privzeto: indikator tipkovnice izključen na touch zaslonih, vključen drugje
-    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
-    this.showActiveIndicator = !isTouch;
+    // Naloži nastavitve iz localStorage ali določi privzete
+    const savedActive = localStorage.getItem('math-game-show-active');
+    if (savedActive !== null) {
+      this.showActiveIndicator = savedActive === 'true';
+    } else {
+      const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+      this.showActiveIndicator = !isTouch;
+    }
 
     this.render();
     this._attachEventListeners();
@@ -136,11 +155,13 @@ class MathGame extends HTMLElement {
     this.shadowRoot.addEventListener('confirm', () => this.onConfirm());
     this.shadowRoot.addEventListener('toggle-sound', (e) => {
       const enabled = e.detail?.enabled ?? true;
-      this.sound.enabled = enabled;
+      this.sound.setEnabled(enabled);
       if (enabled) this.sound.click();
     });
     this.shadowRoot.addEventListener('toggle-active-indicator', (e) => {
-      this.showActiveIndicator = e.detail?.enabled ?? true;
+      const enabled = e.detail?.enabled ?? true;
+      this.showActiveIndicator = enabled;
+      localStorage.setItem('math-game-show-active', enabled);
       this.ctrlEl.setShowActive(this.showActiveIndicator);
     });
   }
@@ -154,25 +175,26 @@ class MathGame extends HTMLElement {
           background: var(--card);
           border-radius: var(--radius);
           box-shadow: var(--shadow);
-          padding: 16px;
+          padding: clamp(12px, 2vh, 24px);
           flex: 1;
           overflow: hidden;
           min-height: 0;
           position: relative;
+          gap: clamp(8px, 1.5vh, 16px);
         }
         .settings-trigger, .reset-trigger {
           position: absolute;
-          top: 12px;
+          top: clamp(8px, 1.5vh, 16px);
           background: #f0f4f8;
           border: none;
           border-radius: var(--radius-sm);
-          width: 38px;
-          height: 38px;
+          width: clamp(32px, 5vh, 42px);
+          height: clamp(32px, 5vh, 42px);
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          font-size: 18px;
+          font-size: clamp(16px, 2.5vh, 20px);
           color: var(--muted);
           transition: all 0.2s;
           opacity: 0.7;
@@ -218,19 +240,31 @@ class MathGame extends HTMLElement {
     this.ctrlEl.setShowActive(this.showActiveIndicator);
   }
 
-  canApply(delta) {
-    const v = this.sum + delta;
+  canApply(step) {
+    let v;
+    if (step.op === 'p') v = this.sum + step.val;
+    else if (step.op === 'm') v = this.sum - step.val;
+    else if (step.op === 't') v = this.sum * step.val;
+    else if (step.op === 's') {
+      if (this.sum % step.val !== 0) return false;
+      v = this.sum / step.val;
+    }
     return v >= 0 && v <= 100;
   }
 
-  onAdd(delta) {
-    if (!this.canApply(delta)) {
+  onAdd(step) {
+    if (!this.canApply(step)) {
       this.gridEl.flash();
       this.ctrlEl.flashAny();
       this.sound.nope();
       return;
     }
-    this.sum += delta;
+
+    if (step.op === 'p') this.sum += step.val;
+    else if (step.op === 'm') this.sum -= step.val;
+    else if (step.op === 't') this.sum *= step.val;
+    else if (step.op === 's') this.sum /= step.val;
+
     this.clicks += 1;
     this.gridEl.setValue(this.sum);
     this.stepsEl.update(this.clicks, this.minSteps);
@@ -251,7 +285,7 @@ class MathGame extends HTMLElement {
     this.shadowRoot.appendChild(resultModal);
     
     if (this.sum === this.target) {
-      this.sound.ok();
+      this.sound.victory(stars);
       resultModal.show(true, stars);
     } else {
       this.sound.nope();

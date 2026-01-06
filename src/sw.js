@@ -1,7 +1,8 @@
-const CACHE_NAME = 'math-game-v1.0.2';
+const CACHE_NAME = 'math-game-v1.0.3';
 const ASSETS = [
   './',
   'play.html',
+  'unlock.html',
   'manifest.json',
   'icon.svg',
   'components/MathGame.js',
@@ -11,6 +12,8 @@ const ASSETS = [
   'components/ControlsBar.js',
   'components/SettingsModal.js',
   'components/ResultModal.js',
+  'components/UnlockPage.js',
+  'components/ComboButton.js',
   'utils/soundManager.js'
 ];
 

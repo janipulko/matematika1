@@ -55,8 +55,18 @@ class ControlsBar extends HTMLElement {
 
     nums.forEach(n => {
       const b = document.createElement('button');
-      b.className = 'btn ' + (n < 0 ? 'neg' : 'pos');
-      b.textContent = n < 0 ? String(n) : n;
+      
+      let label = '';
+      let cls = 'btn ';
+      
+      if (n.op === 'p') { label = '+' + n.val; cls += 'pos'; }
+      else if (n.op === 'm') { label = '-' + n.val; cls += 'neg'; }
+      else if (n.op === 't') { label = '×' + n.val; cls += 'mul'; }
+      else if (n.op === 's') { label = '÷' + n.val; cls += 'div'; }
+
+      b.className = cls;
+      b.textContent = label;
+      
       b.addEventListener('click', () => {
         this.dispatchEvent(new CustomEvent('add', { bubbles: true, composed: true, detail: { value: n } }));
       });
@@ -100,9 +110,9 @@ class ControlsBar extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          margin-top: 20px;
-          padding-bottom: 10px;
+          gap: clamp(6px, 1.5vh, 12px);
+          margin-top: clamp(8px, 2vh, 20px);
+          padding-bottom: clamp(4px, 1vh, 12px);
           width: 100%;
         }
         .btn {
@@ -110,8 +120,8 @@ class ControlsBar extends HTMLElement {
           border: none;
           outline: none;
           flex: 1;
-          min-width: 50px;
-          max-width: 120px;
+          min-width: 40px;
+          max-width: clamp(60px, 15vh, 120px);
           aspect-ratio: 1 / 1;
           display: flex;
           align-items: center;
@@ -120,7 +130,7 @@ class ControlsBar extends HTMLElement {
           background: var(--primary);
           color: #08323c;
           font-weight: 900;
-          font-size: clamp(20px, 4vw, 36px);
+          font-size: clamp(18px, 4vh, 36px);
           letter-spacing: .2px;
           cursor: pointer;
           box-shadow: 0 6px 16px rgba(38,198,218,0.3);
@@ -138,18 +148,32 @@ class ControlsBar extends HTMLElement {
         }
 
         .btn.neg {
-          background: #FFCDD2;
-          color: #7a1c1c;
+          background: var(--neg-bg, #FFCDD2);
+          color: var(--neg-ink, #7a1c1c);
           box-shadow: 0 6px 16px rgba(239,83,80,0.25);
         }
         .btn.neg:hover { box-shadow: 0 8px 20px rgba(239,83,80,0.35); }
         
         .btn.pos {
-          background: #C8E6C9;
-          color: #194d23;
+          background: var(--pos-bg, #C8E6C9);
+          color: var(--pos-ink, #194d23);
           box-shadow: 0 6px 16px rgba(102,187,106,0.25);
         }
         .btn.pos:hover { box-shadow: 0 8px 20px rgba(102,187,106,0.35); }
+
+        .btn.mul {
+          background: var(--mul-bg, #E1F5FE);
+          color: var(--mul-ink, #01579B);
+          box-shadow: 0 6px 16px rgba(3,169,244,0.25);
+        }
+        .btn.mul:hover { box-shadow: 0 8px 20px rgba(3,169,244,0.35); }
+
+        .btn.div {
+          background: var(--div-bg, #FFF3E0);
+          color: var(--div-ink, #E65100);
+          box-shadow: 0 6px 16px rgba(255,152,0,0.25);
+        }
+        .btn.div:hover { box-shadow: 0 8px 20px rgba(255,152,0,0.35); }
 
         .btn.equal {
           background: var(--accent);
