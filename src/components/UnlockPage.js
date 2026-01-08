@@ -7,83 +7,85 @@ class UnlockPage extends HTMLElement {
     this.attachShadow({ mode: 'open' });
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     this.render();
     this.initUnlocked();
-    this.generateGroups();
+    await this.generateGroups();
   }
 
   initUnlocked() {
-    const key = 'math-game-unlocked-combos';
+    const key = 'math-game-step';
     const stored = localStorage.getItem(key);
     if (stored) {
-      this.unlockedCombos = JSON.parse(stored);
+      this.currentStep = parseInt(stored, 10);
     } else {
-      this.unlockedCombos = ['p1p5p10'];
-      localStorage.setItem(key, JSON.stringify(this.unlockedCombos));
+      this.currentStep = 0;
+      localStorage.setItem(key, '0');
     }
   }
 
-  generateGroups() {
+  async generateGroups() {
     const groupsContainer = this.shadowRoot.querySelector('.groups');
     
-    const groupDefinitions = [
-      {
-        title: "Moje kombinacije",
-        description: "Tukaj so kombinacije, ki si jih že odklenil!",
-        isMyGroup: true,
-        generator: () => this.unlockedCombos
-      },
-      {
-        title: "1. Skupina: Veseli plusi (+)",
-        description: "Samo seštevanje, desetka je vedno z nami!",
-        generator: () => this.generateGroup1()
-      },
-      {
-        title: "2. Skupina: Plus in minus z 10",
-        description: "Mešane operacije, a pazi na odštevanje!",
-        generator: () => this.generateGroup2()
-      },
-      {
-        title: "3. Skupina: Brez desetke, s peticami",
-        description: "Večja števila, ki se končajo na 5.",
-        generator: () => this.generateGroup3()
-      },
-      {
-        title: "4. Skupina: Divja naključna števila",
-        description: "Brez okroglih števil, pravi izziv!",
-        generator: () => this.generateGroup4()
-      }
-    ];
-
-    groupDefinitions.forEach(def => {
-      const section = document.createElement('section');
-      section.innerHTML = `
-        <div class="group-header">
-          <h2>${def.title}</h2>
-          <p>${def.description}</p>
-        </div>
-        <div class="grid"></div>
-      `;
-      const grid = section.querySelector('.grid');
-      const combos = def.generator();
-      combos.forEach(combo => {
-        const isAlreadyUnlocked = def.isMyGroup || this.unlockedCombos.includes(combo);
-        const btn = document.createElement('combo-button');
-        btn.setCombo(combo, 30, isAlreadyUnlocked);
-        grid.appendChild(btn);
+    try {
+      const response = await fetch('data/groups.json');
+      const groups = await response.json();
+      
+      let stepCounter = 0;
+      groups.forEach(group => {
+        const section = document.createElement('section');
+        section.innerHTML = `
+          <div class="group-header">
+            <h2>${group.title}</h2>
+            <p>${group.description}</p>
+          </div>
+          <div class="grid"></div>
+        `;
+        const grid = section.querySelector('.grid');
+        
+        let unlockedInGroup = 0;
+        group.combos.forEach((combo, index) => {
+          const globalStepIndex = stepCounter + index;
+          if (globalStepIndex <= this.currentStep) {
+            const btn = document.createElement('combo-button');
+            btn.setCombo(combo, 30, true);
+            btn.setAttribute('data-step', globalStepIndex);
+            grid.appendChild(btn);
+            unlockedInGroup++;
+          }
+        });
+        
+        const groupStartStep = stepCounter;
+        stepCounter += group.combos.length;
+        const groupEndStep = stepCounter - 1;
+        
+        // Pokažemo še naslednji zaklenjen korak, če obstaja v tej skupini
+        if (this.currentStep + 1 >= groupStartStep && this.currentStep + 1 <= groupEndStep) {
+           const nextCombo = group.combos[this.currentStep + 1 - groupStartStep];
+           const btn = document.createElement('combo-button');
+           btn.setCombo(nextCombo, 30, false);
+           btn.setAttribute('data-step', this.currentStep + 1);
+           grid.appendChild(btn);
+        }
+        
+        // Če ima skupina kaj odklenjenega ali če je to skupina, kjer je naslednji korak za odklenit
+        if (unlockedInGroup > 0 || (this.currentStep + 1 >= groupStartStep && this.currentStep + 1 <= groupEndStep)) {
+          groupsContainer.appendChild(section);
+        }
       });
-      groupsContainer.appendChild(section);
-    });
+    } catch (e) {
+      console.error("Napaka pri nalaganju skupin:", e);
+    }
 
     this.shadowRoot.addEventListener('unlock-combo', (e) => {
-      this.handleUnlock(e.detail.combo, e.detail.cost, e.detail.isUnlocked);
+      const step = e.target.getAttribute('data-step');
+      this.handleUnlock(e.detail.combo, e.detail.cost, e.detail.isUnlocked, parseInt(step, 10));
     });
   }
 
-  handleUnlock(combo, cost, isUnlocked) {
+  handleUnlock(combo, cost, isUnlocked, step) {
     if (isUnlocked) {
-      location.href = `play.html?num=${combo}`;
+      location.href = `play.html?step=${step}&num=${combo}`;
       return;
     }
 
@@ -92,103 +94,11 @@ class UnlockPage extends HTMLElement {
       const newTotal = currentStars - cost;
       localStorage.setItem('math-game-total-stars', newTotal);
       
-      // Shrani v odklenjene
-      if (!this.unlockedCombos.includes(combo)) {
-        this.unlockedCombos.push(combo);
-        localStorage.setItem('math-game-unlocked-combos', JSON.stringify(this.unlockedCombos));
-      }
+      // Posodobi korak
+      localStorage.setItem('math-game-step', step);
 
-      location.href = `play.html?num=${combo}`;
+      location.href = `play.html?step=${step}&num=${combo}`;
     }
-  }
-
-  // --- Generatorji ---
-
-  getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  generateGroup1() {
-    const results = [];
-    for (let i = 0; i < 12; i++) {
-      const count = this.getRandomInt(3, 4);
-      const nums = ['p10'];
-      while (nums.length < count) {
-        const v = this.getRandomInt(1, 9);
-        const code = `p${v}`;
-        if (!nums.includes(code)) nums.push(code);
-      }
-      results.push(this.shuffle(nums).join(''));
-    }
-    return results;
-  }
-
-  generateGroup2() {
-    const results = [];
-    for (let i = 0; i < 12; i++) {
-      const count = this.getRandomInt(3, 4);
-      const nums = ['p10'];
-      // Vsaj en minus
-      nums.push(`m${this.getRandomInt(1, 10)}`);
-      while (nums.length < count) {
-        const op = Math.random() > 0.5 ? 'p' : 'm';
-        const v = this.getRandomInt(1, 10);
-        const code = `${op}${v}`;
-        if (!nums.includes(code)) nums.push(code);
-      }
-      results.push(this.shuffle(nums).join(''));
-    }
-    return results;
-  }
-
-  generateGroup3() {
-    const results = [];
-    const fives = [15, 25, 35, 45, 55];
-    for (let i = 0; i < 12; i++) {
-      const count = this.getRandomInt(3, 4);
-      const maxPos = fives[this.getRandomInt(0, fives.length - 1)];
-      const nums = [`p${maxPos}`];
-      // Vsaj en minus
-      nums.push(`m${this.getRandomInt(1, 20)}`);
-      while (nums.length < count) {
-        const op = Math.random() > 0.5 ? 'p' : 'm';
-        const v = this.getRandomInt(1, 20);
-        if (v === 10) continue; 
-        const code = `${op}${v}`;
-        if (!nums.includes(code)) nums.push(code);
-      }
-      results.push(this.shuffle(nums).join(''));
-    }
-    return results;
-  }
-
-  generateGroup4() {
-    const results = [];
-    const noZero = () => {
-      let v;
-      do { v = this.getRandomInt(2, 29); } while (v % 10 === 0);
-      return v;
-    };
-    for (let i = 0; i < 12; i++) {
-      const count = this.getRandomInt(3, 4);
-      const nums = [`p${noZero()}`, `m${noZero()}`];
-      while (nums.length < count) {
-        const op = Math.random() > 0.5 ? 'p' : 'm';
-        const v = noZero();
-        const code = `${op}${v}`;
-        if (!nums.includes(code)) nums.push(code);
-      }
-      results.push(this.shuffle(nums).join(''));
-    }
-    return results;
   }
 
   render() {
@@ -252,13 +162,21 @@ class UnlockPage extends HTMLElement {
         }
         .grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-          grid-auto-rows: 1fr;
-          gap: 20px;
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+          grid-auto-rows: auto;
+          gap: 15px;
         }
         @media (max-width: 600px) {
           .grid {
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+          }
+          :host { padding: 10px; }
+          header { margin-bottom: 20px; }
+        }
+        @media (max-width: 360px) {
+          .grid {
+            grid-template-columns: 1fr;
           }
         }
       </style>

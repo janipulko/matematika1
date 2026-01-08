@@ -63,22 +63,26 @@ class ComboButton extends HTMLElement {
         }
         .circles {
           display: flex;
-          gap: 6px;
+          gap: clamp(2px, 1vw, 6px);
           flex-wrap: nowrap;
           justify-content: center;
           width: 100%;
+          padding: 0 4px;
+          box-sizing: border-box;
         }
         .circle {
-          flex: 0 0 auto;
-          width: 36px;
-          height: 36px;
+          flex: 1 1 0px;
+          min-width: 0;
+          max-width: 42px;
+          aspect-ratio: 1/1;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 900;
-          font-size: 14px;
+          font-size: clamp(10px, 3vw, 14px);
           color: white;
+          white-space: nowrap;
         }
         .op-p { background: var(--pos-bg); color: var(--pos-ink); }
         .op-m { background: var(--neg-bg); color: var(--neg-ink); }

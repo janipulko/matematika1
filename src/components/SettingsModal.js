@@ -145,7 +145,7 @@ class SettingsModal extends HTMLElement {
           gap: 24px;
           width: 100%;
         }
-        .mute-btn, .active-btn {
+        .mute-btn, .active-btn, .unlock-link {
           appearance: none;
           border: 3px solid var(--primary);
           background: white;
@@ -158,6 +158,11 @@ class SettingsModal extends HTMLElement {
           font-size: clamp(18px, 4vw, 24px);
           width: 320px;
           max-width: 80%;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
         }
         .mute-btn.off, .active-btn.off {
           border-color: var(--muted);
@@ -190,6 +195,7 @@ class SettingsModal extends HTMLElement {
         <div class="content">
           <button class="mute-btn"></button>
           <button class="active-btn"></button>
+          <a href="./unlock.html" class="unlock-link">🔓 Odkleni vsebino</a>
         </div>
         <div class="footer">
           <button class="btn-ok">V redu</button>

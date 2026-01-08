@@ -5,6 +5,7 @@ import './StepIndicator.js';
 import './ControlsBar.js';
 import './SettingsModal.js';
 import './ResultModal.js';
+import { sound } from '../utils/soundManager.js';
 
 // ============================================
 // Pomagala: URL parsing, BFS, zvok, random
@@ -15,38 +16,96 @@ function parseNumsFromURL() {
   const raw = params.get('num');
   if (!raw) return null;
 
-  // regex najde pare (crka)(stevilka)
-  const regex = /([pmts])(\d+)/g;
   const nums = [];
+  const regex = /([pmts])(\d+)/g;
   let match;
   while ((match = regex.exec(raw)) !== null) {
     const op = match[1];
     const value = parseInt(match[2], 10);
     if (isNaN(value) || value === 0) continue;
-    
-    // Preprečimo dvojnike (ista operacija in vrednost)
     if (nums.some(n => n.op === op && n.val === value)) continue;
-    
     nums.push({ op, val: value });
-    if (nums.length >= 5) break; // Povečano na 5 gumbov, če je treba
+    if (nums.length >= 5) break;
   }
 
-  if (nums.length < 2) return null;
+  if (nums.length < 1) return null;
   return nums;
 }
 
-import { sound } from '../utils/soundManager.js';
+async function getNumsForStep(stepIndex) {
+  try {
+    const response = await fetch('data/groups.json');
+    const groups = await response.json();
+    let count = 0;
+    for (const group of groups) {
+      if (stepIndex < count + group.combos.length) {
+        return group.combos[stepIndex - count];
+      }
+      count += group.combos.length;
+    }
+  } catch (e) {
+    console.error("Napaka pri nalaganju skupin:", e);
+  }
+  return 'p10p5p1'; // Fallback
+}
 
-function ensureNumsInURL() {
-  const nums = parseNumsFromURL();
-  if (!nums) {
-    const params = new URLSearchParams(location.search);
-    params.set('num', 'p1p5p10');
-    const newURL = `${location.pathname}?${params.toString()}${location.hash}`;
-    location.assign(newURL);
+async function findStepForCombo(combo) {
+  try {
+    const response = await fetch('data/groups.json');
+    const groups = await response.json();
+    let stepCounter = 0;
+    for (const group of groups) {
+      const idx = group.combos.indexOf(combo);
+      if (idx !== -1) {
+        return stepCounter + idx;
+      }
+      stepCounter += group.combos.length;
+    }
+  } catch (e) {
+    console.error("Napaka pri iskanju koraka za combo:", e);
+  }
+  return null;
+}
+
+async function ensureNumsInURL() {
+  const params = new URLSearchParams(location.search);
+  let raw = params.get('num');
+  let step = params.get('step');
+
+  // 1. Če ni ničesar, preusmeri na shranjen korak
+  if (!raw && !step) {
+    const savedStep = parseInt(localStorage.getItem('math-game-step') || '0', 10);
+    const combo = await getNumsForStep(savedStep);
+    params.set('step', savedStep);
+    params.set('num', combo);
+    location.assign(`${location.pathname}?${params.toString()}`);
     return null;
   }
-  return nums;
+
+  // 2. Če je samo step, pridobi num
+  if (step && !raw) {
+    const combo = await getNumsForStep(parseInt(step, 10));
+    params.set('num', combo);
+    location.assign(`${location.pathname}?${params.toString()}`);
+    return null;
+  }
+
+  // 3. Če je samo num, poskusi najti ustrezen step
+  if (raw && !step) {
+    const foundStep = await findStepForCombo(raw);
+    if (foundStep !== null) {
+      params.set('step', foundStep);
+      location.assign(`${location.pathname}?${params.toString()}`);
+      return null;
+    }
+    // Če koraka ne najdemo (custom combo), vsaj dodamo step=0 ali pustimo,
+    // ampak za boljšo logiko bomo dodali vsaj step parameter če ga ni.
+    params.set('step', '0');
+    location.assign(`${location.pathname}?${params.toString()}`);
+    return null;
+  }
+
+  return parseNumsFromURL();
 }
 
 function bfsMinClicks(nums) {
@@ -107,10 +166,20 @@ class MathGame extends HTMLElement {
     this.attachShadow({ mode: 'open' });
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     if (this.initialized) return;
 
-    const parsed = ensureNumsInURL();
+    // Pridobimo korak iz URL-ja
+    const params = new URLSearchParams(location.search);
+    const stepInUrl = params.get('step');
+    if (stepInUrl !== null) {
+        // Če je v URL-ju, ga shranimo kot trenutni (če je večji od shranjenega)
+        // Ali pa samo sledimo navodilu, da je to trenutna igra.
+        // Za zdaj samo nastavimo lastnost.
+        this.currentStepIndex = parseInt(stepInUrl, 10);
+    }
+
+    const parsed = await ensureNumsInURL();
     if (!parsed) return;
     this.nums = parsed;
 
@@ -164,24 +233,52 @@ class MathGame extends HTMLElement {
       localStorage.setItem('math-game-show-active', enabled);
       this.ctrlEl.setShowActive(this.showActiveIndicator);
     });
+
+    this.shadowRoot.addEventListener('next-level', () => {
+      location.reload();
+    });
+    this.shadowRoot.addEventListener('reset-game', () => {
+      this.onReset();
+    });
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
         :host {
+          display: block;
+          height: 100%;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .container {
           display: flex;
           flex-direction: column;
           background: var(--card);
           border-radius: var(--radius);
           box-shadow: var(--shadow);
-          padding: clamp(12px, 2vh, 24px);
-          flex: 1;
-          overflow: hidden;
-          min-height: 0;
+          padding: clamp(10px, 2vh, 20px);
+          height: 100%;
+          box-sizing: border-box;
           position: relative;
           gap: clamp(8px, 1.5vh, 16px);
+          overflow: hidden;
         }
+        .section {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .section-target { flex: 0 0 auto; }
+        .section-grid { 
+          flex: 1; 
+          min-height: 0;
+          overflow: hidden;
+        }
+        .section-steps { flex: 0 0 auto; }
+        .section-controls { flex: 0 0 auto; }
+
         .settings-trigger, .reset-trigger {
           position: absolute;
           top: clamp(8px, 1.5vh, 16px);
@@ -217,12 +314,22 @@ class MathGame extends HTMLElement {
           transform: rotate(-90deg);
         }
       </style>
-      <target-display></target-display>
-      <score-grid></score-grid>
-      <step-indicator></step-indicator>
-      <controls-bar></controls-bar>
-      <button class="settings-trigger" title="Nastavitve">⚙️</button>
-      <button class="reset-trigger" title="Ponastavi">↺</button>
+      <div class="container">
+        <div class="section section-target">
+          <target-display></target-display>
+        </div>
+        <div class="section section-grid">
+          <score-grid></score-grid>
+        </div>
+        <div class="section section-steps">
+          <step-indicator></step-indicator>
+        </div>
+        <div class="section section-controls">
+          <controls-bar></controls-bar>
+        </div>
+        <button class="settings-trigger" title="Nastavitve">⚙️</button>
+        <button class="reset-trigger" title="Ponastavi">↺</button>
+      </div>
     `;
 
     this.targetEl = this.shadowRoot.querySelector('target-display');
@@ -279,17 +386,17 @@ class MathGame extends HTMLElement {
     this.sound.click();
   }
 
-  onConfirm() {
+  async onConfirm() {
     const stars = this.stepsEl.getStarsLeft(this.clicks, this.minSteps);
     const resultModal = document.createElement('result-modal');
     this.shadowRoot.appendChild(resultModal);
     
     if (this.sum === this.target) {
       this.sound.victory(stars);
-      resultModal.show(true, stars);
+      await resultModal.show(true, stars);
     } else {
       this.sound.nope();
-      resultModal.show(false);
+      await resultModal.show(false);
     }
   }
 }

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'math-game-v1.0.3';
+const USE_SW = true; // Ta spremenljivka se ne uporablja neposredno tukaj, ampak v play.html za nadzor registracije.
+const CACHE_NAME = 'math-game-v1.1.2';
 const ASSETS = [
   './',
   'play.html',
@@ -14,7 +15,8 @@ const ASSETS = [
   'components/ResultModal.js',
   'components/UnlockPage.js',
   'components/ComboButton.js',
-  'utils/soundManager.js'
+  'utils/soundManager.js',
+  'data/groups.json'
 ];
 
 self.addEventListener('install', (event) => {

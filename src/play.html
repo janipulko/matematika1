@@ -84,30 +84,46 @@
 </div>
 
 <script>
+  const USE_SW = false; // Nastavi na false med razvojem
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-      .then(reg => {
-        console.log('Service Worker registriran!', reg);
+      if (USE_SW) {
+        navigator.serviceWorker.register('sw.js')
+        .then(reg => {
+          console.log('Service Worker registriran!', reg);
 
-        // Preveri za posodobitve ob nalaganju
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Nova vsebina je na voljo, osveži stran
-              window.location.reload();
-            }
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                window.location.reload();
+              }
+            });
           });
+        })
+        .catch(err => console.error('Napaka pri registraciji SW:', err));
+      } else {
+        // Odstrani Service Workerje in počisti cache, če je USE_SW = false
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            registration.unregister().then(() => {
+              console.log('Service Worker odstranjen');
+            });
+          }
         });
-      })
-      .catch(err => console.error('Napaka pri registraciji SW:', err));
+        
+        if (window.caches) {
+          caches.keys().then(names => {
+            for (let name of names) caches.delete(name);
+          });
+        }
+      }
     });
 
-    // Poslušaj za spremembe v kontrolerju (ko novi SW prevzame nadzor)
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) {
+      if (USE_SW && !refreshing) {
         window.location.reload();
         refreshing = true;
       }

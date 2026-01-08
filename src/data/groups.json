@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "title": "1. Skupina: Veseli začetki",
+    "description": "Desetka je vedno z nami!",
+    "combos": [
+      "p10p1",
+      "p10p5",
+      "p10p5p1",
+      "p10p4p1",
+      "p10p5m1",
+      "p10p5m2",
+      "p10p4p3",
+      "p10p4m3",
+      "p10m5m1",
+      "p10p6m1",
+      "p10p6m2",
+      "p10p7m1"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "2. Skupina: Veselo nadaljevanje",
+    "description": "Petka je vedno z nami!",
+    "combos": [
+      "p15p5",
+      "p15m5",
+      "p25p10",
+      "p25m5",
+      "p15m5p1",
+      "p15m5p2",
+      "p15p6m1",
+      "p15p10p6",
+      "p25m10p5",
+      "p15p5m2",
+      "p15p4p3",
+      "p15p4m3",
+      "p15m4m1",
+      "p15p6m1",
+      "p15p6m2",
+      "p15p7m1"
+    ]
+  }
+]

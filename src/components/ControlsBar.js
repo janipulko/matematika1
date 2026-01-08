@@ -7,6 +7,9 @@ class ControlsBar extends HTMLElement {
     this._activeIndex = 0;
     this._showActive = true;
     this._handleKeyDown = this._handleKeyDown.bind(this);
+
+    /** @type {HTMLButtonElement|null} */
+    this.equalBtn = null;
   }
 
   connectedCallback() {
@@ -18,6 +21,7 @@ class ControlsBar extends HTMLElement {
     window.removeEventListener('keydown', this._handleKeyDown);
   }
 
+  /** Keyboard: Left/Right za premikanje, Enter za klik aktivnega gumba */
   _handleKeyDown(e) {
     const buttons = this.shadowRoot.querySelectorAll('.btn');
     if (buttons.length === 0) return;
@@ -30,10 +34,11 @@ class ControlsBar extends HTMLElement {
       this._updateActiveVisual();
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      buttons[this._activeIndex].click();
+      buttons[this._activeIndex]?.click();
     }
   }
 
+  /** Vizualni označevalec aktivnega gumba (za tipkovnico) */
   _updateActiveVisual() {
     const buttons = this.shadowRoot.querySelectorAll('.btn');
     buttons.forEach((btn, index) => {
@@ -41,11 +46,16 @@ class ControlsBar extends HTMLElement {
     });
   }
 
+  /** API: skrij/kaži aktivni označevalec */
   setShowActive(val) {
-    this._showActive = val;
+    this._showActive = Boolean(val);
     this._updateActiveVisual();
   }
 
+  /**
+   * Ustvari gumbe glede na podane operacije.
+   * @param {Array<{op:'p'|'m'|'t'|'s', val:number}>} nums
+   */
   setNums(nums) {
     const container = this.shadowRoot.querySelector('.controls');
     if (!container) return;
@@ -55,10 +65,10 @@ class ControlsBar extends HTMLElement {
 
     nums.forEach(n => {
       const b = document.createElement('button');
-      
+
       let label = '';
       let cls = 'btn ';
-      
+
       if (n.op === 'p') { label = '+' + n.val; cls += 'pos'; }
       else if (n.op === 'm') { label = '-' + n.val; cls += 'neg'; }
       else if (n.op === 't') { label = '×' + n.val; cls += 'mul'; }
@@ -66,10 +76,17 @@ class ControlsBar extends HTMLElement {
 
       b.className = cls;
       b.textContent = label;
-      
+      b.setAttribute('type', 'button');
+      b.setAttribute('aria-label', `Operacija ${label}`);
+
       b.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('add', { bubbles: true, composed: true, detail: { value: n } }));
+        this.dispatchEvent(new CustomEvent('add', {
+          bubbles: true,
+          composed: true,
+          detail: { value: n }
+        }));
       });
+
       container.appendChild(b);
     });
 
@@ -77,128 +94,180 @@ class ControlsBar extends HTMLElement {
     this.equalBtn = document.createElement('button');
     this.equalBtn.className = 'btn equal';
     this.equalBtn.textContent = '=';
+    this.equalBtn.setAttribute('type', 'button');
+    this.equalBtn.setAttribute('aria-label', 'Potrdi operacije');
+
     this.equalBtn.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('confirm', { bubbles: true, composed: true }));
     });
+
     container.appendChild(this.equalBtn);
-    
+
+    // Osveži aktivni indikator
+    this._activeIndex = 0;
     this._updateActiveVisual();
   }
 
+  /** Flash animacija posebej za "=" gumb */
   flashEquals() {
     if (!this.equalBtn) return;
     this.equalBtn.classList.remove('flash');
+    // Reflow za restart animacije
     void this.equalBtn.offsetWidth;
     this.equalBtn.classList.add('flash');
   }
 
+  /** Flash animacija za celoten container */
   flashAny() {
     const container = this.shadowRoot.querySelector('.controls');
     if (!container) return;
-    container.classList.remove('flash');
+    container.classList.remove('flash-container');
     void container.offsetWidth;
-    container.classList.add('flash');
+    container.classList.add('flash-container');
   }
 
+  /** Render z refaktoriranim CSS */
   render() {
     this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
-        }
-        .controls {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: clamp(6px, 1.5vh, 12px);
           margin-top: clamp(8px, 2vh, 20px);
-          padding-bottom: clamp(4px, 1vh, 12px);
           width: 100%;
         }
+
+        /* 1) Container omogoči cq-enote za širino in višino */
+        .controls {
+          container-type: size;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: var(--gap, 0.75rem);
+          padding: 0.5rem;
+          box-sizing: border-box;
+          
+          /* Omejena višina vrstice z gumbi */
+          height: clamp(64px, 15vh, 120px);
+          width: 100%;
+
+          /* 2) Izračun premera:
+             - po višini: 100cqb (minus padding)
+             - po širini: (100cqi - 4*gap)/5
+          */
+          --gap: 0.75rem;
+          --raw-d: min(calc(100cqb - 1rem), calc((100cqi - 4 * var(--gap)) / 5));
+          --btn-size: clamp(42px, var(--raw-d), 90px);
+          --btn-font: calc(var(--btn-size) * 0.35);
+        }
+
+        /* ========= Button Base ========= */
         .btn {
           appearance: none;
           border: none;
           outline: none;
-          flex: 1;
-          min-width: 40px;
-          max-width: clamp(60px, 15vh, 120px);
-          aspect-ratio: 1 / 1;
+
+          /* Gumbi so popolni krogi s premerom --btn-size */
+          width: var(--btn-size);
+          height: var(--btn-size);
+          border-radius: 50%;
+
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 50%;
-          background: var(--primary);
+          background: radial-gradient(circle at 30% 30%, #fff, #cfd8ff);
           color: #08323c;
           font-weight: 900;
-          font-size: clamp(18px, 4vh, 36px);
-          letter-spacing: .2px;
+          font-size: var(--btn-font);
           cursor: pointer;
-          box-shadow: 0 6px 16px rgba(38,198,218,0.3);
-          transition: transform .1s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter .12s ease, background .2s ease, box-shadow .2s ease;
+
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.2);
+          transition: transform .1s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                      filter .12s ease,
+                      box-shadow .2s ease;
+
           user-select: none;
+          white-space: nowrap;
+          line-height: 1;
         }
-        .btn:hover { 
+
+        .btn:hover {
           filter: brightness(1.05);
           transform: scale(1.05);
-          box-shadow: 0 8px 20px rgba(38,198,218,0.4);
+          box-shadow: 0 6px 14px rgba(0,0,0,0.15);
         }
-        .btn:active { 
+        .btn:active {
           transform: scale(0.95);
-          box-shadow: 0 2px 8px rgba(38,198,218,0.3);
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
+        /* ========= Semantic Variants (ohranjene barve z gradacijami) ========= */
         .btn.neg {
-          background: var(--neg-bg, #FFCDD2);
+          background: radial-gradient(circle at 30% 30%, #fff, var(--neg-bg, #FFCDD2));
           color: var(--neg-ink, #7a1c1c);
-          box-shadow: 0 6px 16px rgba(239,83,80,0.25);
+          box-shadow: 0 4px 10px rgba(239,83,80,0.2);
         }
-        .btn.neg:hover { box-shadow: 0 8px 20px rgba(239,83,80,0.35); }
-        
+        .btn.neg:hover { box-shadow: 0 6px 14px rgba(239,83,80,0.3); }
+
         .btn.pos {
-          background: var(--pos-bg, #C8E6C9);
+          background: radial-gradient(circle at 30% 30%, #fff, var(--pos-bg, #C8E6C9));
           color: var(--pos-ink, #194d23);
-          box-shadow: 0 6px 16px rgba(102,187,106,0.25);
+          box-shadow: 0 4px 10px rgba(102,187,106,0.2);
         }
-        .btn.pos:hover { box-shadow: 0 8px 20px rgba(102,187,106,0.35); }
+        .btn.pos:hover { box-shadow: 0 6px 14px rgba(102,187,106,0.3); }
 
         .btn.mul {
-          background: var(--mul-bg, #E1F5FE);
+          background: radial-gradient(circle at 30% 30%, #fff, var(--mul-bg, #E1F5FE));
           color: var(--mul-ink, #01579B);
-          box-shadow: 0 6px 16px rgba(3,169,244,0.25);
+          box-shadow: 0 4px 10px rgba(3,169,244,0.2);
         }
-        .btn.mul:hover { box-shadow: 0 8px 20px rgba(3,169,244,0.35); }
+        .btn.mul:hover { box-shadow: 0 6px 14px rgba(3,169,244,0.3); }
 
         .btn.div {
-          background: var(--div-bg, #FFF3E0);
+          background: radial-gradient(circle at 30% 30%, #fff, var(--div-bg, #FFF3E0));
           color: var(--div-ink, #E65100);
-          box-shadow: 0 6px 16px rgba(255,152,0,0.25);
+          box-shadow: 0 4px 10px rgba(255,152,0,0.2);
         }
-        .btn.div:hover { box-shadow: 0 8px 20px rgba(255,152,0,0.35); }
+        .btn.div:hover { box-shadow: 0 6px 14px rgba(255,152,0,0.3); }
 
         .btn.equal {
-          background: var(--accent);
+          background: radial-gradient(circle at 30% 30%, #fff, var(--accent, #FFD54F));
           color: #5a4605;
-          box-shadow: 0 6px 16px rgba(255,213,79,0.3);
-          font-size: clamp(28px, 6vw, 48px);
+          box-shadow: 0 4px 10px rgba(255,213,79,0.3);
         }
-        .btn.equal:hover { box-shadow: 0 8px 20px rgba(255,213,79,0.4); }
+        .btn.equal:hover { box-shadow: 0 6px 14px rgba(255,213,79,0.4); }
+
+        /* ========= Keyboard Active Highlight ========= */
         .btn.active-kbd {
-          outline: 4px solid #FF5252;
-          outline-offset: 4px;
-          box-shadow: 0 0 20px rgba(255, 82, 82, 0.7);
+          outline: 3px solid #FF5252;
+          outline-offset: 3px;
+          box-shadow: 0 0 15px rgba(255, 82, 82, 0.6);
           transform: scale(1.1);
           z-index: 5;
         }
+
+        /* ========= Flash Animations ========= */
         .flash {
           animation: flash 320ms ease;
         }
         @keyframes flash {
-          0% { box-shadow: 0 0 0 0 rgba(239,83,80,0.3); }
-          50% { box-shadow: 0 0 0 8px rgba(239,83,80,0); }
+          0%   { box-shadow: 0 0 0 0 rgba(239,83,80,0.3); }
+          50%  { box-shadow: 0 0 0 8px rgba(239,83,80,0); }
           100% { box-shadow: 0 0 0 0 rgba(239,83,80,0); }
         }
+
+        .flash-container {
+          animation: flash-container 320ms ease;
+        }
+        @keyframes flash-container {
+          0%   { background-color: transparent; }
+          50%  { background-color: rgba(239,83,80,0.1); }
+          100% { background-color: transparent; }
+        }
       </style>
-      <div class="controls"></div>
+      <div class="controls" role="group" aria-label="Kontrole operacij">
+      <div>test 123</div>
+      
+</div>
     `;
   }
 }

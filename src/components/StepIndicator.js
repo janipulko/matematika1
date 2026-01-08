@@ -11,28 +11,26 @@ class StepIndicator extends HTMLElement {
 
   setSteps(minSteps) {
     this.minSteps = minSteps;
-    const container = this.shadowRoot.querySelector('.steps-row');
-    if (!container) return;
+    const bubblesContainer = this.shadowRoot.querySelector('.bubbles-row');
+    const starsContainer = this.shadowRoot.querySelector('.stars-row');
+    if (!bubblesContainer || !starsContainer) return;
 
-    container.innerHTML = '';
+    bubblesContainer.innerHTML = '';
+    starsContainer.innerHTML = '';
     this.circles = [];
     for (let i = 0; i < minSteps; i++) {
       const b = document.createElement('div');
       b.className = 'bubble';
-      container.appendChild(b);
+      bubblesContainer.appendChild(b);
       this.circles.push(b);
     }
-
-    const spacer = document.createElement('div');
-    spacer.style.width = '8px';
-    container.appendChild(spacer);
 
     this.stars = [];
     for (let i = 0; i < 3; i++) {
       const s = document.createElement('div');
       s.className = 'star';
       s.textContent = '★';
-      container.appendChild(s);
+      starsContainer.appendChild(s);
       this.stars.push(s);
     }
   }
@@ -47,7 +45,7 @@ class StepIndicator extends HTMLElement {
     let starsLeft = 3 - Math.max(0, clicks - minSteps);
     if (starsLeft < 0) starsLeft = 0;
     this.stars.forEach((star, i) => {
-      if (i >= (3 - starsLeft)) star.classList.remove('dim');
+      if (i < starsLeft) star.classList.remove('dim');
       else star.classList.add('dim');
     });
   }
@@ -62,18 +60,33 @@ class StepIndicator extends HTMLElement {
       <style>
         :host {
           display: block;
+          width: 100%;
         }
-        .steps-row {
+        .container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+        }
+        .bubbles-row {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          flex-wrap: wrap;
-          padding: 4px 10px;
+          gap: 6px;
+          width: 100%;
+          padding: 0;
+        }
+        .stars-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          width: 100%;
         }
         .bubble {
-          width: clamp(12px, 2vh, 16px);
-          height: clamp(12px, 2vh, 16px);
+          width: clamp(10px, 1.8vh, 14px);
+          height: clamp(10px, 1.8vh, 14px);
           border-radius: 999px;
           background: #fff;
           border: 2px solid #bcd4e6;
@@ -85,22 +98,25 @@ class StepIndicator extends HTMLElement {
           border-color: #92d493;
         }
         .star {
-          width: clamp(14px, 2.5vh, 18px);
-          height: clamp(14px, 2.5vh, 18px);
+          width: clamp(20px, 3vh, 26px);
+          height: clamp(20px, 3vh, 26px);
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          font-size: clamp(14px, 2.5vh, 18px);
+          font-size: clamp(20px, 3vh, 26px);
           color: var(--gold);
           text-shadow: 0 1px 0 rgba(0,0,0,0.08);
           transition: transform .08s ease, opacity .2s ease, color .2s ease;
         }
         .star.dim {
           color: #d9d9d9;
-          opacity: .7;
+          opacity: .4;
         }
       </style>
-      <div class="steps-row"></div>
+      <div class="container">
+        <div class="bubbles-row"></div>
+        <div class="stars-row"></div>
+      </div>
     `;
   }
 }

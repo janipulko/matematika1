@@ -1,14 +1,31 @@
-
 class ScoreGrid extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this.value = 0;
+    this._ro = null;
   }
 
   connectedCallback() {
     this.render();
     this.cells = Array.from(this.shadowRoot.querySelectorAll('.cell'));
+
+    const wrap = this.shadowRoot.querySelector('.grid-wrap');
+    const grid = this.shadowRoot.querySelector('.grid-frame');
+
+    // 🔥 STABILNA RESIZE LOGIKA
+    this._ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      const size = Math.floor(Math.min(width, height));
+      grid.style.width = `${size}px`;
+      grid.style.height = `${size}px`;
+    });
+
+    this._ro.observe(wrap);
+  }
+
+  disconnectedCallback() {
+    this._ro?.disconnect();
   }
 
   setValue(v) {
@@ -16,8 +33,7 @@ class ScoreGrid extends HTMLElement {
     this.value = n;
     if (!this.cells) return;
     this.cells.forEach((cell, i) => {
-      if (i < n) cell.classList.add('filled');
-      else cell.classList.remove('filled');
+      cell.classList.toggle('filled', i < n);
     });
   }
 
@@ -41,54 +57,73 @@ class ScoreGrid extends HTMLElement {
           display: flex;
           flex: 1;
           min-height: 0;
+          width: 100%;
+          height: 100%;
           align-items: center;
           justify-content: center;
-          width: 100%;
           overflow: hidden;
         }
+
         .grid-wrap {
-          padding: clamp(4px, 1vh, 12px);
-          background: linear-gradient(180deg, #fff, #f9fbff);
-          border-radius: var(--radius);
-          border: 1px solid #eef2f7;
-          height: 100%;
-          aspect-ratio: 1/1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-sizing: border-box;
-        }
-        .grid {
-          display: grid;
-          grid-template-columns: repeat(10, 1fr);
-          gap: clamp(1px, 0.4vh, 6px);
           width: 100%;
           height: 100%;
+          display: grid;
+          place-items: center;
         }
+        
+        /* 🔥 KVADRAT Z OKVIRJEM */
+        .grid-frame {
+            box-sizing: border-box;
+          
+            background: linear-gradient(180deg, #fff, #f9fbff);
+            border-radius: var(--radius);
+            border: 1px solid #eef2f7;
+            padding: clamp(4px, 1vh, 12px);
+          
+            display: grid;
+          }
+          
+          .grid {
+            width: 100%;
+            height: 100%;
+          
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: clamp(1px, 0.4vh, 6px);
+          }
+
+
+
         .cell {
-          aspect-ratio: 1/1;
+          aspect-ratio: 1 / 1;
           background: #fff;
           border: clamp(1px, 0.2vh, 2px) solid var(--grid-stroke);
           border-radius: clamp(4px, 1vh, 10px);
           transition: background .18s ease, border-color .18s ease, transform .08s ease;
         }
+
         .cell.filled {
           background: var(--grid-fill);
           border-color: #f3d070;
           box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6);
         }
+
         .flash {
           animation: flash 320ms ease;
         }
+
         @keyframes flash {
           0% { box-shadow: 0 0 0 0 rgba(239,83,80,0.3); }
           50% { box-shadow: 0 0 0 8px rgba(239,83,80,0); }
           100% { box-shadow: 0 0 0 0 rgba(239,83,80,0); }
         }
       </style>
+
       <div class="grid-wrap">
-        <div class="grid">
-          ${cellsHTML}
+        <div class="grid-frame">
+           <div class="grid">
+             ${cellsHTML}
+            </div>
         </div>
       </div>
     `;
