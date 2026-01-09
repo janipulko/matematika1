@@ -1,3 +1,4 @@
+
 [
   {
     "id": 1,
@@ -5,17 +6,14 @@
     "description": "Desetka je vedno z nami!",
     "combos": [
       "p10p1",
+      "p10p2",
+      "p10p3",
+      "p10p4",
       "p10p5",
-      "p10p5p1",
-      "p10p4p1",
-      "p10p5m1",
-      "p10p5m2",
-      "p10p4p3",
-      "p10p4m3",
-      "p10m5m1",
-      "p10p6m1",
-      "p10p6m2",
-      "p10p7m1"
+      "p10p6",
+      "p10p7",
+      "p10p8",
+      "p10p9"
     ]
   },
   {
@@ -23,22 +21,307 @@
     "title": "2. Skupina: Veselo nadaljevanje",
     "description": "Petka je vedno z nami!",
     "combos": [
+      "p15p1",
+      "p15p2",
+      "p15p3",
+      "p15p4",
       "p15p5",
-      "p15m5",
-      "p25p10",
-      "p25m5",
-      "p15m5p1",
-      "p15m5p2",
-      "p15p6m1",
-      "p15p10p6",
-      "p25m10p5",
-      "p15p5m2",
-      "p15p4p3",
-      "p15p4m3",
-      "p15m4m1",
-      "p15p6m1",
-      "p15p6m2",
-      "p15p7m1"
+      "p15p6",
+      "p15p7",
+      "p15p8",
+      "p15p9",
+      "p25p1",
+      "p25p2",
+      "p25p3",
+      "p25p4",
+      "p25p5",
+      "p25p6",
+      "p25p7",
+      "p25p8",
+      "p25p9"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "3. Skupina: Veseli minusi",
+    "description": "Desetka in prijatelji minus!",
+    "combos": [
+      "p10m1",
+      "p10m2",
+      "p10m3",
+      "p10m4",
+      "p10m5",
+      "p10m6",
+      "p10m7",
+      "p10m8",
+      "p10m9"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "4. Skupina: Trojčki z desetko",
+    "description": "Desetka z dodatkom in malim minusom!",
+    "combos": [
+      "p10p2m1",
+      "p10p3m1",
+      "p10p4m1",
+      "p10p5m1",
+      "p10p6m1",
+      "p10p7m1",
+      "p10p8m1",
+      "p10p9m1"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "5. Skupina: Devetka v akciji",
+    "description": "Devetka s prijatelji od ena do osem!",
+    "combos": [
+      "p9p1",
+      "p9p2",
+      "p9p3",
+      "p9p4",
+      "p9p5",
+      "p9p6",
+      "p9p7",
+      "p9p8"
+    ]
+  },
+  {
+    "id": 6,
+    "title": "6. Skupina: Osemka v akciji",
+    "description": "Osemka z vsemi, razen osem!",
+    "combos": [
+      "p8p1",
+      "p8p2",
+      "p8p3",
+      "p8p4",
+      "p8p5",
+      "p8p6",
+      "p8p7",
+      "p8p9"
+    ]
+  },
+  {
+    "id": 7,
+    "title": "7. Skupina: Sedmica v akciji",
+    "description": "Sedmica s prijatelji od ena do devet, brez sedem!",
+    "combos": [
+      "p7p1",
+      "p7p2",
+      "p7p3",
+      "p7p4",
+      "p7p5",
+      "p7p6",
+      "p7p8",
+      "p7p9"
+    ]
+  },
+  {
+    "id": 8,
+    "title": "8. Skupina: Šestica v akciji",
+    "description": "Šestica s prijatelji od ena do devet, brez šest!",
+    "combos": [
+      "p6p1",
+      "p6p2",
+      "p6p3",
+      "p6p4",
+      "p6p5",
+      "p6p7",
+      "p6p8",
+      "p6p9"
+    ]
+  },
+  {
+    "id": 9,
+    "title": "9. Skupina: Petica v akciji",
+    "description": "Petica s prijatelji od ena do devet, brez pet!",
+    "combos": [
+      "p5p1",
+      "p5p2",
+      "p5p3",
+      "p5p4",
+      "p5p6",
+      "p5p7",
+      "p5p8",
+      "p5p9"
+    ]
+  },
+  {
+    "id": 10,
+    "title": "10. Skupina: Štirica v akciji",
+    "description": "Štirica s prijatelji od ena do devet, brez štiri!",
+    "combos": [
+      "p4p1",
+      "p4p2",
+      "p4p3",
+      "p4p5",
+      "p4p6",
+      "p4p7",
+      "p4p8",
+      "p4p9"
+    ]
+  },
+  {
+    "id": 11,
+    "title": "11. Skupina: Trojka v akciji",
+    "description": "Trojka s prijatelji od ena do devet, brez tri!",
+    "combos": [
+      "p3p1",
+      "p3p2",
+      "p3p4",
+      "p3p5",
+      "p3p6",
+      "p3p7",
+      "p3p8",
+      "p3p9"
+    ]
+  },
+  {
+    "id": 12,
+    "title": "12. Skupina: Dvojka v akciji",
+    "description": "Dvojka s prijatelji od ena do devet, brez dva!",
+    "combos": [
+      "p2p1",
+      "p2p3",
+      "p2p4",
+      "p2p5",
+      "p2p6",
+      "p2p7",
+      "p2p8",
+      "p2p9"
+    ]
+  },
+  {
+    "id": 13,
+    "title": "13. Skupina: Desetka z večjimi prijatelji",
+    "description": "Desetka se druži z enajstko do devetnajstke!",
+    "combos": [
+      "p10p11",
+      "p10p12",
+      "p10p13",
+      "p10p14",
+      "p10p15",
+      "p10p16",
+      "p10p17",
+      "p10p18",
+      "p10p19"
+    ]
+  },
+  {
+    "id": 14,
+    "title": "14. Skupina: Desetka trojčki z večjimi prijatelji",
+    "description": "Dodajmo malo minus ena za uravnoteženje!",
+    "combos": [
+      "p10p11m1",
+      "p10p12m1",
+      "p10p13m1",
+      "p10p14m1",
+      "p10p15m1",
+      "p10p16m1",
+      "p10p17m1",
+      "p10p18m1",
+      "p10p19m1"
+    ]
+  },
+  {
+    "id": 15,
+    "title": "15. Skupina: Dvajsetka v akciji",
+    "description": "Dvajsetka s prijatelji od ena do devet!",
+    "combos": [
+      "p20p1",
+      "p20p2",
+      "p20p3",
+      "p20p4",
+      "p20p5",
+      "p20p6",
+      "p20p7",
+      "p20p8",
+      "p20p9"
+    ]
+  },
+  {
+    "id": 16,
+    "title": "16. Skupina: Dvajsetka z večjimi prijatelji",
+    "description": "Dvajsetka in desetke od 10 do 19!",
+    "combos": [
+      "p20p10",
+      "p20p11",
+      "p20p12",
+      "p20p13",
+      "p20p14",
+      "p20p15",
+      "p20p16",
+      "p20p17",
+      "p20p18",
+      "p20p19"
+    ]
+  },
+  {
+    "id": 17,
+    "title": "17. Skupina: Dvajsetka trojčki z večjimi prijatelji",
+    "description": "Dodajmo minus ena k desetkam!",
+    "combos": [
+      "p20p10m1",
+      "p20p11m1",
+      "p20p12m1",
+      "p20p13m1",
+      "p20p14m1",
+      "p20p15m1",
+      "p20p16m1",
+      "p20p17m1",
+      "p20p18m1",
+      "p20p19m1"
+    ]
+  },
+  {
+    "id": 18,
+    "title": "18. Skupina: Tridesetka v akciji",
+    "description": "Tridesetka s prijatelji od ena do devet!",
+    "combos": [
+      "p30p1",
+      "p30p2",
+      "p30p3",
+      "p30p4",
+      "p30p5",
+      "p30p6",
+      "p30p7",
+      "p30p8",
+      "p30p9"
+    ]
+  },
+  {
+    "id": 19,
+    "title": "19. Skupina: Tridesetka z večjimi prijatelji",
+    "description": "Tridesetka in desetke od 10 do 19!",
+    "combos": [
+      "p30p10",
+      "p30p11",
+      "p30p12",
+      "p30p13",
+      "p30p14",
+      "p30p15",
+      "p30p16",
+      "p30p17",
+      "p30p18",
+      "p30p19"
+    ]
+  },
+  {
+    "id": 20,
+    "title": "20. Skupina: Tridesetka trojčki z večjimi prijatelji",
+    "description": "Dodajmo minus ena k desetkam!",
+    "combos": [
+      "p30p10m1",
+      "p30p11m1",
+      "p30p12m1",
+      "p30p13m1",
+      "p30p14m1",
+      "p30p15m1",
+      "p30p16m1",
+      "p30p17m1",
+      "p30p18m1",
+      "p30p19m1"
     ]
   }
 ]
