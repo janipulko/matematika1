@@ -33,7 +33,8 @@ class ComboButton extends HTMLElement {
           width: 100%;
           height: 100%;
           min-height: 110px;
-          background: white;
+          background: var(--card);
+          color: var(--ink);
           border: 4px solid var(--bubble);
           border-radius: var(--radius-sm);
           padding: 12px;

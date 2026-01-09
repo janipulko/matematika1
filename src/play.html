@@ -8,6 +8,80 @@
   <meta name="theme-color" content="#26C6DA">
   <link rel="apple-touch-icon" href="icon.svg">
   <style>
+    :root {
+      /* Initial fallback values to prevent empty vars before JS runs */
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --ink: #223;
+      --primary: #26C6DA;
+      --bubble: #e5eef6;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg), var(--bubble));
+      background-attachment: fixed;
+    }
+  </style>
+  <script>
+    (function() {
+      const paletteId = localStorage.getItem('math-game-palette') || 'fruit';
+      const palettes = {
+        candy: { type: 'light', colors: { '--bg': '#FFB6C1', '--card': '#FFFFFF', '--ink': '#34495E', '--primary': '#9B59B6', '--primary-d': '#8E44AD', '--accent': '#FFD54F', '--muted': '#7F8C8D', '--bubble': '#FADBD8' } },
+        ocean: { type: 'light', colors: { '--bg': '#00B4D8', '--card': '#FFFFFF', '--ink': '#112D4E', '--primary': '#0077B6', '--primary-d': '#005F8D', '--accent': '#FFD54F', '--muted': '#3F72AF', '--bubble': '#CAF0F8' } },
+        forest: { type: 'light', colors: { '--bg': '#A3D9A5', '--card': '#FFFFFF', '--ink': '#334D3A', '--primary': '#FFD54F', '--primary-d': '#F4C02E', '--accent': '#66BB6A', '--muted': '#4E6E5D', '--bubble': '#E8F5E9' } },
+        rainbow: { type: 'light', colors: { '--bg': '#FFD1DC', '--card': '#FFFFFF', '--ink': '#2C3E50', '--primary': '#A0DFFD', '--primary-d': '#7FB3D5', '--accent': '#F7DC6F', '--muted': '#7D8387', '--bubble': '#EBDEF0' } },
+        fresh: { type: 'light', colors: { '--bg': '#C6EBC5', '--card': '#FFFFFF', '--ink': '#22313F', '--primary': '#7EA1FF', '--primary-d': '#5D85FF', '--accent': '#A1EEBD', '--muted': '#5D6D7E', '--bubble': '#F2FFE9' } },
+        summer: { type: 'light', colors: { '--bg': '#FFF455', '--card': '#FFFFFF', '--ink': '#2C3E50', '--primary': '#4793AF', '--primary-d': '#34708A', '--accent': '#FFC470', '--muted': '#5D6D7E', '--bubble': '#FFFFE0' } },
+        cute: { type: 'light', colors: { '--bg': '#FFEAA7', '--card': '#FFFFFF', '--ink': '#1B2631', '--primary': '#FFBB64', '--primary-d': '#F39C12', '--accent': '#81ECEC', '--muted': '#566573', '--bubble': '#FFF9E1' } },
+        fruit: { type: 'light', colors: { '--bg': '#F9F07A', '--card': '#FFFFFF', '--ink': '#1C2833', '--primary': '#59B4C3', '--primary-d': '#4099A8', '--accent': '#FF9F66', '--muted': '#5D6D7E', '--bubble': '#FEFDEB' } },
+        starry_dark: { type: 'dark', colors: { '--bg': '#4A4E6D', '--card': '#22223B', '--ink': '#F9FFC6', '--primary': '#F9A7AF', '--primary-d': '#E0808A', '--accent': '#9A8C98', '--muted': '#C9ADA7', '--bubble': '#414461' } },
+        material: { type: 'dark', colors: { '--bg': '#121212', '--card': '#1E1E1E', '--ink': '#E0E0E0', '--primary': '#BB86FC', '--primary-d': '#9965f4', '--accent': '#03DAC6', '--muted': '#9E9E9E', '--bubble': '#2C2C2C' } },
+        ocean_night: { type: 'dark', colors: { '--bg': '#003F53', '--card': '#002B39', '--ink': '#F0F0F0', '--primary': '#00B4D8', '--primary-d': '#0096B4', '--accent': '#48CAE4', '--muted': '#90E0EF', '--bubble': '#004E66' } },
+        blackberry: { type: 'dark', colors: { '--bg': '#121212', '--card': '#1A1A1A', '--ink': '#E0E0E0', '--primary': '#2D3DAC', '--primary-d': '#1E2B8E', '--accent': '#CF6679', '--muted': '#757575', '--bubble': '#212121' } },
+        dark_vibrant: { type: 'dark', colors: { '--bg': '#211951', '--card': '#150E36', '--ink': '#FFFFFF', '--primary': '#74E291', '--primary-d': '#5AC275', '--accent': '#F7E987', '--muted': '#A5A5A5', '--bubble': '#2A2066' } },
+        autumn_night: { type: 'dark', colors: { '--bg': '#402B3A', '--card': '#2E1F2A', '--ink': '#F8F4EC', '--primary': '#FF9BD2', '--primary-d': '#E07FB4', '--accent': '#D63484', '--muted': '#A0909B', '--bubble': '#4F3648' } },
+        stellar: { type: 'dark', colors: { '--bg': '#280274', '--card': '#1C0152', '--ink': '#E9F6FF', '--primary': '#FDE767', '--primary-d': '#D9C557', '--accent': '#FF90BC', '--muted': '#9186B1', '--bubble': '#350394' } },
+        cold_night: { type: 'dark', colors: { '--bg': '#0C359E', '--card': '#08256E', '--ink': '#FFF67E', '--primary': '#FFB5DA', '--primary-d': '#E09BBF', '--accent': '#EE99C2', '--muted': '#8EA2D9', '--bubble': '#1044CC' } }
+      };
+      const palette = palettes[paletteId] || palettes.fruit;
+      const root = document.documentElement;
+      for (const [prop, val] of Object.entries(palette.colors)) {
+        root.style.setProperty(prop, val);
+      }
+      if (palette.type === 'dark') {
+        root.style.setProperty('--pos-bg', '#1B5E20'); root.style.setProperty('--pos-ink', '#C8E6C9');
+        root.style.setProperty('--neg-bg', '#B71C1C'); root.style.setProperty('--neg-ink', '#FFCDD2');
+        root.style.setProperty('--mul-bg', '#01579B'); root.style.setProperty('--mul-ink', '#E1F5FE');
+        root.style.setProperty('--div-bg', '#E65100'); root.style.setProperty('--div-ink', '#FFF3E0');
+        root.style.setProperty('--on-primary', '#000000');
+        root.style.setProperty('--on-accent', '#000000');
+        root.style.setProperty('--grid-fill', palette.colors['--primary']);
+        root.style.setProperty('--grid-stroke', 'rgba(255,255,255,0.1)');
+      } else {
+        root.style.setProperty('--pos-bg', '#C8E6C9'); root.style.setProperty('--pos-ink', '#194d23');
+        root.style.setProperty('--neg-bg', '#FFCDD2'); root.style.setProperty('--neg-ink', '#7a1c1c');
+        root.style.setProperty('--mul-bg', '#E1F5FE'); root.style.setProperty('--mul-ink', '#01579B');
+        root.style.setProperty('--div-bg', '#FFF3E0'); root.style.setProperty('--div-ink', '#E65100');
+        root.style.setProperty('--on-primary', '#FFFFFF');
+        root.style.setProperty('--on-accent', '#000000');
+        root.style.setProperty('--grid-fill', '#FFE082');
+        root.style.setProperty('--grid-stroke', '#dfe7ef');
+      }
+      
+      const pId = paletteId;
+      if (pId === 'material') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'ocean_night') root.style.setProperty('--on-primary', '#FFFFFF');
+      else if (pId === 'blackberry') root.style.setProperty('--on-primary', '#FFFFFF');
+      else if (pId === 'dark_vibrant') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'autumn_night') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'stellar') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'cold_night') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'starry_dark') root.style.setProperty('--on-primary', '#000000');
+    })();
+  </script>
+  <style>
     /* ===========================
        Globalni stili in barvna paleta
        =========================== */
@@ -31,6 +105,10 @@
       --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
       --radius: 16px;
       --radius-sm: 12px;
+
+      /* Dodatne barve za kontrast na gumbih */
+      --on-primary: #ffffff;
+      --on-accent: #000000;
 
       /* Barve za gumbe operacij */
       --pos-bg: #C8E6C9;
@@ -56,8 +134,8 @@
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, "Apple Color Emoji", "Segoe UI Emoji";
       color: var(--ink);
-      background: radial-gradient(circle at 20% 10%, #fdf7e3, transparent 40%),
-      radial-gradient(circle at 80% 0%, #e6fbff, transparent 40%),
+      background: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.4), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.3), transparent 40%),
       var(--bg);
     }
 

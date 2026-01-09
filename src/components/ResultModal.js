@@ -11,6 +11,12 @@ class ResultModal extends HTMLElement {
     this.dialog.onclose = () => {
       this.remove();
     };
+
+    const closeBtn = this.shadowRoot.querySelector('.close-btn');
+    if (closeBtn) {
+      closeBtn.onclick = () => this.close();
+    }
+
     this._canClose = false;
     // Preprečimo takojšnje zapiranje: modal se lahko zapre šele, ko uporabnik 
     // spusti tipko Enter (keyup) in jo nato znova pritisne.
@@ -29,6 +35,9 @@ class ResultModal extends HTMLElement {
     if (e.key === 'Enter') {
       if (!this._canClose) return;
       e.stopPropagation();
+      this.close();
+    }
+    if (e.key === 'Escape') {
       this.close();
     }
   }
@@ -94,13 +103,13 @@ class ResultModal extends HTMLElement {
     const isAlreadyUnlocked = nextStep <= maxUnlockedStep;
 
     if (isAlreadyUnlocked) {
-      btn.textContent = 'Naslednji korak ➔';
+      btn.innerHTML = '<span>Naslednji korak ➔</span>';
       btn.onclick = () => {
         location.href = `play.html?step=${nextStep}&num=${nextCombo}`;
       };
     } else {
       const cost = 10;
-      btn.innerHTML = `Odkleni korak ${nextStep + 1} <span style="font-size: 0.8em; opacity: 0.9;">(${cost} ★)</span>`;
+      btn.innerHTML = `<span>Odkleni korak ${nextStep + 1}</span> <span style="font-size: 0.7em; opacity: 0.9; margin-left: 8px;">(${cost} ★)</span>`;
       btn.disabled = totalStars < cost;
       btn.onclick = () => {
         const newTotal = totalStars - cost;
@@ -138,14 +147,11 @@ class ResultModal extends HTMLElement {
     totalContainer.innerHTML = `Skupaj: <span>${totalStars}</span> ★`;
     container.appendChild(totalContainer);
 
-    // Gumb za naslednji korak
-    await this.renderNextStepButton(container, totalStars);
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'button-group';
 
-    const btnRow = document.createElement('div');
-    btnRow.style.display = 'flex';
-    btnRow.style.gap = '10px';
-    btnRow.style.width = '100%';
-    btnRow.style.justifyContent = 'center';
+    // Gumb za naslednji korak
+    await this.renderNextStepButton(buttonGroup, totalStars);
 
     const btn = document.createElement('button');
     btn.className = 'btn-next';
@@ -154,8 +160,8 @@ class ResultModal extends HTMLElement {
       this.close();
       location.reload();
     };
-    btnRow.appendChild(btn);
-    container.appendChild(btnRow);
+    buttonGroup.appendChild(btn);
+    container.appendChild(buttonGroup);
 
     // Animate stars
     setTimeout(() => {
@@ -178,6 +184,9 @@ class ResultModal extends HTMLElement {
     emoji.textContent = '😢';
     container.appendChild(emoji);
 
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'button-group';
+
     const btn = document.createElement('button');
     btn.className = 'btn-retry';
     btn.textContent = 'Poskusi ponovno';
@@ -185,12 +194,16 @@ class ResultModal extends HTMLElement {
       this.close();
       this.dispatchEvent(new CustomEvent('reset-game', { bubbles: true, composed: true }));
     };
-    container.appendChild(btn);
+    buttonGroup.appendChild(btn);
+    container.appendChild(buttonGroup);
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
+        :host {
+          --modal-bg: var(--card);
+        }
         dialog {
           border: none;
           padding: 0;
@@ -199,12 +212,11 @@ class ResultModal extends HTMLElement {
           max-width: 100vw;
           max-height: 100vh;
           margin: 0;
-          text-align: center;
-          box-shadow: none;
-          background: var(--card);
+          background: radial-gradient(circle at 50% 20%, var(--card), var(--bubble));
+          box-sizing: border-box;
+          overflow: hidden;
           display: flex;
-          align-items: center;
-          justify-content: center;
+          flex-direction: column;
         }
         dialog[open] {
           display: flex;
@@ -213,44 +225,74 @@ class ResultModal extends HTMLElement {
           background: rgba(0, 0, 0, 0.4);
           backdrop-filter: blur(4px);
         }
+        .close-btn {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 1px solid var(--bubble);
+          background: var(--card);
+          color: var(--muted);
+          font-size: 24px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          transition: all 0.2s;
+          padding: 0;
+          box-shadow: none;
+        }
+        .close-btn:hover {
+          background: var(--primary);
+          color: white;
+          transform: rotate(90deg);
+        }
         .content {
+          flex: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
-          gap: 40px;
+          justify-content: space-evenly;
+          padding: 40px 20px;
+          box-sizing: border-box;
           width: 100%;
           height: 100%;
+          overflow: hidden;
         }
         h2 {
           margin: 0;
-          color: var(--ok);
-          font-size: clamp(24px, 5vw, 48px);
+          color: var(--primary-d);
+          font-size: clamp(24px, 6vw, 42px);
+          line-height: 1.2;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          text-align: center;
         }
         .sad-emoji {
-          font-size: clamp(80px, 15vw, 150px);
+          font-size: clamp(80px, 20vw, 150px);
+          line-height: 1;
         }
         .stars-container {
           display: flex;
-          gap: clamp(15px, 3vw, 40px);
-          margin: 20px 0;
+          gap: clamp(10px, 4vw, 30px);
+          justify-content: center;
+          align-items: center;
         }
         .star-outline {
-          font-size: clamp(60px, 12vw, 120px);
-          color: #eee;
+          font-size: clamp(60px, 15vw, 120px);
+          color: var(--bubble);
           position: relative;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           user-select: none;
+          line-height: 1;
         }
         .star-outline.filled {
-          color: var(--gold);
+          color: var(--primary);
           transform: scale(1.2) rotate(5deg);
-          text-shadow: 0 0 20px rgba(242, 201, 76, 0.8),
-                       0 0 40px rgba(242, 201, 76, 0.4);
-          background: linear-gradient(45deg, #FFD700, #FFA500);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+          text-shadow: 0 0 15px rgba(var(--primary-rgb, 38, 198, 218), 0.5);
+          filter: drop-shadow(0 0 2px var(--primary));
           animation: star-pop 0.5s ease-out forwards;
         }
         @keyframes star-pop {
@@ -259,35 +301,41 @@ class ResultModal extends HTMLElement {
           100% { transform: scale(1.2) rotate(5deg); opacity: 1; }
         }
         .star-outline.super-star {
+          color: var(--accent);
+          text-shadow: 0 0 20px var(--accent);
+          filter: drop-shadow(0 0 5px var(--accent));
           animation: star-pulse 2s infinite ease-in-out, star-pop 0.5s ease-out forwards;
         }
         @keyframes star-pulse {
           0%, 100% { transform: scale(1.2) rotate(5deg); filter: brightness(1); }
-          50% { transform: scale(1.3) rotate(-5deg); filter: brightness(1.3) drop-shadow(0 0 15px var(--gold)); }
+          50% { transform: scale(1.3) rotate(-5deg); filter: brightness(1.3) drop-shadow(0 0 15px var(--accent)); }
         }
         .total-stars {
-          font-size: clamp(20px, 4vw, 32px);
-          color: var(--primary);
-          background: #fdfcf0;
-          padding: 12px 30px;
+          font-size: clamp(18px, 4vw, 28px);
+          color: var(--ink);
+          background: var(--bubble);
+          padding: 10px 24px;
           border-radius: var(--radius);
           font-weight: bold;
-          margin-top: -10px;
-          border: 2px solid rgba(242, 201, 76, 0.2);
+          border: 2px solid var(--primary);
           box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .total-stars span {
-          color: var(--gold);
-          display: inline-block;
-          animation: count-up 0.5s ease-out;
+          color: var(--primary-d);
         }
-        @keyframes count-up {
-          from { transform: translateY(10px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+        .button-group {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          width: 100%;
+          max-width: 400px;
+          align-items: center;
         }
         button {
-          padding: 18px 36px;
-          font-size: clamp(18px, 4vw, 24px);
+          width: 100%;
+          max-width: 320px;
+          padding: 16px 24px;
+          font-size: clamp(16px, 4vw, 20px);
           font-weight: 900;
           border: none;
           border-radius: var(--radius);
@@ -296,60 +344,64 @@ class ResultModal extends HTMLElement {
           text-transform: uppercase;
           letter-spacing: 1px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 60px;
         }
         button:active {
           transform: scale(0.95);
         }
         .btn-next {
-          background: var(--ok);
-          color: white;
-          padding: 12px 24px;
-          font-size: clamp(14px, 3vw, 18px);
-          margin: 0 auto;
+          background: var(--primary);
+          color: var(--on-primary, white);
+          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         .btn-next:hover {
-          background: #27ae60;
+          background: var(--primary);
+          filter: brightness(1.1);
           transform: translateY(-2px);
-          box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
         .btn-reward {
-          background: linear-gradient(135deg, var(--gold), #f39c12);
-          color: white;
-          margin-top: -10px;
-          padding: 24px 48px;
-          font-size: clamp(22px, 5vw, 30px);
-          box-shadow: 0 8px 20px rgba(241, 196, 15, 0.4);
+          background: var(--accent);
+          color: var(--on-accent, black);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
           animation: entice 2s infinite ease-in-out;
-          border: 3px solid rgba(255, 255, 255, 0.3);
+          border: 3px solid rgba(255, 255, 255, 0.5);
         }
         .btn-reward:hover:not(:disabled) {
-          background: linear-gradient(135deg, #f1c40f, #e67e22);
+          background: var(--accent);
+          filter: brightness(1.1);
           transform: translateY(-4px) scale(1.02);
-          box-shadow: 0 12px 25px rgba(241, 196, 15, 0.5);
         }
         @keyframes entice {
           0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+          50% { transform: scale(1.02); }
         }
         .btn-reward:disabled {
-          background: #e2e8f0;
-          color: #94a3b8;
+          background: var(--bubble);
+          color: var(--muted);
           cursor: not-allowed;
-          transform: none;
           animation: none;
           box-shadow: none;
           border: none;
+          opacity: 0.6;
         }
         .btn-retry {
           background: var(--primary);
-          color: white;
+          color: var(--on-primary, white);
+          text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .btn-retry:hover {
-          background: #2980b9;
+          background: var(--primary);
+          filter: brightness(1.1);
           transform: translateY(-2px);
         }
       </style>
       <dialog>
+        <button class="close-btn" aria-label="Zapri">&times;</button>
         <div class="content"></div>
       </dialog>
     `;

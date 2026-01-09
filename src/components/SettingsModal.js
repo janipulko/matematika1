@@ -54,12 +54,21 @@ class SettingsModal extends HTMLElement {
     const okBtn = this.shadowRoot.querySelector('.btn-ok');
     const muteBtn = this.shadowRoot.querySelector('.mute-btn');
     const activeBtn = this.shadowRoot.querySelector('.active-btn');
+    const colorBtn = this.shadowRoot.querySelector('.color-btn');
 
     closeBtn.onclick = () => this.close();
     okBtn.onclick = () => this.close();
     
     dialog.onclose = () => {
       this.remove();
+    };
+
+    colorBtn.onclick = () => {
+      this.close();
+      this.dispatchEvent(new CustomEvent('open-color-settings', {
+        bubbles: true,
+        composed: true
+      }));
     };
 
     muteBtn.onclick = () => {
@@ -145,14 +154,14 @@ class SettingsModal extends HTMLElement {
           gap: 24px;
           width: 100%;
         }
-        .mute-btn, .active-btn, .unlock-link {
+        .mute-btn, .active-btn, .unlock-link, .color-btn {
           appearance: none;
           border: 3px solid var(--primary);
-          background: white;
+          background: var(--bubble);
           color: var(--primary-d);
           padding: 20px 40px;
           border-radius: var(--radius);
-          font-weight: bold;
+          font-weight: 900;
           cursor: pointer;
           transition: all 0.2s;
           font-size: clamp(18px, 4vw, 24px);
@@ -163,10 +172,20 @@ class SettingsModal extends HTMLElement {
           align-items: center;
           justify-content: center;
           box-sizing: border-box;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .mute-btn:hover, .active-btn:hover, .unlock-link:hover, .color-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+          filter: brightness(1.05);
+        }
+        .mute-btn:active, .active-btn:active, .unlock-link:active, .color-btn:active {
+          transform: scale(0.96);
         }
         .mute-btn.off, .active-btn.off {
           border-color: var(--muted);
           color: var(--muted);
+          opacity: 0.8;
         }
         .footer {
           margin-top: 40px;
@@ -174,7 +193,7 @@ class SettingsModal extends HTMLElement {
         }
         .btn-ok {
           background: var(--primary);
-          color: white;
+          color: var(--on-primary, white);
           border: none;
           padding: 16px 48px;
           border-radius: 999px;
@@ -195,6 +214,7 @@ class SettingsModal extends HTMLElement {
         <div class="content">
           <button class="mute-btn"></button>
           <button class="active-btn"></button>
+          <button class="color-btn">🎨 Barve aplikacije</button>
           <a href="./unlock.html" class="unlock-link">🔓 Odkleni vsebino</a>
         </div>
         <div class="footer">

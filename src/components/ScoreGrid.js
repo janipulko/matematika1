@@ -75,9 +75,9 @@ class ScoreGrid extends HTMLElement {
         .grid-frame {
             box-sizing: border-box;
           
-            background: linear-gradient(180deg, #fff, #f9fbff);
+            background: var(--card);
             border-radius: var(--radius);
-            border: 1px solid #eef2f7;
+            border: 1px solid var(--grid-stroke);
             padding: clamp(4px, 1vh, 12px);
           
             display: grid;
@@ -96,7 +96,7 @@ class ScoreGrid extends HTMLElement {
 
         .cell {
           aspect-ratio: 1 / 1;
-          background: #fff;
+          background: rgba(128, 128, 128, 0.1);
           border: clamp(1px, 0.2vh, 2px) solid var(--grid-stroke);
           border-radius: clamp(4px, 1vh, 10px);
           transition: background .18s ease, border-color .18s ease, transform .08s ease;
@@ -104,8 +104,8 @@ class ScoreGrid extends HTMLElement {
 
         .cell.filled {
           background: var(--grid-fill);
-          border-color: #f3d070;
-          box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6);
+          border-color: var(--primary);
+          box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .flash {

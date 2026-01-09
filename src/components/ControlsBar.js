@@ -174,13 +174,13 @@ class ControlsBar extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: radial-gradient(circle at 30% 30%, #fff, #cfd8ff);
-          color: #08323c;
+          background: var(--card);
+          color: var(--ink);
           font-weight: 900;
           font-size: var(--btn-font);
           cursor: pointer;
 
-          box-shadow: 0 4px 10px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.2);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.1);
           transition: transform .1s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                       filter .12s ease,
                       box-shadow .2s ease;
@@ -191,54 +191,54 @@ class ControlsBar extends HTMLElement {
         }
 
         .btn:hover {
-          filter: brightness(1.05);
-          transform: scale(1.05);
-          box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+          filter: brightness(1.1);
+          transform: scale(1.08);
+          box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
         .btn:active {
-          transform: scale(0.95);
+          transform: scale(0.92);
           box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* ========= Semantic Variants (ohranjene barve z gradacijami) ========= */
+        /* ========= Semantic Variants (polne barve za boljšo opaznost) ========= */
         .btn.neg {
-          background: radial-gradient(circle at 30% 30%, #fff, var(--neg-bg, #FFCDD2));
+          background: var(--neg-bg, #FFCDD2);
           color: var(--neg-ink, #7a1c1c);
           box-shadow: 0 4px 10px rgba(239,83,80,0.2);
         }
-        .btn.neg:hover { box-shadow: 0 6px 14px rgba(239,83,80,0.3); }
+        .btn.neg:hover { box-shadow: 0 8px 16px rgba(239,83,80,0.4); }
 
         .btn.pos {
-          background: radial-gradient(circle at 30% 30%, #fff, var(--pos-bg, #C8E6C9));
+          background: var(--pos-bg, #C8E6C9);
           color: var(--pos-ink, #194d23);
           box-shadow: 0 4px 10px rgba(102,187,106,0.2);
         }
-        .btn.pos:hover { box-shadow: 0 6px 14px rgba(102,187,106,0.3); }
+        .btn.pos:hover { box-shadow: 0 8px 16px rgba(102,187,106,0.4); }
 
         .btn.mul {
-          background: radial-gradient(circle at 30% 30%, #fff, var(--mul-bg, #E1F5FE));
+          background: var(--mul-bg, #E1F5FE);
           color: var(--mul-ink, #01579B);
           box-shadow: 0 4px 10px rgba(3,169,244,0.2);
         }
-        .btn.mul:hover { box-shadow: 0 6px 14px rgba(3,169,244,0.3); }
+        .btn.mul:hover { box-shadow: 0 8px 16px rgba(3,169,244,0.4); }
 
         .btn.div {
-          background: radial-gradient(circle at 30% 30%, #fff, var(--div-bg, #FFF3E0));
+          background: var(--div-bg, #FFF3E0);
           color: var(--div-ink, #E65100);
           box-shadow: 0 4px 10px rgba(255,152,0,0.2);
         }
-        .btn.div:hover { box-shadow: 0 6px 14px rgba(255,152,0,0.3); }
+        .btn.div:hover { box-shadow: 0 8px 16px rgba(255,152,0,0.4); }
 
         .btn.equal {
-          background: radial-gradient(circle at 30% 30%, #fff, var(--accent, #FFD54F));
-          color: #5a4605;
-          box-shadow: 0 4px 10px rgba(255,213,79,0.3);
+          background: var(--accent, #FFD54F);
+          color: var(--on-accent, var(--ink));
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .btn.equal:hover { box-shadow: 0 6px 14px rgba(255,213,79,0.4); }
+        .btn.equal:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
 
         /* ========= Keyboard Active Highlight ========= */
         .btn.active-kbd {
-          outline: 3px solid #FF5252;
+          outline: 3px solid var(--danger);
           outline-offset: 3px;
           box-shadow: 0 0 15px rgba(255, 82, 82, 0.6);
           transform: scale(1.1);

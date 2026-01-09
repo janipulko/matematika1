@@ -26,11 +26,11 @@ class TargetDisplay extends HTMLElement {
           align-items: center;
           justify-content: center;
           text-align: center;
-          font-weight: 800;
+          font-weight: 900;
           font-size: clamp(32px, 8vh, 64px);
           line-height: 1;
-          color: #123;
-          text-shadow: 0 2px 0 rgba(255,255,255,0.9);
+          color: var(--ink);
+          text-shadow: 0 4px 10px rgba(0,0,0,0.1);
           margin: 4px 0;
         }
 

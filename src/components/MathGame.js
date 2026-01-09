@@ -4,6 +4,7 @@ import './ScoreGrid.js';
 import './StepIndicator.js';
 import './ControlsBar.js';
 import './SettingsModal.js';
+import './ColorSettingsModal.js';
 import './ResultModal.js';
 import { sound } from '../utils/soundManager.js';
 
@@ -234,6 +235,12 @@ class MathGame extends HTMLElement {
       this.ctrlEl.setShowActive(this.showActiveIndicator);
     });
 
+    this.shadowRoot.addEventListener('open-color-settings', () => {
+      const modal = document.createElement('color-settings-modal');
+      this.shadowRoot.appendChild(modal);
+      modal.show();
+    });
+
     this.shadowRoot.addEventListener('next-level', () => {
       location.reload();
     });
@@ -263,6 +270,7 @@ class MathGame extends HTMLElement {
           position: relative;
           gap: clamp(8px, 1.5vh, 16px);
           overflow: hidden;
+          border: 1px solid var(--bubble);
         }
         .section {
           width: 100%;
@@ -282,7 +290,7 @@ class MathGame extends HTMLElement {
         .settings-trigger, .reset-trigger {
           position: absolute;
           top: clamp(8px, 1.5vh, 16px);
-          background: #f0f4f8;
+          background: var(--bubble);
           border: none;
           border-radius: var(--radius-sm);
           width: clamp(32px, 5vh, 42px);
@@ -294,7 +302,7 @@ class MathGame extends HTMLElement {
           font-size: clamp(16px, 2.5vh, 20px);
           color: var(--muted);
           transition: all 0.2s;
-          opacity: 0.7;
+          opacity: 0.8;
           z-index: 10;
         }
         .settings-trigger {
@@ -304,7 +312,8 @@ class MathGame extends HTMLElement {
           left: 12px;
         }
         .settings-trigger:hover, .reset-trigger:hover {
-          background: #e2e8f0;
+          background: var(--primary);
+          color: var(--on-primary, white);
           opacity: 1;
         }
         .settings-trigger:hover {
