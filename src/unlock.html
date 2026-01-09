@@ -6,6 +6,63 @@
   <title>Odkleni nove številke</title>
   <style>
     :root {
+      /* Initial fallback values to prevent empty vars before JS runs */
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --ink: #223;
+      --primary: #26C6DA;
+      --bubble: #e5eef6;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg), var(--bubble));
+      background-attachment: fixed;
+    }
+  </style>
+  <script type="module">
+    import { PALETTES } from './utils/palettes.js';
+    (function() {
+      const paletteId = localStorage.getItem('math-game-palette') || 'fruit';
+      const palette = PALETTES[paletteId] || PALETTES.fruit;
+      const root = document.documentElement;
+      for (const [prop, val] of Object.entries(palette.colors)) {
+        root.style.setProperty(prop, val);
+      }
+      if (palette.type === 'dark') {
+        root.style.setProperty('--pos-bg', '#1B5E20'); root.style.setProperty('--pos-ink', '#C8E6C9');
+        root.style.setProperty('--neg-bg', '#B71C1C'); root.style.setProperty('--neg-ink', '#FFCDD2');
+        root.style.setProperty('--mul-bg', '#01579B'); root.style.setProperty('--mul-ink', '#E1F5FE');
+        root.style.setProperty('--div-bg', '#E65100'); root.style.setProperty('--div-ink', '#FFF3E0');
+        root.style.setProperty('--on-primary', '#000000');
+        root.style.setProperty('--on-accent', '#000000');
+        root.style.setProperty('--grid-fill', palette.colors['--primary']);
+        root.style.setProperty('--grid-stroke', 'rgba(255,255,255,0.1)');
+      } else {
+        root.style.setProperty('--pos-bg', '#C8E6C9'); root.style.setProperty('--pos-ink', '#194d23');
+        root.style.setProperty('--neg-bg', '#FFCDD2'); root.style.setProperty('--neg-ink', '#7a1c1c');
+        root.style.setProperty('--mul-bg', '#E1F5FE'); root.style.setProperty('--mul-ink', '#01579B');
+        root.style.setProperty('--div-bg', '#FFF3E0'); root.style.setProperty('--div-ink', '#E65100');
+        root.style.setProperty('--on-primary', '#FFFFFF');
+        root.style.setProperty('--on-accent', '#000000');
+        root.style.setProperty('--grid-fill', '#FFE082');
+        root.style.setProperty('--grid-stroke', '#dfe7ef');
+      }
+      
+      const pId = paletteId;
+      if (pId === 'material') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'ocean_night') root.style.setProperty('--on-primary', '#FFFFFF');
+      else if (pId === 'blackberry') root.style.setProperty('--on-primary', '#FFFFFF');
+      else if (pId === 'dark_vibrant') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'autumn_night') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'stellar') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'cold_night') root.style.setProperty('--on-primary', '#000000');
+      else if (pId === 'starry_dark') root.style.setProperty('--on-primary', '#000000');
+    })();
+  </script>
+  <style>
+    :root {
       --bg: #f7fafc;
       --card: #ffffff;
       --ink: #223;
@@ -24,6 +81,9 @@
       --radius: 16px;
       --radius-sm: 12px;
 
+      --on-primary: #ffffff;
+      --on-accent: #000000;
+
       --pos-bg: #C8E6C9;
       --pos-ink: #194d23;
       --neg-bg: #FFCDD2;
@@ -35,8 +95,11 @@
     }
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.4), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.3), transparent 40%),
+      var(--bg);
+      background-attachment: fixed;
       color: var(--ink);
     }
   </style>

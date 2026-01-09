@@ -119,10 +119,11 @@ class UnlockPage extends HTMLElement {
         }
         header {
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
           align-items: center;
           margin-bottom: 40px;
-          background: white;
+          background: var(--card);
+          color: var(--ink);
           padding: 20px;
           border-radius: var(--radius);
           box-shadow: var(--shadow);
@@ -186,7 +187,6 @@ class UnlockPage extends HTMLElement {
         }
       </style>
       <header>
-        <a href="play.html" class="logo"><span>🏠</span> Domov</a>
         <div class="stars-badge">Moje zvezdice: <span>${totalStars}</span> ★</div>
       </header>
       <div class="groups"></div>

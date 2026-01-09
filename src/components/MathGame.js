@@ -236,8 +236,16 @@ class MathGame extends HTMLElement {
     }
 
     this.render();
+    this._updateExternalStepCounter();
     this._attachEventListeners();
     this.initialized = true;
+  }
+
+  _updateExternalStepCounter() {
+    const el = document.getElementById('step-display');
+    if (el && this.currentStepIndex !== undefined) {
+      el.textContent = this.currentStepIndex + 1;
+    }
   }
 
   _attachEventListeners() {
@@ -282,6 +290,8 @@ class MathGame extends HTMLElement {
     });
 
     this.shadowRoot.addEventListener('next-level', () => {
+      this.currentStepIndex++;
+      this._updateExternalStepCounter();
       location.reload();
     });
     this.shadowRoot.addEventListener('reset-game', () => {

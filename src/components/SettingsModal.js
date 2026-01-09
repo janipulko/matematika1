@@ -62,6 +62,32 @@ class SettingsModal extends HTMLElement {
     if (slider) slider.value = this._maxSteps;
   }
 
+  async _hardReset() {
+    try {
+      // 1. Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+        }
+      }
+
+      // 2. Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        for (let name of cacheNames) {
+          await caches.delete(name);
+        }
+      }
+
+      // 3. Reload the page
+      window.location.reload();
+    } catch (error) {
+      console.error('Hard reset failed:', error);
+      alert('Prišlo je do napake pri osveževanju. Prosimo, poskusite znova.');
+    }
+  }
+
   _attachEventListeners() {
     const dialog = this.shadowRoot.querySelector('dialog');
     const closeBtn = this.shadowRoot.querySelector('.close-btn');
@@ -69,6 +95,7 @@ class SettingsModal extends HTMLElement {
     const muteBtn = this.shadowRoot.querySelector('.mute-btn');
     const activeBtn = this.shadowRoot.querySelector('.active-btn');
     const colorBtn = this.shadowRoot.querySelector('.color-btn');
+    const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
     const stepsSlider = this.shadowRoot.querySelector('#max-steps-slider');
     const gameTypeSelect = this.shadowRoot.querySelector('#game-type-select');
 
@@ -77,6 +104,12 @@ class SettingsModal extends HTMLElement {
     
     dialog.onclose = () => {
       this.remove();
+    };
+
+    refreshBtn.onclick = async () => {
+      if (confirm('Ali želite popolno osvežiti aplikacijo? To bo ponovno naložilo vse datoteke, nastavitve in napredek pa bodo ohranjeni.')) {
+        await this._hardReset();
+      }
     };
 
     gameTypeSelect.onchange = (e) => {
@@ -196,7 +229,7 @@ class SettingsModal extends HTMLElement {
           gap: 24px;
           width: 100%;
         }
-        .mute-btn, .active-btn, .unlock-link, .color-btn {
+        .mute-btn, .active-btn, .unlock-link, .color-btn, .refresh-btn {
           appearance: none;
           border: 3px solid var(--primary);
           background: var(--bubble);
@@ -216,13 +249,17 @@ class SettingsModal extends HTMLElement {
           box-sizing: border-box;
           box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-        .mute-btn:hover, .active-btn:hover, .unlock-link:hover, .color-btn:hover {
+        .mute-btn:hover, .active-btn:hover, .unlock-link:hover, .color-btn:hover, .refresh-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 12px rgba(0,0,0,0.1);
           filter: brightness(1.05);
         }
-        .mute-btn:active, .active-btn:active, .unlock-link:active, .color-btn:active {
+        .mute-btn:active, .active-btn:active, .unlock-link:active, .color-btn:active, .refresh-btn:active {
           transform: scale(0.96);
+        }
+        .refresh-btn {
+          border-color: #ff9800;
+          color: #e65100;
         }
         .mute-btn.off, .active-btn.off {
           border-color: var(--muted);
@@ -327,6 +364,7 @@ class SettingsModal extends HTMLElement {
           <button class="mute-btn"></button>
           <button class="active-btn"></button>
           <button class="color-btn">🎨 Barve aplikacije</button>
+          <button class="refresh-btn">🔄 Osveži aplikacijo</button>
           <a href="./unlock.html" class="unlock-link">🔓 Odkleni vsebino</a>
         </div>
         <div class="footer">
