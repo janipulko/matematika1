@@ -74,13 +74,17 @@ class ResultModal extends HTMLElement {
 
   async renderNextStepButton(container, totalStars) {
     const params = new URLSearchParams(location.search);
-    const currentStep = parseInt(params.get('step') || localStorage.getItem('math-game-step') || '0', 10);
+    const type = localStorage.getItem('math-game-type') || 'sum';
+    const dataPath = type === 'groups' ? 'data/groups.json' : 'data/sum.json';
+    const stepKey = `math-game-step-${type}`;
+
+    const currentStep = parseInt(params.get('step') || localStorage.getItem(stepKey) || '0', 10);
     const nextStep = currentStep + 1;
 
     // Pridobimo podatke o naslednjem koraku
     let nextCombo = null;
     try {
-      const response = await fetch('data/groups.json');
+      const response = await fetch(dataPath);
       const groups = await response.json();
       let count = 0;
       for (const group of groups) {
@@ -99,7 +103,7 @@ class ResultModal extends HTMLElement {
     const btn = document.createElement('button');
     btn.className = 'btn-reward'; // Uporabimo isti stil kot prej
     
-    const maxUnlockedStep = parseInt(localStorage.getItem('math-game-step') || '0', 10);
+    const maxUnlockedStep = parseInt(localStorage.getItem(stepKey) || '0', 10);
     const isAlreadyUnlocked = nextStep <= maxUnlockedStep;
 
     if (isAlreadyUnlocked) {
@@ -109,12 +113,17 @@ class ResultModal extends HTMLElement {
       };
     } else {
       const cost = 10;
-      btn.innerHTML = `<span>Odkleni korak ${nextStep + 1}</span> <span style="font-size: 0.7em; opacity: 0.9; margin-left: 8px;">(${cost} ★)</span>`;
+      btn.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; line-height: 1.2;">
+          <span>Odkleni korak ${nextStep + 1}</span>
+          <span style="font-size: 0.8em; opacity: 0.9;">(${cost} ★)</span>
+        </div>
+      `;
       btn.disabled = totalStars < cost;
       btn.onclick = () => {
         const newTotal = totalStars - cost;
         localStorage.setItem('math-game-total-stars', newTotal);
-        localStorage.setItem('math-game-step', nextStep);
+        localStorage.setItem(stepKey, nextStep);
         location.href = `play.html?step=${nextStep}&num=${nextCombo}`;
       };
     }
@@ -334,7 +343,7 @@ class ResultModal extends HTMLElement {
         button {
           width: 100%;
           max-width: 320px;
-          padding: 16px 24px;
+          padding: 12px 24px;
           font-size: clamp(16px, 4vw, 20px);
           font-weight: 900;
           border: none;
@@ -348,7 +357,7 @@ class ResultModal extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 60px;
+          min-height: 64px;
         }
         button:active {
           transform: scale(0.95);

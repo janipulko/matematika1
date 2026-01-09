@@ -5,6 +5,8 @@ class SettingsModal extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this._soundOn = true;
     this._showActive = true;
+    this._maxSteps = parseInt(localStorage.getItem('math-game-max-steps') || '10', 10);
+    this._gameType = localStorage.getItem('math-game-type') || 'sum';
   }
 
   connectedCallback() {
@@ -32,6 +34,11 @@ class SettingsModal extends HTMLElement {
     this._updateActiveBtn();
   }
 
+  setMaxSteps(value) {
+    this._maxSteps = value;
+    this._updateMaxStepsDisplay();
+  }
+
   _updateMuteBtn() {
     const btn = this.shadowRoot.querySelector('.mute-btn');
     if (btn) {
@@ -48,6 +55,13 @@ class SettingsModal extends HTMLElement {
     }
   }
 
+  _updateMaxStepsDisplay() {
+    const display = this.shadowRoot.querySelector('.max-steps-val');
+    const slider = this.shadowRoot.querySelector('#max-steps-slider');
+    if (display) display.textContent = this._maxSteps;
+    if (slider) slider.value = this._maxSteps;
+  }
+
   _attachEventListeners() {
     const dialog = this.shadowRoot.querySelector('dialog');
     const closeBtn = this.shadowRoot.querySelector('.close-btn');
@@ -55,12 +69,40 @@ class SettingsModal extends HTMLElement {
     const muteBtn = this.shadowRoot.querySelector('.mute-btn');
     const activeBtn = this.shadowRoot.querySelector('.active-btn');
     const colorBtn = this.shadowRoot.querySelector('.color-btn');
+    const stepsSlider = this.shadowRoot.querySelector('#max-steps-slider');
+    const gameTypeSelect = this.shadowRoot.querySelector('#game-type-select');
 
     closeBtn.onclick = () => this.close();
     okBtn.onclick = () => this.close();
     
     dialog.onclose = () => {
       this.remove();
+    };
+
+    gameTypeSelect.onchange = (e) => {
+      const val = e.target.value;
+      localStorage.setItem('math-game-type', val);
+      this._gameType = val;
+      this.dispatchEvent(new CustomEvent('change-game-type', {
+        bubbles: true,
+        composed: true,
+        detail: { value: val }
+      }));
+    };
+
+    stepsSlider.oninput = (e) => {
+      this._maxSteps = parseInt(e.target.value, 10);
+      this._updateMaxStepsDisplay();
+    };
+
+    stepsSlider.onchange = (e) => {
+      const val = parseInt(e.target.value, 10);
+      localStorage.setItem('math-game-max-steps', val);
+      this.dispatchEvent(new CustomEvent('change-max-steps', {
+        bubbles: true,
+        composed: true,
+        detail: { value: val }
+      }));
     };
 
     colorBtn.onclick = () => {
@@ -187,6 +229,60 @@ class SettingsModal extends HTMLElement {
           color: var(--muted);
           opacity: 0.8;
         }
+        .slider-container, .select-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          width: 320px;
+          max-width: 80%;
+          background: var(--bubble);
+          padding: 20px;
+          border-radius: var(--radius);
+          border: 3px solid var(--primary);
+          box-sizing: border-box;
+        }
+        .slider-label, .select-label {
+          font-weight: 900;
+          color: var(--primary-d);
+          font-size: 1.2rem;
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+        }
+        select {
+          width: 100%;
+          padding: 10px;
+          border-radius: var(--radius);
+          border: 2px solid var(--primary);
+          background: white;
+          font-size: 1.1rem;
+          color: var(--primary-d);
+          font-family: inherit;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        input[type=range] {
+          width: 100%;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+          background: var(--primary-l, #eee);
+          height: 12px;
+          border-radius: 6px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+          appearance: none;
+          height: 28px;
+          width: 28px;
+          background: var(--primary);
+          border-radius: 50%;
+          margin-top: -8px;
+          border: 3px solid white;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
         .footer {
           margin-top: 40px;
           text-align: center;
@@ -212,6 +308,22 @@ class SettingsModal extends HTMLElement {
           <button class="close-btn">&times;</button>
         </div>
         <div class="content">
+          <div class="select-container">
+            <div class="select-label">
+              <span>Vrsta igre:</span>
+            </div>
+            <select id="game-type-select">
+              <option value="groups" ${this._gameType === 'groups' ? 'selected' : ''}>Skupine</option>
+              <option value="sum" ${this._gameType === 'sum' ? 'selected' : ''}>Seštevanje</option>
+            </select>
+          </div>
+          <div class="slider-container">
+            <div class="slider-label">
+              <span>Maks. korakov:</span>
+              <span class="max-steps-val">${this._maxSteps}</span>
+            </div>
+            <input type="range" id="max-steps-slider" min="2" max="10" value="${this._maxSteps}">
+          </div>
           <button class="mute-btn"></button>
           <button class="active-btn"></button>
           <button class="color-btn">🎨 Barve aplikacije</button>

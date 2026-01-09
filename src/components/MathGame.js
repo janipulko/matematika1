@@ -18,24 +18,44 @@ function parseNumsFromURL() {
   if (!raw) return null;
 
   const nums = [];
-  const regex = /([pmts])(\d+)/g;
+  // Regex zdaj išče tudi x parameter za korake
+  const regex = /([pmtsx])(\d+)/g;
   let match;
+  let maxStepsOverride = null;
+
   while ((match = regex.exec(raw)) !== null) {
     const op = match[1];
     const value = parseInt(match[2], 10);
-    if (isNaN(value) || value === 0) continue;
+    if (isNaN(value)) continue;
+
+    if (op === 'x') {
+      maxStepsOverride = value;
+      continue;
+    }
+
+    if (value === 0) continue;
     if (nums.some(n => n.op === op && n.val === value)) continue;
     nums.push({ op, val: value });
     if (nums.length >= 5) break;
   }
 
   if (nums.length < 1) return null;
-  return nums;
+  return { nums, maxStepsOverride };
+}
+
+function getGameDataPath() {
+  const type = localStorage.getItem('math-game-type') || 'sum';
+  return type === 'groups' ? 'data/groups.json' : 'data/sum.json';
+}
+
+function getStepKey() {
+  const type = localStorage.getItem('math-game-type') || 'sum';
+  return `math-game-step-${type}`;
 }
 
 async function getNumsForStep(stepIndex) {
   try {
-    const response = await fetch('data/groups.json');
+    const response = await fetch(getGameDataPath());
     const groups = await response.json();
     let count = 0;
     for (const group of groups) {
@@ -45,14 +65,14 @@ async function getNumsForStep(stepIndex) {
       count += group.combos.length;
     }
   } catch (e) {
-    console.error("Napaka pri nalaganju skupin:", e);
+    console.error("Napaka pri nalaganju podatkov:", e);
   }
   return 'p10p5p1'; // Fallback
 }
 
 async function findStepForCombo(combo) {
   try {
-    const response = await fetch('data/groups.json');
+    const response = await fetch(getGameDataPath());
     const groups = await response.json();
     let stepCounter = 0;
     for (const group of groups) {
@@ -73,23 +93,23 @@ async function ensureNumsInURL() {
   let raw = params.get('num');
   let step = params.get('step');
 
-  // 1. Če ni ničesar, preusmeri na shranjen korak
-  if (!raw && !step) {
-    const savedStep = parseInt(localStorage.getItem('math-game-step') || '0', 10);
-    const combo = await getNumsForStep(savedStep);
-    params.set('step', savedStep);
-    params.set('num', combo);
-    location.assign(`${location.pathname}?${params.toString()}`);
-    return null;
-  }
+    // 1. Če ni ničesar, preusmeri na shranjen korak
+    if (!raw && !step) {
+      const savedStep = parseInt(localStorage.getItem(getStepKey()) || '0', 10);
+      const combo = await getNumsForStep(savedStep);
+      params.set('step', savedStep);
+      params.set('num', combo);
+      location.assign(`${location.pathname}?${params.toString()}`);
+      return null;
+    }
 
-  // 2. Če je samo step, pridobi num
-  if (step && !raw) {
-    const combo = await getNumsForStep(parseInt(step, 10));
-    params.set('num', combo);
-    location.assign(`${location.pathname}?${params.toString()}`);
-    return null;
-  }
+    // 2. Če je samo step, pridobi num
+    if (step && !raw) {
+      const combo = await getNumsForStep(parseInt(step, 10));
+      params.set('num', combo);
+      location.assign(`${location.pathname}?${params.toString()}`);
+      return null;
+    }
 
   // 3. Če je samo num, poskusi najti ustrezen step
   if (raw && !step) {
@@ -182,10 +202,19 @@ class MathGame extends HTMLElement {
 
     const parsed = await ensureNumsInURL();
     if (!parsed) return;
-    this.nums = parsed;
+    this.nums = parsed.nums;
+    this.maxStepsOverride = parsed.maxStepsOverride;
 
     this.dist = bfsMinClicks(this.nums);
-    this.target = pickRandomTarget(this.dist, 3, 10);
+    
+    // Naloži nastavitev za korake
+    const settingsMaxSteps = parseInt(localStorage.getItem('math-game-max-steps') || '10', 10);
+    
+    // Prioriteta: 1. Override iz URL/JSON (x parameter), 2. Nastavitve iz localStorage
+    const maxK = this.maxStepsOverride !== null ? this.maxStepsOverride : settingsMaxSteps;
+    const minK = Math.max(2, Math.ceil(maxK / 2));
+    
+    this.target = pickRandomTarget(this.dist, minK, maxK);
     if (this.target === null) {
       const urlHint = this.nums.map(n => n.op + n.val).join('');
       this.shadowRoot.innerHTML = `<p>Konfiguracija <code>?num=${urlHint}</code> ne omogoča doseči nobenega cilja v [0..100]. Spremeni parametre.</p>`;
@@ -212,11 +241,22 @@ class MathGame extends HTMLElement {
   }
 
   _attachEventListeners() {
+    this.addEventListener('change-game-type', () => {
+      // Ob spremembi igre preprosto osvežimo stran brez parametrov, 
+      // da ensureNumsInURL prebere nov tip in pravilni step
+      location.href = location.pathname;
+    });
+
+    this.addEventListener('change-max-steps', () => {
+      // Takojšnja ponastavitev igre ob spremembi težavnosti
+      location.reload();
+    });
     this.settingsTrigger.onclick = () => {
       const modal = document.createElement('settings-modal');
       modal.setSound(this.sound.enabled);
       modal.setActiveIndicator(this.showActiveIndicator);
       this.shadowRoot.appendChild(modal);
+      modal.setMaxSteps(parseInt(localStorage.getItem('math-game-max-steps') || '10', 10));
       modal.show();
     };
     this.resetTrigger.onclick = () => this.onReset();

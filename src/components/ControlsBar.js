@@ -180,7 +180,7 @@ class ControlsBar extends HTMLElement {
           font-size: var(--btn-font);
           cursor: pointer;
 
-          box-shadow: 0 4px 10px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.1);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.1);
           transition: transform .1s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                       filter .12s ease,
                       box-shadow .2s ease;
@@ -193,7 +193,7 @@ class ControlsBar extends HTMLElement {
         .btn:hover {
           filter: brightness(1.1);
           transform: scale(1.08);
-          box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+          box-shadow: 0 8px 12px rgba(0,0,0,0.25);
         }
         .btn:active {
           transform: scale(0.92);
@@ -204,43 +204,43 @@ class ControlsBar extends HTMLElement {
         .btn.neg {
           background: var(--neg-bg, #FFCDD2);
           color: var(--neg-ink, #7a1c1c);
-          box-shadow: 0 4px 10px rgba(239,83,80,0.2);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.15);
         }
-        .btn.neg:hover { box-shadow: 0 8px 16px rgba(239,83,80,0.4); }
+        .btn.neg:hover { box-shadow: 0 8px 12px rgba(0,0,0,0.25); }
 
         .btn.pos {
           background: var(--pos-bg, #C8E6C9);
           color: var(--pos-ink, #194d23);
-          box-shadow: 0 4px 10px rgba(102,187,106,0.2);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.15);
         }
-        .btn.pos:hover { box-shadow: 0 8px 16px rgba(102,187,106,0.4); }
+        .btn.pos:hover { box-shadow: 0 8px 12px rgba(0,0,0,0.25); }
 
         .btn.mul {
           background: var(--mul-bg, #E1F5FE);
           color: var(--mul-ink, #01579B);
-          box-shadow: 0 4px 10px rgba(3,169,244,0.2);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.15);
         }
-        .btn.mul:hover { box-shadow: 0 8px 16px rgba(3,169,244,0.4); }
+        .btn.mul:hover { box-shadow: 0 8px 12px rgba(0,0,0,0.25); }
 
         .btn.div {
           background: var(--div-bg, #FFF3E0);
           color: var(--div-ink, #E65100);
-          box-shadow: 0 4px 10px rgba(255,152,0,0.2);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.15);
         }
-        .btn.div:hover { box-shadow: 0 8px 16px rgba(255,152,0,0.4); }
+        .btn.div:hover { box-shadow: 0 8px 12px rgba(0,0,0,0.25); }
 
         .btn.equal {
           background: var(--accent, #FFD54F);
           color: var(--on-accent, var(--ink));
-          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.15);
         }
-        .btn.equal:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+        .btn.equal:hover { box-shadow: 0 8px 12px rgba(0,0,0,0.25); }
 
         /* ========= Keyboard Active Highlight ========= */
         .btn.active-kbd {
           outline: 3px solid var(--danger);
           outline-offset: 3px;
-          box-shadow: 0 0 15px rgba(255, 82, 82, 0.6);
+          box-shadow: 0 0 15px rgba(255, 82, 82, 0.4);
           transform: scale(1.1);
           z-index: 5;
         }

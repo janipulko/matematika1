@@ -14,7 +14,8 @@ class UnlockPage extends HTMLElement {
   }
 
   initUnlocked() {
-    const key = 'math-game-step';
+    const type = localStorage.getItem('math-game-type') || 'sum';
+    const key = `math-game-step-${type}`;
     const stored = localStorage.getItem(key);
     if (stored) {
       this.currentStep = parseInt(stored, 10);
@@ -26,9 +27,11 @@ class UnlockPage extends HTMLElement {
 
   async generateGroups() {
     const groupsContainer = this.shadowRoot.querySelector('.groups');
+    const type = localStorage.getItem('math-game-type') || 'sum';
+    const dataPath = type === 'groups' ? 'data/groups.json' : 'data/sum.json';
     
     try {
-      const response = await fetch('data/groups.json');
+      const response = await fetch(dataPath);
       const groups = await response.json();
       
       let stepCounter = 0;
@@ -94,8 +97,10 @@ class UnlockPage extends HTMLElement {
       const newTotal = currentStars - cost;
       localStorage.setItem('math-game-total-stars', newTotal);
       
-      // Posodobi korak
-      localStorage.setItem('math-game-step', step);
+      // Posodobi korak za trenutno igro
+      const type = localStorage.getItem('math-game-type') || 'sum';
+      const key = `math-game-step-${type}`;
+      localStorage.setItem(key, step);
 
       location.href = `play.html?step=${step}&num=${combo}`;
     }
