@@ -1,5 +1,7 @@
 
+
 export const PALETTES = {
+  // SVETLE PALETE
   candy: {
     id: 'candy',
     name: 'Candy Land',
@@ -8,8 +10,8 @@ export const PALETTES = {
       '--bg': '#FFB6C1',
       '--card': '#FFFFFF',
       '--ink': '#34495E',
-      '--primary': '#9B59B6',
-      '--primary-d': '#8E44AD',
+      '--primary': '#6A1B9A',     // temnejša vijolična (kontrastno)
+      '--primary-d': '#4A148C',   // hover/active še temnejši
       '--accent': '#FFD54F',
       '--muted': '#7F8C8D',
       '--bubble': '#FADBD8'
@@ -23,8 +25,8 @@ export const PALETTES = {
       '--bg': '#00B4D8',
       '--card': '#FFFFFF',
       '--ink': '#112D4E',
-      '--primary': '#0077B6',
-      '--primary-d': '#005F8D',
+      '--primary': '#002F6C',     // globlja modra za visoko kontrastnost
+      '--primary-d': '#00224F',
       '--accent': '#FFD54F',
       '--muted': '#3F72AF',
       '--bubble': '#CAF0F8'
@@ -38,8 +40,8 @@ export const PALETTES = {
       '--bg': '#A3D9A5',
       '--card': '#FFFFFF',
       '--ink': '#334D3A',
-      '--primary': '#FFD54F',
-      '--primary-d': '#F4C02E',
+      '--primary': '#0B4F6C',     // temen teal (bolj kontrasten kot rumeni odtenki)
+      '--primary-d': '#083B52',
       '--accent': '#66BB6A',
       '--muted': '#4E6E5D',
       '--bubble': '#E8F5E9'
@@ -53,8 +55,8 @@ export const PALETTES = {
       '--bg': '#FFD1DC',
       '--card': '#FFFFFF',
       '--ink': '#2C3E50',
-      '--primary': '#A0DFFD',
-      '--primary-d': '#7FB3D5',
+      '--primary': '#0D47A1',     // material blue 900 (visok kontrast)
+      '--primary-d': '#0A3780',
       '--accent': '#F7DC6F',
       '--muted': '#7D8387',
       '--bubble': '#EBDEF0'
@@ -68,8 +70,8 @@ export const PALETTES = {
       '--bg': '#C6EBC5',
       '--card': '#FFFFFF',
       '--ink': '#22313F',
-      '--primary': '#7EA1FF',
-      '--primary-d': '#5D85FF',
+      '--primary': '#1E3A8A',     // indigo 700 (močnejši kontrast)
+      '--primary-d': '#162D6A',
       '--accent': '#A1EEBD',
       '--muted': '#5D6D7E',
       '--bubble': '#F2FFE9'
@@ -83,8 +85,8 @@ export const PALETTES = {
       '--bg': '#FFF455',
       '--card': '#FFFFFF',
       '--ink': '#2C3E50',
-      '--primary': '#4793AF',
-      '--primary-d': '#34708A',
+      '--primary': '#2B6EA6',     // precej temen (varno nad pragom)
+      '--primary-d': '#1F537D',
       '--accent': '#FFC470',
       '--muted': '#5D6D7E',
       '--bubble': '#FFFFE0'
@@ -98,8 +100,8 @@ export const PALETTES = {
       '--bg': '#FFEAA7',
       '--card': '#FFFFFF',
       '--ink': '#1B2631',
-      '--primary': '#FFBB64',
-      '--primary-d': '#F39C12',
+      '--primary': '#A84300',     // temna oranžna (ne več pastelna)
+      '--primary-d': '#8E3B00',
       '--accent': '#81ECEC',
       '--muted': '#566573',
       '--bubble': '#FFF9E1'
@@ -113,13 +115,14 @@ export const PALETTES = {
       '--bg': '#F9F07A',
       '--card': '#FFFFFF',
       '--ink': '#1C2833',
-      '--primary': '#59B4C3',
-      '--primary-d': '#4099A8',
+      '--primary': '#255E6B',     // temen teal za kontrast na svetlo rumenem
+      '--primary-d': '#1D4A54',
       '--accent': '#FF9F66',
       '--muted': '#5D6D7E',
       '--bubble': '#FEFDEB'
     }
   },
+
   // TEMNE PALETE
   starry_dark: {
     id: 'starry_dark',
@@ -129,8 +132,8 @@ export const PALETTES = {
       '--bg': '#4A4E6D',
       '--card': '#22223B',
       '--ink': '#F9FFC6',
-      '--primary': '#F9A7AF',
-      '--primary-d': '#E0808A',
+      '--primary': '#FFC2D1',     // svetlejša rožnata (dvignjen kontrast)
+      '--primary-d': '#FFA6BE',
       '--accent': '#9A8C98',
       '--muted': '#C9ADA7',
       '--bubble': '#414461'
@@ -145,7 +148,7 @@ export const PALETTES = {
       '--card': '#1E1E1E',
       '--ink': '#E0E0E0',
       '--primary': '#BB86FC',
-      '--primary-d': '#9965f4',
+      '--primary-d': '#9965F4',
       '--accent': '#03DAC6',
       '--muted': '#9E9E9E',
       '--bubble': '#2C2C2C'
@@ -174,8 +177,8 @@ export const PALETTES = {
       '--bg': '#121212',
       '--card': '#1A1A1A',
       '--ink': '#E0E0E0',
-      '--primary': '#2D3DAC',
-      '--primary-d': '#1E2B8E',
+      '--primary': '#8AB4F8',     // svetla modra namesto pretemne
+      '--primary-d': '#669DF6',
       '--accent': '#CF6679',
       '--muted': '#757575',
       '--bubble': '#212121'
@@ -242,6 +245,8 @@ export const PALETTES = {
     }
   }
 };
+
+
 
 export function applyPalette(paletteId) {
   const palette = PALETTES[paletteId];
