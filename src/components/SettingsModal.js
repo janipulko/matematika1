@@ -223,11 +223,12 @@ class SettingsModal extends HTMLElement {
         dialog {
           border: none;
           padding: 0;
-          width: 100vw;
-          height: 100vh;
-          max-width: 100vw;
-          max-height: 100vh;
-          margin: 0;
+          width: 92vw;
+          height: 92vh;
+          max-width: 600px;
+          max-height: 800px;
+          margin: auto;
+          border-radius: var(--radius);
           background: var(--card);
           color: var(--ink);
           display: flex;
@@ -235,6 +236,7 @@ class SettingsModal extends HTMLElement {
           align-items: center;
           justify-content: flex-start;
           overflow: hidden;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         dialog[open] {
           display: flex;
