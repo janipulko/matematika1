@@ -7,12 +7,26 @@ class TargetDisplay extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    this.valueEl = this.shadowRoot.querySelector('#targetValue');
+    this.containerEl = this.shadowRoot.querySelector('#targetsContainer');
   }
 
-  setValue(v) {
-    if (!this.valueEl) return;
-    this.valueEl.textContent = String(v);
+  setTargets(targets, achievedIndices = []) {
+    if (!this.containerEl) return;
+    this.containerEl.innerHTML = '';
+    
+    targets.forEach((t, i) => {
+      const isAchieved = achievedIndices.includes(i);
+      const bubble = document.createElement('div');
+      bubble.className = `target-bubble ${isAchieved ? 'achieved' : ''}`;
+      bubble.textContent = t;
+      if (isAchieved) {
+        const check = document.createElement('span');
+        check.className = 'check';
+        check.textContent = '✓';
+        bubble.appendChild(check);
+      }
+      this.containerEl.appendChild(bubble);
+    });
   }
 
   render() {
@@ -20,23 +34,56 @@ class TargetDisplay extends HTMLElement {
       <style>
         :host {
           display: block;
+          width: 100%;
         }
-        .target {
+        .targets-wrapper {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: center;
+          gap: clamp(8px, 2vh, 20px);
+          padding: 8px 0;
+        }
+        .target-bubble {
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          text-align: center;
+          min-width: clamp(45px, 10vh, 80px);
+          height: clamp(45px, 10vh, 80px);
+          background: var(--card);
+          border: 3px solid var(--bubble);
+          border-radius: 50%;
           font-weight: 900;
-          font-size: clamp(32px, 8vh, 64px);
-          line-height: 1;
+          font-size: clamp(20px, 4vh, 36px);
           color: var(--ink);
-          text-shadow: 0 4px 10px rgba(0,0,0,0.1);
-          margin: 4px 0;
+          box-shadow: var(--shadow-sm);
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
+        .target-bubble.achieved {
+          background: var(--accent);
+          border-color: var(--primary);
+          transform: scale(0.9);
+          opacity: 0.8;
+          color: var(--primary-d);
+        }
+        .check {
+          position: absolute;
+          bottom: -5px;
+          right: -5px;
+          background: var(--primary);
+          color: white;
+          font-size: 14px;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
       </style>
-      <div class="target" id="targetValue">0</div>
-
+      <div class="targets-wrapper" id="targetsContainer"></div>
     `;
   }
 }

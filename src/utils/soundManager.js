@@ -74,7 +74,8 @@ class Sound {
   }
 
   nope() {
-    this.beep({ freq: 220, dur: 0.09, type: 'sawtooth', gain: 0.2 });
+    this.beep({ freq: 180, dur: 0.15, type: 'sawtooth', gain: 0.25 });
+    setTimeout(() => this.beep({ freq: 140, dur: 0.2, type: 'sawtooth', gain: 0.2 }), 100);
   }
 }
 

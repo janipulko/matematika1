@@ -9,8 +9,9 @@ class StepIndicator extends HTMLElement {
     this.render();
   }
 
-  setSteps(minSteps) {
+  setSteps(minSteps, targetCount = 1) {
     this.minSteps = minSteps;
+    this.targetCount = targetCount;
     const bubblesContainer = this.shadowRoot.querySelector('.bubbles-row');
     const starsContainer = this.shadowRoot.querySelector('.stars-row');
     if (!bubblesContainer || !starsContainer) return;
@@ -26,7 +27,8 @@ class StepIndicator extends HTMLElement {
     }
 
     this.stars = [];
-    for (let i = 0; i < 3; i++) {
+    const starCount = Math.max(3, targetCount * 2);
+    for (let i = 0; i < starCount; i++) {
       const s = document.createElement('div');
       s.className = 'star';
       s.textContent = '★';
@@ -42,7 +44,8 @@ class StepIndicator extends HTMLElement {
       else circle.classList.remove('filled');
     });
 
-    let starsLeft = 3 - Math.max(0, clicks - minSteps);
+    const starCount = this.stars.length;
+    let starsLeft = starCount - Math.max(0, clicks - minSteps);
     if (starsLeft < 0) starsLeft = 0;
     this.stars.forEach((star, i) => {
       if (i < starsLeft) star.classList.remove('dim');
@@ -51,7 +54,8 @@ class StepIndicator extends HTMLElement {
   }
 
   getStarsLeft(clicks, minSteps) {
-    let left = 3 - Math.max(0, clicks - minSteps);
+    const starCount = this.stars ? this.stars.length : 3;
+    let left = starCount - Math.max(0, clicks - minSteps);
     return left < 0 ? 0 : left;
   }
 
@@ -81,8 +85,9 @@ class StepIndicator extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 12px;
+          gap: clamp(4px, 1vw, 12px);
           width: 100%;
+          flex-wrap: wrap;
         }
         .bubble {
           width: clamp(10px, 1.8vh, 14px);

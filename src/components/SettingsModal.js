@@ -97,7 +97,6 @@ class SettingsModal extends HTMLElement {
     const colorBtn = this.shadowRoot.querySelector('.color-btn');
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
     const stepsSlider = this.shadowRoot.querySelector('#max-steps-slider');
-    const gameTypeSelect = this.shadowRoot.querySelector('#game-type-select');
 
     closeBtn.onclick = () => this.close();
     okBtn.onclick = () => this.close();
@@ -110,17 +109,6 @@ class SettingsModal extends HTMLElement {
       if (confirm('Ali želite popolno osvežiti aplikacijo? To bo ponovno naložilo vse datoteke, nastavitve in napredek pa bodo ohranjeni.')) {
         await this._hardReset();
       }
-    };
-
-    gameTypeSelect.onchange = (e) => {
-      const val = e.target.value;
-      localStorage.setItem('math-game-type', val);
-      this._gameType = val;
-      this.dispatchEvent(new CustomEvent('change-game-type', {
-        bubbles: true,
-        composed: true,
-        detail: { value: val }
-      }));
     };
 
     stepsSlider.oninput = (e) => {
@@ -266,7 +254,7 @@ class SettingsModal extends HTMLElement {
           color: var(--muted);
           opacity: 0.8;
         }
-        .slider-container, .select-container {
+        .slider-container {
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -279,7 +267,7 @@ class SettingsModal extends HTMLElement {
           border: 3px solid var(--primary);
           box-sizing: border-box;
         }
-        .slider-label, .select-label {
+        .slider-label {
           font-weight: 900;
           color: var(--primary-d);
           font-size: 1.2rem;
@@ -345,15 +333,8 @@ class SettingsModal extends HTMLElement {
           <button class="close-btn">&times;</button>
         </div>
         <div class="content">
-          <div class="select-container">
-            <div class="select-label">
-              <span>Vrsta igre:</span>
-            </div>
-            <select id="game-type-select">
-              <option value="groups" ${this._gameType === 'groups' ? 'selected' : ''}>Skupine</option>
-              <option value="sum" ${this._gameType === 'sum' ? 'selected' : ''}>Seštevanje</option>
-            </select>
-          </div>
+          <a href="./type.html" class="unlock-link">🎮 Izberi igro</a>
+          <a href="./unlock.html" class="unlock-link">🔓 Moja zbirka</a>
           <div class="slider-container">
             <div class="slider-label">
               <span>Maks. korakov:</span>
@@ -365,7 +346,6 @@ class SettingsModal extends HTMLElement {
           <button class="active-btn"></button>
           <button class="color-btn">🎨 Barve aplikacije</button>
           <button class="refresh-btn">🔄 Osveži aplikacijo</button>
-          <a href="./unlock.html" class="unlock-link">🔓 Odkleni vsebino</a>
         </div>
         <div class="footer">
           <button class="btn-ok">V redu</button>

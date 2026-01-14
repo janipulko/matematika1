@@ -129,12 +129,42 @@ async function ensureNumsInURL() {
   return parseNumsFromURL();
 }
 
-function bfsMinClicks(nums) {
+function pickTargetSequence(nums, minK, maxK) {
+  // 1. Določimo število ciljev (1-5, naključno)
+  const count = Math.floor(Math.random() * 5) + 1;
+  const targets = [];
+  let currentStart = 0;
+  
+  // Za vsak cilj posebej izračunamo dostopnost iz prejšnje točke
+  for (let i = 0; i < count; i++) {
+    const dist = bfsFrom(currentStart, nums);
+    const candidates = [];
+    for (let t = 1; t <= 100; t++) {
+      // Razdalja med posameznimi cilji naj bo razumna
+      const stepDist = dist[t];
+      if (stepDist >= 2 && stepDist <= maxK && !targets.includes(t)) {
+        candidates.push(t);
+      }
+    }
+    
+    if (candidates.length === 0) break; // Ne moremo dodati več ciljev
+    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+    targets.push(chosen);
+    currentStart = chosen;
+  }
+  
+  if (targets.length === 0) return null;
+  
+  // Pomešamo cilje, da igralec nima vedno naraščajočega zaporedja
+  return targets.sort(() => Math.random() - 0.5);
+}
+
+function bfsFrom(startNode, nums, traps = []) {
   const MAX = 100;
   const dist = new Array(MAX + 1).fill(Infinity);
   const q = [];
-  dist[0] = 0;
-  q.push(0);
+  dist[startNode] = 0;
+  q.push(startNode);
   while (q.length) {
     const u = q.shift();
     for (const step of nums) {
@@ -143,11 +173,11 @@ function bfsMinClicks(nums) {
       else if (step.op === 'm') v = u - step.val;
       else if (step.op === 't') v = u * step.val;
       else if (step.op === 's') {
-        if (u % step.val !== 0) continue; // Le celoštevilsko deljenje brez ostanka
+        if (u % step.val !== 0) continue;
         v = u / step.val;
       }
-
       if (v < 0 || v > MAX) continue;
+      if (traps.includes(v)) continue;
       if (dist[v] !== Infinity) continue;
       dist[v] = dist[u] + 1;
       q.push(v);
@@ -156,29 +186,78 @@ function bfsMinClicks(nums) {
   return dist;
 }
 
-function pickRandomTarget(dist, minK = 4, maxK = 10) {
-  const candidates = [];
-  for (let t = 1; t <= 100; t++) {
-    if (dist[t] >= minK && dist[t] <= maxK) candidates.push(t);
-  }
-  if (candidates.length > 0) {
-    return candidates[Math.floor(Math.random() * candidates.length)];
-  }
-  const fallbackMin = [];
-  const fallbackAny = [];
-  for (let t = 1; t <= 100; t++) {
-    if (Number.isFinite(dist[t])) {
-      fallbackAny.push(t);
-      if (dist[t] >= minK) fallbackMin.push(t);
+function calculateOptimalPath(targets, nums, traps = []) {
+  // Izračunamo najkrajšo pot, ki obišče vse cilje (permutacije)
+  const permutations = getPermutations(targets);
+  let minTotalSteps = Infinity;
+
+  for (const p of permutations) {
+    let currentSteps = 0;
+    let currentPos = 0;
+    let possible = true;
+    
+    for (const target of p) {
+      const dists = bfsFrom(currentPos, nums, traps);
+      if (dists[target] === Infinity) {
+        possible = false;
+        break;
+      }
+      currentSteps += dists[target];
+      currentPos = target;
+    }
+    
+    if (possible && currentSteps < minTotalSteps) {
+      minTotalSteps = currentSteps;
     }
   }
-  if (fallbackMin.length) {
-    return fallbackMin[Math.floor(Math.random() * fallbackMin.length)];
+  
+  return minTotalSteps;
+}
+
+function getPermutations(arr) {
+  if (arr.length <= 1) return [arr];
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    const char = arr[i];
+    const remainingChars = arr.slice(0, i).concat(arr.slice(i + 1));
+    for (const p of getPermutations(remainingChars)) {
+      result.push([char].concat(p));
+    }
   }
-  if (fallbackAny.length) {
-    return fallbackAny[Math.floor(Math.random() * fallbackAny.length)];
+  return result;
+}
+
+function pickTraps(nums, targets, minK, maxK) {
+  const traps = [];
+  const numTraps = Math.floor(Math.random() * 5) + 1;
+  const possibleTraps = [];
+
+  // Najdemo vsa dosegljiva števila (0-100)
+  const reachable = bfsFrom(0, nums);
+  for (let i = 1; i <= 100; i++) {
+    if (reachable[i] !== Infinity && !targets.includes(i)) {
+      possibleTraps.push(i);
+    }
   }
-  return null;
+
+  if (possibleTraps.length === 0) return [];
+
+  // Premešamo možne pasti
+  possibleTraps.sort(() => Math.random() - 0.5);
+
+  for (const t of possibleTraps) {
+    if (traps.length >= numTraps) break;
+
+    // Začasno dodamo past in preverimo rešljivost
+    const testTraps = [...traps, t];
+    const opt = calculateOptimalPath(targets, nums, testTraps);
+
+    if (opt !== Infinity) {
+      traps.push(t);
+    }
+  }
+
+  return traps;
 }
 
 class MathGame extends HTMLElement {
@@ -205,22 +284,27 @@ class MathGame extends HTMLElement {
     this.nums = parsed.nums;
     this.maxStepsOverride = parsed.maxStepsOverride;
 
-    this.dist = bfsMinClicks(this.nums);
-    
     // Naloži nastavitev za korake
     const settingsMaxSteps = parseInt(localStorage.getItem('math-game-max-steps') || '10', 10);
-    
-    // Prioriteta: 1. Override iz URL/JSON (x parameter), 2. Nastavitve iz localStorage
     const maxK = this.maxStepsOverride !== null ? this.maxStepsOverride : settingsMaxSteps;
     const minK = Math.max(2, Math.ceil(maxK / 2));
-    
-    this.target = pickRandomTarget(this.dist, minK, maxK);
-    if (this.target === null) {
+
+    this.targets = pickTargetSequence(this.nums, minK, maxK);
+    if (!this.targets) {
       const urlHint = this.nums.map(n => n.op + n.val).join('');
       this.shadowRoot.innerHTML = `<p>Konfiguracija <code>?num=${urlHint}</code> ne omogoča doseči nobenega cilja v [0..100]. Spremeni parametre.</p>`;
       return;
     }
-    this.minSteps = this.dist[this.target];
+
+    this.traps = pickTraps(this.nums, this.targets, minK, maxK);
+    this.achievedTargets = [];
+    this.minSteps = calculateOptimalPath(this.targets, this.nums, this.traps);
+    
+    // Če BFS ne najde poti (teoretično ne bi smelo priti do tega, a za varnost)
+    if (this.minSteps === Infinity) {
+        this.traps = [];
+        this.minSteps = calculateOptimalPath(this.targets, this.nums, []);
+    }
 
     this.sum = 0;
     this.clicks = 0;
@@ -398,9 +482,10 @@ class MathGame extends HTMLElement {
     this.settingsTrigger = this.shadowRoot.querySelector('.settings-trigger');
     this.resetTrigger = this.shadowRoot.querySelector('.reset-trigger');
 
-    this.targetEl.setValue(this.target);
+    this.targetEl.setTargets(this.targets, this.achievedTargets);
     this.gridEl.setValue(this.sum);
-    this.stepsEl.setSteps(this.minSteps);
+    this.gridEl.setTraps(this.traps);
+    this.stepsEl.setSteps(this.minSteps, this.targets.length);
     this.stepsEl.update(this.clicks, this.minSteps);
     this.ctrlEl.setNums(this.nums);
     this.ctrlEl.setShowActive(this.showActiveIndicator);
@@ -426,37 +511,64 @@ class MathGame extends HTMLElement {
       return;
     }
 
-    if (step.op === 'p') this.sum += step.val;
-    else if (step.op === 'm') this.sum -= step.val;
-    else if (step.op === 't') this.sum *= step.val;
-    else if (step.op === 's') this.sum /= step.val;
+    let nextSum = this.sum;
+    if (step.op === 'p') nextSum += step.val;
+    else if (step.op === 'm') nextSum -= step.val;
+    else if (step.op === 't') nextSum *= step.val;
+    else if (step.op === 's') nextSum /= step.val;
 
+    // PREVERJANJE PASTI
+    if (this.traps.includes(nextSum)) {
+      this.clicks += 1; // Kazen
+      this.gridEl.flash();
+      this.stepsEl.update(this.clicks, this.minSteps);
+      this.sound.nope();
+      return; // Ne posodobimo this.sum
+    }
+
+    this.sum = nextSum;
     this.clicks += 1;
     this.gridEl.setValue(this.sum);
     this.stepsEl.update(this.clicks, this.minSteps);
     this.sound.click();
+
+    // Preveri, če smo dosegli kakšen cilj
+    this.targets.forEach((t, i) => {
+      if (this.sum === t && !this.achievedTargets.includes(i)) {
+        this.achievedTargets.push(i);
+        this.targetEl.setTargets(this.targets, this.achievedTargets);
+        this.sound.victory(1); // Manjši zmagovalni zvok za vmesni cilj
+        
+        // Če so vsi cilji doseženi, avtomatsko odpri modal po kratkem premoru
+        if (this.achievedTargets.length === this.targets.length) {
+          setTimeout(() => this.onConfirm(), 500);
+        }
+      }
+    });
   }
 
   onReset() {
     this.sum = 0;
     this.clicks = 0;
+    this.achievedTargets = [];
     this.gridEl.setValue(this.sum);
+    this.targetEl.setTargets(this.targets, this.achievedTargets);
     this.stepsEl.update(this.clicks, this.minSteps);
     this.sound.click();
   }
 
   async onConfirm() {
+    if (this.achievedTargets.length < this.targets.length) {
+      this.sound.nope();
+      return;
+    }
+
     const stars = this.stepsEl.getStarsLeft(this.clicks, this.minSteps);
     const resultModal = document.createElement('result-modal');
     this.shadowRoot.appendChild(resultModal);
     
-    if (this.sum === this.target) {
-      this.sound.victory(stars);
-      await resultModal.show(true, stars);
-    } else {
-      this.sound.nope();
-      await resultModal.show(false);
-    }
+    this.sound.victory(stars);
+    await resultModal.show(true, stars);
   }
 }
 

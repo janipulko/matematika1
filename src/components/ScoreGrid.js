@@ -37,6 +37,20 @@ class ScoreGrid extends HTMLElement {
     });
   }
 
+  setTraps(traps) {
+    if (!this.cells) return;
+    this.cells.forEach((cell, i) => {
+      // Število 1 je na indeksu 0, zato traps.includes(i + 1)
+      const isTrap = traps.includes(i + 1);
+      cell.classList.toggle('trap', isTrap);
+      if (isTrap) {
+        cell.title = `Past na številu ${i + 1}`;
+      } else {
+        cell.removeAttribute('title');
+      }
+    });
+  }
+
   flash() {
     const wrap = this.shadowRoot.querySelector('.grid-wrap');
     if (!wrap) return;
@@ -106,6 +120,25 @@ class ScoreGrid extends HTMLElement {
           background: var(--grid-fill);
           border-color: var(--primary);
           box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cell.trap {
+          background: rgba(239, 83, 80, 0.25);
+          border-color: #ef5350;
+          border-width: clamp(2px, 0.4vh, 4px);
+          position: relative;
+          z-index: 1;
+        }
+
+        .cell.trap::after {
+          content: '!';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: #ef5350;
+          font-weight: bold;
+          font-size: clamp(8px, 1.5vh, 16px);
         }
 
         .flash {

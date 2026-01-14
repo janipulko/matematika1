@@ -119,7 +119,7 @@ class UnlockPage extends HTMLElement {
         }
         header {
           display: flex;
-          justify-content: center;
+          justify-content: space-between;
           align-items: center;
           margin-bottom: 40px;
           background: var(--card);
@@ -136,6 +136,25 @@ class UnlockPage extends HTMLElement {
           display: flex;
           align-items: center;
           gap: 10px;
+        }
+        .back-link {
+          appearance: none;
+          border: 2px solid var(--primary);
+          background: var(--bubble);
+          color: var(--primary-d);
+          padding: 8px 16px;
+          border-radius: var(--radius-sm);
+          font-weight: bold;
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        .back-link:hover {
+          background: var(--primary);
+          color: var(--on-primary);
         }
         .stars-badge {
           background: var(--bg);
@@ -187,7 +206,8 @@ class UnlockPage extends HTMLElement {
         }
       </style>
       <header>
-        <div class="stars-badge">Moje zvezdice: <span>${totalStars}</span> ★</div>
+        <a href="play.html" class="back-link">← Nazaj v igro</a>
+        <div class="stars-badge"><span>${totalStars}</span> ★</div>
       </header>
       <div class="groups"></div>
     `;
