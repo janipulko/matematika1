@@ -233,7 +233,8 @@ class SettingsModal extends HTMLElement {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
+          overflow: hidden;
         }
         dialog[open] {
           display: flex;
@@ -246,13 +247,17 @@ class SettingsModal extends HTMLElement {
           display: flex;
           justify-content: center;
           align-items: center;
-          margin-bottom: 40px;
+          padding: 20px 0;
           position: relative;
           width: 100%;
+          background: var(--card);
+          z-index: 10;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          flex-shrink: 0;
         }
         h2 {
           margin: 0;
-          font-size: clamp(24px, 5vw, 48px);
+          font-size: clamp(24px, 5vw, 40px);
           color: var(--primary-d);
         }
         .close-btn {
@@ -272,8 +277,12 @@ class SettingsModal extends HTMLElement {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 24px;
+          gap: 20px;
           width: 100%;
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px 0;
+          -webkit-overflow-scrolling: touch;
         }
         .mute-btn, .active-btn, .unlock-link, .color-btn, .refresh-btn {
           appearance: none;
@@ -367,8 +376,13 @@ class SettingsModal extends HTMLElement {
           box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .footer {
-          margin-top: 40px;
+          padding: 20px 0;
           text-align: center;
+          width: 100%;
+          background: var(--card);
+          z-index: 10;
+          box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+          flex-shrink: 0;
         }
         .btn-ok {
           background: var(--primary);
