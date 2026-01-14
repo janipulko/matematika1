@@ -49,16 +49,27 @@ class TargetDisplay extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-width: clamp(45px, 10vh, 80px);
-          height: clamp(45px, 10vh, 80px);
+          min-width: clamp(40px, 8vh, 80px);
+          height: clamp(40px, 8vh, 80px);
           background: var(--card);
           border: 3px solid var(--bubble);
           border-radius: 50%;
           font-weight: 900;
-          font-size: clamp(20px, 4vh, 36px);
+          font-size: clamp(18px, 3.5vh, 36px);
           color: var(--ink);
           box-shadow: var(--shadow-sm);
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @media (max-width: 480px) {
+          .target-bubble {
+            min-width: 45px;
+            height: 45px;
+            font-size: 20px;
+            border-width: 2px;
+          }
+          .targets-wrapper {
+            gap: 8px;
+          }
         }
         .target-bubble.achieved {
           background: var(--accent);

@@ -320,16 +320,8 @@ class MathGame extends HTMLElement {
     }
 
     this.render();
-    this._updateExternalStepCounter();
     this._attachEventListeners();
     this.initialized = true;
-  }
-
-  _updateExternalStepCounter() {
-    const el = document.getElementById('step-display');
-    if (el && this.currentStepIndex !== undefined) {
-      el.textContent = this.currentStepIndex + 1;
-    }
   }
 
   _attachEventListeners() {
@@ -343,15 +335,6 @@ class MathGame extends HTMLElement {
       // Takojšnja ponastavitev igre ob spremembi težavnosti
       location.reload();
     });
-    this.settingsTrigger.onclick = () => {
-      const modal = document.createElement('settings-modal');
-      modal.setSound(this.sound.enabled);
-      modal.setActiveIndicator(this.showActiveIndicator);
-      this.shadowRoot.appendChild(modal);
-      modal.setMaxSteps(parseInt(localStorage.getItem('math-game-max-steps') || '10', 10));
-      modal.show();
-    };
-    this.resetTrigger.onclick = () => this.onReset();
 
     this.shadowRoot.addEventListener('add', (e) => this.onAdd(e.detail.value));
     this.shadowRoot.addEventListener('confirm', () => this.onConfirm());
@@ -375,7 +358,6 @@ class MathGame extends HTMLElement {
 
     this.shadowRoot.addEventListener('next-level', () => {
       this.currentStepIndex++;
-      this._updateExternalStepCounter();
       location.reload();
     });
     this.shadowRoot.addEventListener('reset-game', () => {
@@ -420,42 +402,6 @@ class MathGame extends HTMLElement {
         }
         .section-steps { flex: 0 0 auto; }
         .section-controls { flex: 0 0 auto; }
-
-        .settings-trigger, .reset-trigger {
-          position: absolute;
-          top: clamp(8px, 1.5vh, 16px);
-          background: var(--bubble);
-          border: none;
-          border-radius: var(--radius-sm);
-          width: clamp(32px, 5vh, 42px);
-          height: clamp(32px, 5vh, 42px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          font-size: clamp(16px, 2.5vh, 20px);
-          color: var(--muted);
-          transition: all 0.2s;
-          opacity: 0.8;
-          z-index: 10;
-        }
-        .settings-trigger {
-          right: 12px;
-        }
-        .reset-trigger {
-          left: 12px;
-        }
-        .settings-trigger:hover, .reset-trigger:hover {
-          background: var(--primary);
-          color: var(--on-primary, white);
-          opacity: 1;
-        }
-        .settings-trigger:hover {
-          transform: rotate(30deg);
-        }
-        .reset-trigger:hover {
-          transform: rotate(-90deg);
-        }
       </style>
       <div class="container">
         <div class="section section-target">
@@ -470,8 +416,6 @@ class MathGame extends HTMLElement {
         <div class="section section-controls">
           <controls-bar></controls-bar>
         </div>
-        <button class="settings-trigger" title="Nastavitve">⚙️</button>
-        <button class="reset-trigger" title="Ponastavi">↺</button>
       </div>
     `;
 
@@ -479,8 +423,15 @@ class MathGame extends HTMLElement {
     this.gridEl = this.shadowRoot.querySelector('score-grid');
     this.stepsEl = this.shadowRoot.querySelector('step-indicator');
     this.ctrlEl = this.shadowRoot.querySelector('controls-bar');
-    this.settingsTrigger = this.shadowRoot.querySelector('.settings-trigger');
-    this.resetTrigger = this.shadowRoot.querySelector('.reset-trigger');
+    this.settingsTrigger = { click: () => {
+      const modal = document.createElement('settings-modal');
+      modal.setSound(this.sound.enabled);
+      modal.setActiveIndicator(this.showActiveIndicator);
+      this.shadowRoot.appendChild(modal);
+      modal.setMaxSteps(parseInt(localStorage.getItem('math-game-max-steps') || '10', 10));
+      modal.show();
+    }};
+    this.resetTrigger = { onclick: null }; 
 
     this.targetEl.setTargets(this.targets, this.achievedTargets);
     this.gridEl.setValue(this.sum);
