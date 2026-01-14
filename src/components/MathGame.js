@@ -130,8 +130,11 @@ async function ensureNumsInURL() {
 }
 
 function pickTargetSequence(nums, minK, maxK) {
-  // 1. Določimo število ciljev (1-5, naključno)
-  const count = Math.floor(Math.random() * 5) + 1;
+  // 1. Določimo število ciljev na podlagi nastavitev
+  const maxTargetsSetting = parseInt(localStorage.getItem('math-game-max-targets') || '3', 10);
+  const minCount = Math.ceil(maxTargetsSetting * 0.6);
+  const count = Math.floor(Math.random() * (maxTargetsSetting - minCount + 1)) + minCount;
+  
   const targets = [];
   let currentStart = 0;
   
@@ -229,10 +232,17 @@ function getPermutations(arr) {
 
 function pickTraps(nums, targets, minK, maxK) {
   const traps = [];
-  const numTraps = Math.floor(Math.random() * 5) + 1;
+  
+  // Pridobi nastavljeno maksimalno število pasti (privzeto 10)
+  const maxTrapsSetting = parseInt(localStorage.getItem('math-game-max-traps') || '10', 10);
+  
+  // Število pasti je naključno med 0.7 * max in max
+  const minTraps = Math.floor(0.7 * maxTrapsSetting);
+  const targetNumTraps = Math.floor(Math.random() * (maxTrapsSetting - minTraps + 1)) + minTraps;
+  
   const possibleTraps = [];
 
-  // Najdemo vsa dosegljiva števila (0-100)
+  // Najdemo vsa dosegljiva števila (1-100), ki niso cilji
   const reachable = bfsFrom(0, nums);
   for (let i = 1; i <= 100; i++) {
     if (reachable[i] !== Infinity && !targets.includes(i)) {
@@ -246,13 +256,15 @@ function pickTraps(nums, targets, minK, maxK) {
   possibleTraps.sort(() => Math.random() - 0.5);
 
   for (const t of possibleTraps) {
-    if (traps.length >= numTraps) break;
+    if (traps.length >= targetNumTraps) break;
 
     // Začasno dodamo past in preverimo rešljivost
     const testTraps = [...traps, t];
     const opt = calculateOptimalPath(targets, nums, testTraps);
 
-    if (opt !== Infinity) {
+    // Če je igra še vedno rešljiva in pot ni preveč ekstremno dolga (npr. > 30 korakov)
+    // lahko past obdržimo. 
+    if (opt !== Infinity && opt < 40) {
       traps.push(t);
     }
   }
@@ -312,6 +324,7 @@ class MathGame extends HTMLElement {
     
     // Naloži nastavitve iz localStorage ali določi privzete
     const savedActive = localStorage.getItem('math-game-show-active');
+    const maxTraps = parseInt(localStorage.getItem('math-game-max-traps') || '10', 10);
     if (savedActive !== null) {
       this.showActiveIndicator = savedActive === 'true';
     } else {
@@ -333,6 +346,16 @@ class MathGame extends HTMLElement {
 
     this.addEventListener('change-max-steps', () => {
       // Takojšnja ponastavitev igre ob spremembi težavnosti
+      location.reload();
+    });
+
+    this.addEventListener('change-max-traps', () => {
+      // Takojšnja ponastavitev igre ob spremembi števila pasti
+      location.reload();
+    });
+
+    this.addEventListener('change-max-targets', () => {
+      // Takojšnja ponastavitev igre ob spremembi števila ciljev
       location.reload();
     });
 
@@ -429,6 +452,8 @@ class MathGame extends HTMLElement {
       modal.setActiveIndicator(this.showActiveIndicator);
       this.shadowRoot.appendChild(modal);
       modal.setMaxSteps(parseInt(localStorage.getItem('math-game-max-steps') || '10', 10));
+      modal.setMaxTraps(parseInt(localStorage.getItem('math-game-max-traps') || '10', 10));
+      modal.setMaxTargets(parseInt(localStorage.getItem('math-game-max-targets') || '3', 10));
       modal.show();
     }};
     this.resetTrigger = { onclick: null }; 

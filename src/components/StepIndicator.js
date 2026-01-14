@@ -19,6 +19,13 @@ class StepIndicator extends HTMLElement {
     bubblesContainer.innerHTML = '';
     starsContainer.innerHTML = '';
     this.circles = [];
+
+    if (minSteps > 10) {
+      bubblesContainer.classList.add('many-steps');
+    } else {
+      bubblesContainer.classList.remove('many-steps');
+    }
+
     for (let i = 0; i < minSteps; i++) {
       const b = document.createElement('div');
       b.className = 'bubble';
@@ -79,7 +86,14 @@ class StepIndicator extends HTMLElement {
           justify-content: center;
           gap: 6px;
           width: 100%;
+          max-width: 400px;
+          margin: 0 auto;
           padding: 0;
+          transition: gap .3s ease;
+        }
+        .bubbles-row.many-steps {
+          justify-content: space-evenly;
+          gap: 2px;
         }
         .stars-row {
           display: flex;
@@ -90,8 +104,9 @@ class StepIndicator extends HTMLElement {
           flex-wrap: wrap;
         }
         .bubble {
-          width: clamp(10px, 1.8vh, 14px);
-          height: clamp(10px, 1.8vh, 14px);
+          width: clamp(8px, 1.8vh, 14px);
+          height: clamp(8px, 1.8vh, 14px);
+          flex-shrink: 1;
           border-radius: 999px;
           background: var(--bg);
           border: 2px solid var(--bubble);

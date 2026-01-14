@@ -6,6 +6,8 @@ class SettingsModal extends HTMLElement {
     this._soundOn = true;
     this._showActive = true;
     this._maxSteps = parseInt(localStorage.getItem('math-game-max-steps') || '10', 10);
+    this._maxTraps = parseInt(localStorage.getItem('math-game-max-traps') || '10', 10);
+    this._maxTargets = parseInt(localStorage.getItem('math-game-max-targets') || '3', 10);
     this._gameType = localStorage.getItem('math-game-type') || 'sum';
   }
 
@@ -39,6 +41,16 @@ class SettingsModal extends HTMLElement {
     this._updateMaxStepsDisplay();
   }
 
+  setMaxTraps(value) {
+    this._maxTraps = value;
+    this._updateMaxTrapsDisplay();
+  }
+
+  setMaxTargets(value) {
+    this._maxTargets = value;
+    this._updateMaxTargetsDisplay();
+  }
+
   _updateMuteBtn() {
     const btn = this.shadowRoot.querySelector('.mute-btn');
     if (btn) {
@@ -60,6 +72,20 @@ class SettingsModal extends HTMLElement {
     const slider = this.shadowRoot.querySelector('#max-steps-slider');
     if (display) display.textContent = this._maxSteps;
     if (slider) slider.value = this._maxSteps;
+  }
+
+  _updateMaxTrapsDisplay() {
+    const display = this.shadowRoot.querySelector('.max-traps-val');
+    const slider = this.shadowRoot.querySelector('#max-traps-slider');
+    if (display) display.textContent = this._maxTraps;
+    if (slider) slider.value = this._maxTraps;
+  }
+
+  _updateMaxTargetsDisplay() {
+    const display = this.shadowRoot.querySelector('.max-targets-val');
+    const slider = this.shadowRoot.querySelector('#max-targets-slider');
+    if (display) display.textContent = this._maxTargets;
+    if (slider) slider.value = this._maxTargets;
   }
 
   async _hardReset() {
@@ -97,6 +123,8 @@ class SettingsModal extends HTMLElement {
     const colorBtn = this.shadowRoot.querySelector('.color-btn');
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
     const stepsSlider = this.shadowRoot.querySelector('#max-steps-slider');
+    const trapsSlider = this.shadowRoot.querySelector('#max-traps-slider');
+    const targetsSlider = this.shadowRoot.querySelector('#max-targets-slider');
 
     closeBtn.onclick = () => this.close();
     okBtn.onclick = () => this.close();
@@ -120,6 +148,36 @@ class SettingsModal extends HTMLElement {
       const val = parseInt(e.target.value, 10);
       localStorage.setItem('math-game-max-steps', val);
       this.dispatchEvent(new CustomEvent('change-max-steps', {
+        bubbles: true,
+        composed: true,
+        detail: { value: val }
+      }));
+    };
+
+    trapsSlider.oninput = (e) => {
+      this._maxTraps = parseInt(e.target.value, 10);
+      this._updateMaxTrapsDisplay();
+    };
+
+    trapsSlider.onchange = (e) => {
+      const val = parseInt(e.target.value, 10);
+      localStorage.setItem('math-game-max-traps', val);
+      this.dispatchEvent(new CustomEvent('change-max-traps', {
+        bubbles: true,
+        composed: true,
+        detail: { value: val }
+      }));
+    };
+
+    targetsSlider.oninput = (e) => {
+      this._maxTargets = parseInt(e.target.value, 10);
+      this._updateMaxTargetsDisplay();
+    };
+
+    targetsSlider.onchange = (e) => {
+      const val = parseInt(e.target.value, 10);
+      localStorage.setItem('math-game-max-targets', val);
+      this.dispatchEvent(new CustomEvent('change-max-targets', {
         bubbles: true,
         composed: true,
         detail: { value: val }
@@ -341,6 +399,20 @@ class SettingsModal extends HTMLElement {
               <span class="max-steps-val">${this._maxSteps}</span>
             </div>
             <input type="range" id="max-steps-slider" min="2" max="10" value="${this._maxSteps}">
+          </div>
+          <div class="slider-container">
+            <div class="slider-label">
+              <span>Maks. pasti:</span>
+              <span class="max-traps-val">${this._maxTraps}</span>
+            </div>
+            <input type="range" id="max-traps-slider" min="0" max="25" value="${this._maxTraps}">
+          </div>
+          <div class="slider-container">
+            <div class="slider-label">
+              <span>Maks. ciljev:</span>
+              <span class="max-targets-val">${this._maxTargets}</span>
+            </div>
+            <input type="range" id="max-targets-slider" min="1" max="5" value="${this._maxTargets}">
           </div>
           <button class="mute-btn"></button>
           <button class="active-btn"></button>

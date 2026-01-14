@@ -1,5 +1,5 @@
 const USE_SW = true; // Ta spremenljivka se ne uporablja neposredno tukaj, ampak v play.html za nadzor registracije.
-const CACHE_NAME = 'math-game-v1.4.2';
+const CACHE_NAME = 'math-game-v1.4.4';
 const ASSETS = [
   './',
   'play.html',
