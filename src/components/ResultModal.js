@@ -48,7 +48,7 @@ class ResultModal extends HTMLElement {
     }
   }
 
-  async show(isSuccess, stars = 0) {
+  async show(isSuccess, stars = 0, maxStars = 3) {
     const content = this.shadowRoot.querySelector('.content');
     content.innerHTML = '';
 
@@ -58,7 +58,7 @@ class ResultModal extends HTMLElement {
       const newTotal = currentTotal + stars;
       localStorage.setItem('math-game-total-stars', newTotal);
 
-      await this.renderSuccess(content, stars, newTotal);
+      await this.renderSuccess(content, stars, newTotal, maxStars);
     } else {
       this.renderFailure(content);
     }
@@ -131,7 +131,7 @@ class ResultModal extends HTMLElement {
     container.appendChild(btn);
   }
 
-  async renderSuccess(container, starsCount, totalStars) {
+  async renderSuccess(container, starsCount, totalStars, maxStars = 3) {
     const title = document.createElement('h2');
     title.textContent = 'Bravo! Odlično ti gre!';
     container.appendChild(title);
@@ -139,8 +139,12 @@ class ResultModal extends HTMLElement {
     const starsContainer = document.createElement('div');
     starsContainer.className = 'stars-container';
     
+    // Prilagodimo velikost zvezdic glede na število
+    const starSize = maxStars > 5 ? 'clamp(30px, 8vw, 60px)' : 'clamp(60px, 15vw, 120px)';
+    starsContainer.style.setProperty('--star-size', starSize);
+
     const starOutlines = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < maxStars; i++) {
       const star = document.createElement('div');
       star.className = 'star-outline';
       star.innerHTML = '★';
@@ -178,7 +182,7 @@ class ResultModal extends HTMLElement {
         if (i < starsCount) {
           setTimeout(() => {
             star.classList.add('filled');
-            if (starsCount === 3) {
+            if (starsCount === maxStars && maxStars >= 3) {
               star.classList.add('super-star');
             }
           }, i * 150);
@@ -285,12 +289,14 @@ class ResultModal extends HTMLElement {
         }
         .stars-container {
           display: flex;
-          gap: clamp(10px, 4vw, 30px);
+          gap: clamp(10px, 2vw, 30px);
           justify-content: center;
           align-items: center;
+          flex-wrap: wrap;
+          max-width: 90vw;
         }
         .star-outline {
-          font-size: clamp(60px, 15vw, 120px);
+          font-size: var(--star-size, clamp(60px, 15vw, 120px));
           color: var(--bubble);
           position: relative;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);

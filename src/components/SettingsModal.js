@@ -9,6 +9,7 @@ class SettingsModal extends HTMLElement {
     this._maxTraps = parseInt(localStorage.getItem('math-game-max-traps') || '10', 10);
     this._maxTargets = parseInt(localStorage.getItem('math-game-max-targets') || '3', 10);
     this._gameType = localStorage.getItem('math-game-type') || 'sum';
+    this._needsReload = false;
   }
 
   connectedCallback() {
@@ -130,6 +131,12 @@ class SettingsModal extends HTMLElement {
     okBtn.onclick = () => this.close();
     
     dialog.onclose = () => {
+      if (this._needsReload) {
+        this.dispatchEvent(new CustomEvent('settings-changed', {
+          bubbles: true,
+          composed: true
+        }));
+      }
       this.remove();
     };
 
@@ -147,11 +154,7 @@ class SettingsModal extends HTMLElement {
     stepsSlider.onchange = (e) => {
       const val = parseInt(e.target.value, 10);
       localStorage.setItem('math-game-max-steps', val);
-      this.dispatchEvent(new CustomEvent('change-max-steps', {
-        bubbles: true,
-        composed: true,
-        detail: { value: val }
-      }));
+      this._needsReload = true;
     };
 
     trapsSlider.oninput = (e) => {
@@ -162,11 +165,7 @@ class SettingsModal extends HTMLElement {
     trapsSlider.onchange = (e) => {
       const val = parseInt(e.target.value, 10);
       localStorage.setItem('math-game-max-traps', val);
-      this.dispatchEvent(new CustomEvent('change-max-traps', {
-        bubbles: true,
-        composed: true,
-        detail: { value: val }
-      }));
+      this._needsReload = true;
     };
 
     targetsSlider.oninput = (e) => {
@@ -177,11 +176,7 @@ class SettingsModal extends HTMLElement {
     targetsSlider.onchange = (e) => {
       const val = parseInt(e.target.value, 10);
       localStorage.setItem('math-game-max-targets', val);
-      this.dispatchEvent(new CustomEvent('change-max-targets', {
-        bubbles: true,
-        composed: true,
-        detail: { value: val }
-      }));
+      this._needsReload = true;
     };
 
     colorBtn.onclick = () => {

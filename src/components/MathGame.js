@@ -344,18 +344,8 @@ class MathGame extends HTMLElement {
       location.href = location.pathname;
     });
 
-    this.addEventListener('change-max-steps', () => {
-      // Takojšnja ponastavitev igre ob spremembi težavnosti
-      location.reload();
-    });
-
-    this.addEventListener('change-max-traps', () => {
-      // Takojšnja ponastavitev igre ob spremembi števila pasti
-      location.reload();
-    });
-
-    this.addEventListener('change-max-targets', () => {
-      // Takojšnja ponastavitev igre ob spremembi števila ciljev
+    this.addEventListener('settings-changed', () => {
+      // Ponastavitev igre ob spremembi drsnikov v nastavitvah (ko se modal zapre)
       location.reload();
     });
 
@@ -507,20 +497,6 @@ class MathGame extends HTMLElement {
     this.gridEl.setValue(this.sum);
     this.stepsEl.update(this.clicks, this.minSteps);
     this.sound.click();
-
-    // Preveri, če smo dosegli kakšen cilj
-    this.targets.forEach((t, i) => {
-      if (this.sum === t && !this.achievedTargets.includes(i)) {
-        this.achievedTargets.push(i);
-        this.targetEl.setTargets(this.targets, this.achievedTargets);
-        this.sound.victory(1); // Manjši zmagovalni zvok za vmesni cilj
-        
-        // Če so vsi cilji doseženi, avtomatsko odpri modal po kratkem premoru
-        if (this.achievedTargets.length === this.targets.length) {
-          setTimeout(() => this.onConfirm(), 500);
-        }
-      }
-    });
   }
 
   onReset() {
@@ -534,17 +510,40 @@ class MathGame extends HTMLElement {
   }
 
   async onConfirm() {
-    if (this.achievedTargets.length < this.targets.length) {
-      this.sound.nope();
+    let found = false;
+    this.targets.forEach((t, i) => {
+      if (this.sum === t && !this.achievedTargets.includes(i)) {
+        this.achievedTargets.push(i);
+        found = true;
+      }
+    });
+
+    if (found) {
+      this.targetEl.setTargets(this.targets, this.achievedTargets);
+      
+      if (this.achievedTargets.length === this.targets.length) {
+        // Vsi cilji doseženi
+        const stars = this.stepsEl.getStarsLeft(this.clicks, this.minSteps);
+        const maxStars = this.stepsEl.stars ? this.stepsEl.stars.length : 3;
+        const resultModal = document.createElement('result-modal');
+        this.shadowRoot.appendChild(resultModal);
+        
+        this.sound.victory(stars);
+        await resultModal.show(true, stars, maxStars);
+      } else {
+        // Le vmesni cilj
+        this.gridEl.flashSuccess();
+        this.sound.victory(1);
+      }
       return;
     }
 
-    const stars = this.stepsEl.getStarsLeft(this.clicks, this.minSteps);
-    const resultModal = document.createElement('result-modal');
-    this.shadowRoot.appendChild(resultModal);
-    
-    this.sound.victory(stars);
-    await resultModal.show(true, stars);
+    // Če ni bil dosežen noben (nov) cilj
+    if (this.achievedTargets.length < this.targets.length) {
+      this.sound.nope();
+      this.ctrlEl.flashEquals();
+      return;
+    }
   }
 }
 
