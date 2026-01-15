@@ -165,18 +165,12 @@ class ScoreGrid extends HTMLElement {
     const wrap = this.shadowRoot.querySelector('.grid-wrap');
     if (!wrap) return;
     wrap.classList.remove('flash');
-    wrap.classList.remove('flash-success');
     void wrap.offsetWidth;
     wrap.classList.add('flash');
   }
 
   flashSuccess() {
-    const wrap = this.shadowRoot.querySelector('.grid-wrap');
-    if (!wrap) return;
-    wrap.classList.remove('flash');
-    wrap.classList.remove('flash-success');
-    void wrap.offsetWidth;
-    wrap.classList.add('flash-success');
+    // Odstranjeno, ker je animacija moteča
   }
 
   render() {
@@ -286,16 +280,6 @@ class ScoreGrid extends HTMLElement {
           0% { box-shadow: 0 0 0 0 rgba(239,83,80,0.3); }
           50% { box-shadow: 0 0 0 8px rgba(239,83,80,0); }
           100% { box-shadow: 0 0 0 0 rgba(239,83,80,0); }
-        }
-
-        .flash-success {
-          animation: flash-success 400ms ease;
-        }
-
-        @keyframes flash-success {
-          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102,187,106,0.4); }
-          50% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(102,187,106,0); }
-          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102,187,106,0); }
         }
       </style>
 

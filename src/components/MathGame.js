@@ -551,7 +551,6 @@ class MathGame extends HTMLElement {
         if (this.gridEl && this.gridEl.cat) {
           this.gridEl.cat.cheer();
         }
-        this.gridEl.flashSuccess();
         this.sound.victory(1);
       }
       return;
