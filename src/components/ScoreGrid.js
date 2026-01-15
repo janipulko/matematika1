@@ -1,3 +1,7 @@
+import './IconCat.js';
+import './IconTnt.js';
+import './BoomIcon.js';
+
 class ScoreGrid extends HTMLElement {
   constructor() {
     super();
@@ -9,6 +13,7 @@ class ScoreGrid extends HTMLElement {
   connectedCallback() {
     this.render();
     this.cells = Array.from(this.shadowRoot.querySelectorAll('.cell'));
+    this.cat = this.shadowRoot.querySelector('icon-cat');
 
     const wrap = this.shadowRoot.querySelector('.grid-wrap');
     const grid = this.shadowRoot.querySelector('.grid-frame');
@@ -19,6 +24,26 @@ class ScoreGrid extends HTMLElement {
       const size = Math.floor(Math.min(width, height));
       grid.style.width = `${size}px`;
       grid.style.height = `${size}px`;
+      
+      // Prilagodi velikost mačke glede na celico
+      const padding = size * 0.05; // ocena
+      const totalGap = 9 * (size * 0.005); // ocena gapa
+      const cellSize = (size - padding - totalGap) / 10;
+
+      if (this.cat) {
+        // Mačka je zdaj v celici in se prilagodi njeni velikosti. 
+        // 110% velikosti celice je dovolj, da uhlji malce gledajo čez.
+        const catSize = Math.floor(cellSize * 1.1);
+        this.cat.setAttribute('size', catSize);
+      }
+
+      // Prilagodi velikost TNT ikon
+      const tntIcons = this.shadowRoot.querySelectorAll('icon-tnt');
+      const tntSize = Math.floor(cellSize * 0.8);
+      tntIcons.forEach(icon => icon.setAttribute('size', tntSize));
+
+      // Shranimo zadnjo izračunano velikost celice za nove TNT ikone
+      this._lastCellSize = cellSize;
     });
 
     this._ro.observe(wrap);
@@ -35,20 +60,105 @@ class ScoreGrid extends HTMLElement {
     this.cells.forEach((cell, i) => {
       cell.classList.toggle('filled', i < n);
     });
+
+    if (this.cat) {
+      if (n > 0) {
+        const targetCell = this.cells[n - 1];
+        if (targetCell) {
+          this.cat.style.display = 'block';
+          
+          // Premaknemo mačko v celico
+          targetCell.appendChild(this.cat);
+          // Ponastavimo margin če ga je kaj preneslo
+          this.cat.style.margin = '0';
+        }
+      } else {
+        this.cat.style.display = 'none';
+      }
+    }
   }
 
   setTraps(traps) {
     if (!this.cells) return;
     this.cells.forEach((cell, i) => {
-      // Število 1 je na indeksu 0, zato traps.includes(i + 1)
       const isTrap = traps.includes(i + 1);
+      
+      // Preverimo, če je bila tu prej past, ki je zdaj ni več
+      const hasOldTnt = !!cell.querySelector('icon-tnt');
+      
+      if (hasOldTnt && !isTrap) {
+        // Past je bila odstranjena -> sproži boom
+        this.showExplosion(i);
+      }
+
       cell.classList.toggle('trap', isTrap);
+      
+      // Odstranimo obstoječo TNT ikono, če obstaja
+      const oldTnt = cell.querySelector('icon-tnt');
+      if (oldTnt) oldTnt.remove();
+
       if (isTrap) {
         cell.title = `Past na številu ${i + 1}`;
+        // Dodamo TNT ikono
+        const tnt = document.createElement('icon-tnt');
+        // Uporabimo zadnjo znano velikost celice
+        const tntSize = this._lastCellSize ? Math.floor(this._lastCellSize * 0.8) : 20;
+        tnt.setAttribute('size', tntSize); 
+        cell.appendChild(tnt);
       } else {
         cell.removeAttribute('title');
       }
     });
+    // Sprožimo resize observer, da se velikosti TNT ikon takoj popravijo
+    if (this._ro && this.shadowRoot.querySelector('.grid-wrap')) {
+        // ResizeObserver bo samodejno zaznal če se kaj spremeni, 
+        // ampak ker smo dodali elemente v shadow DOM, je varno poklicati render velikosti
+    }
+  }
+
+  showExplosion(index) {
+    const cell = this.cells[index];
+    if (!cell) return;
+
+    const grid = this.shadowRoot.querySelector('.grid-frame');
+    if (!grid) return;
+
+    const boom = document.createElement('boom-icon');
+    const size = this._lastCellSize ? Math.floor(this._lastCellSize * 2.5) : 48;
+    boom.setAttribute('size', size);
+    boom.setAttribute('variant', 'burst');
+    boom.setAttribute('autoplay', '');
+    
+    // Barve prilagodimo tnt ikoni (oranžno-rdeča)
+    boom.setAttribute('start', '#ff8a00');
+    boom.setAttribute('end', '#ff0033');
+
+    // Izračunamo pozicijo celice glede na grid-frame
+    const cellRect = cell.getBoundingClientRect();
+    const gridRect = grid.getBoundingClientRect();
+    
+    const left = cellRect.left - gridRect.left + (cellRect.width / 2);
+    const top = cellRect.top - gridRect.top + cellRect.height; // Dno celice
+
+    // Pozicioniranje
+    boom.style.position = 'absolute';
+    boom.style.left = `${left}px`;
+    boom.style.top = `${top}px`;
+    boom.style.transform = 'translate(-50%, -60%)'; // -60% da je center malo nad dnom celice
+    boom.style.pointerEvents = 'none';
+    boom.style.zIndex = '1000';
+
+    grid.appendChild(boom);
+
+    // Odstranimo po koncu animacije
+    boom.addEventListener('boomend', () => {
+      boom.remove();
+    });
+
+    // Varnostni izklop če boomend ne bi bil sprožen
+    setTimeout(() => {
+      if (boom.parentNode) boom.remove();
+    }, 1500);
   }
 
   flash() {
@@ -93,6 +203,7 @@ class ScoreGrid extends HTMLElement {
           height: 100%;
           display: grid;
           place-items: center;
+          position: relative;
         }
         
         /* 🔥 KVADRAT Z OKVIRJEM */
@@ -105,6 +216,8 @@ class ScoreGrid extends HTMLElement {
             padding: clamp(4px, 1vh, 12px);
           
             display: grid;
+            position: relative;
+            overflow: visible; /* Za srčke */
           }
           
           .grid {
@@ -114,6 +227,7 @@ class ScoreGrid extends HTMLElement {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             gap: clamp(1px, 0.4vh, 6px);
+            overflow: visible;
           }
 
 
@@ -124,31 +238,44 @@ class ScoreGrid extends HTMLElement {
           border: clamp(1px, 0.2vh, 2px) solid var(--grid-stroke);
           border-radius: clamp(4px, 1vh, 10px);
           transition: background .18s ease, border-color .18s ease, transform .08s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: visible; /* Pomembno za senco mačke in srčke */
+          position: relative;
+          z-index: 1;
         }
 
         .cell.filled {
           background: var(--grid-fill);
           border-color: var(--primary);
           box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.1);
+          z-index: 2; /* Višji z-index za trenutno/izbrano celico */
+        }
+
+        icon-cat {
+          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+          pointer-events: none;
+          position: absolute;
+          z-index: 100;
+          /* Centriranje mačke, ki je večja od celice */
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          /* Zagotovimo, da se ne zamakne zaradi inline stilov */
+          margin: 0;
+          overflow: visible; /* Za srčke */
         }
 
         .cell.trap {
-          background: rgba(239, 83, 80, 0.25);
-          border-color: #ef5350;
-          border-width: clamp(2px, 0.4vh, 4px);
           position: relative;
           z-index: 1;
         }
 
-        .cell.trap::after {
-          content: '!';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          color: #ef5350;
-          font-weight: bold;
-          font-size: clamp(8px, 1.5vh, 16px);
+        icon-tnt {
+          pointer-events: none;
+          display: block;
         }
 
         .flash {
@@ -178,6 +305,7 @@ class ScoreGrid extends HTMLElement {
              ${cellsHTML}
             </div>
         </div>
+        <icon-cat style="display: none;"></icon-cat>
       </div>
     `;
   }

@@ -494,6 +494,17 @@ class MathGame extends HTMLElement {
 
     this.sum = nextSum;
     this.clicks += 1;
+
+    // Odstranimo pasti, ki so bile prečkane (sum > trap) ali dosežene (sum == trap)
+    // Opomba: Trenutno onAdd prepreči skok DIREKTNO na past, 
+    // a če jo prečkamo (npr. iz 5 na 15, past pa je na 10), naj izgine.
+    const initialTrapCount = this.traps.length;
+    this.traps = this.traps.filter(t => t > this.sum);
+    
+    if (this.traps.length !== initialTrapCount) {
+      this.gridEl.setTraps(this.traps);
+    }
+
     this.gridEl.setValue(this.sum);
     this.stepsEl.update(this.clicks, this.minSteps);
     this.sound.click();
@@ -523,6 +534,11 @@ class MathGame extends HTMLElement {
       
       if (this.achievedTargets.length === this.targets.length) {
         // Vsi cilji doseženi
+        // Mucek veselje
+        if (this.gridEl && this.gridEl.cat) {
+          this.gridEl.cat.cheer();
+        }
+
         const stars = this.stepsEl.getStarsLeft(this.clicks, this.minSteps);
         const maxStars = this.stepsEl.stars ? this.stepsEl.stars.length : 3;
         const resultModal = document.createElement('result-modal');
@@ -532,6 +548,9 @@ class MathGame extends HTMLElement {
         await resultModal.show(true, stars, maxStars);
       } else {
         // Le vmesni cilj
+        if (this.gridEl && this.gridEl.cat) {
+          this.gridEl.cat.cheer();
+        }
         this.gridEl.flashSuccess();
         this.sound.victory(1);
       }
