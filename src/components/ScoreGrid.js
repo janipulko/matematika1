@@ -206,13 +206,36 @@ class ScoreGrid extends HTMLElement {
           
             background: var(--card);
             border-radius: var(--radius);
-            border: 1px solid var(--grid-stroke);
+            border: 2px solid var(--grid-stroke);
             padding: clamp(4px, 1vh, 12px);
           
             display: grid;
             position: relative;
             overflow: visible; /* Za srčke */
           }
+
+        /* Črte za kvadrante */
+        .quadrant-line {
+          position: absolute;
+          pointer-events: none;
+          z-index: 5;
+          }
+
+        .quadrant-line.horizontal {
+          left: 0;
+          right: 0;
+          top: 50%;
+          border-top: 2px dashed var(--grid-stroke);
+          transform: translateY(calc(-50% + 0.5px));
+        }
+
+        .quadrant-line.vertical {
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          border-left: 2px dashed var(--grid-stroke);
+          transform: translateX(calc(-50% + 0.5px));
+        }
           
           .grid {
             width: 100%;
@@ -285,6 +308,8 @@ class ScoreGrid extends HTMLElement {
 
       <div class="grid-wrap">
         <div class="grid-frame">
+           <div class="quadrant-line horizontal"></div>
+           <div class="quadrant-line vertical"></div>
            <div class="grid">
              ${cellsHTML}
             </div>

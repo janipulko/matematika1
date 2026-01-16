@@ -1,8 +1,7 @@
-
 class ResultModal extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({mode: 'open'});
   }
 
   connectedCallback() {
@@ -11,11 +10,6 @@ class ResultModal extends HTMLElement {
     this.dialog.onclose = () => {
       this.remove();
     };
-
-    const closeBtn = this.shadowRoot.querySelector('.close-btn');
-    if (closeBtn) {
-      closeBtn.onclick = () => this.close();
-    }
 
     this._canClose = false;
     // Preprečimo takojšnje zapiranje: modal se lahko zapre šele, ko uporabnik 
@@ -33,7 +27,9 @@ class ResultModal extends HTMLElement {
 
   _handleKeyDown(e) {
     if (e.key === 'Enter') {
-      if (!this._canClose) return;
+      if (!this._canClose) {
+        return;
+      }
       e.stopPropagation();
       this.close();
     }
@@ -54,7 +50,8 @@ class ResultModal extends HTMLElement {
 
     if (isSuccess) {
       // Posodobi skupno število zvezdic v localStorage
-      const currentTotal = parseInt(localStorage.getItem('math-game-total-stars') || '0', 10);
+      const currentTotal = parseInt(
+          localStorage.getItem('math-game-total-stars') || '0', 10);
       const newTotal = currentTotal + stars;
       localStorage.setItem('math-game-total-stars', newTotal);
 
@@ -78,7 +75,8 @@ class ResultModal extends HTMLElement {
     const dataPath = type === 'groups' ? 'data/groups.json' : 'data/sum.json';
     const stepKey = `math-game-step-${type}`;
 
-    const currentStep = parseInt(params.get('step') || localStorage.getItem(stepKey) || '0', 10);
+    const currentStep = parseInt(
+        params.get('step') || localStorage.getItem(stepKey) || '0', 10);
     const nextStep = currentStep + 1;
 
     // Pridobimo podatke o naslednjem koraku
@@ -98,11 +96,13 @@ class ResultModal extends HTMLElement {
       console.error("Napaka pri nalaganju za naslednji korak:", e);
     }
 
-    if (!nextCombo) return; // Ni več korakov
+    if (!nextCombo) {
+      return;
+    } // Ni več korakov
 
     const btn = document.createElement('button');
     btn.className = 'btn-reward'; // Uporabimo isti stil kot prej
-    
+
     const maxUnlockedStep = parseInt(localStorage.getItem(stepKey) || '0', 10);
     const isAlreadyUnlocked = nextStep <= maxUnlockedStep;
 
@@ -127,7 +127,7 @@ class ResultModal extends HTMLElement {
         location.href = `play.html?step=${nextStep}&num=${nextCombo}`;
       };
     }
-    
+
     container.appendChild(btn);
   }
 
@@ -138,9 +138,10 @@ class ResultModal extends HTMLElement {
 
     const starsContainer = document.createElement('div');
     starsContainer.className = 'stars-container';
-    
+
     // Prilagodimo velikost zvezdic glede na število
-    const starSize = maxStars > 5 ? 'clamp(30px, 8vw, 60px)' : 'clamp(60px, 15vw, 120px)';
+    const starSize = maxStars > 5 ? 'clamp(30px, 8vw, 60px)'
+        : 'clamp(60px, 15vw, 120px)';
     starsContainer.style.setProperty('--star-size', starSize);
 
     const starOutlines = [];
@@ -151,7 +152,7 @@ class ResultModal extends HTMLElement {
       starsContainer.appendChild(star);
       starOutlines.push(star);
     }
-    
+
     container.appendChild(starsContainer);
 
     // Prikaz skupnega seštevka zvezdic
@@ -205,7 +206,8 @@ class ResultModal extends HTMLElement {
     btn.textContent = 'Poskusi ponovno';
     btn.onclick = () => {
       this.close();
-      this.dispatchEvent(new CustomEvent('reset-game', { bubbles: true, composed: true }));
+      this.dispatchEvent(
+          new CustomEvent('reset-game', {bubbles: true, composed: true}));
     };
     buttonGroup.appendChild(btn);
     container.appendChild(buttonGroup);
@@ -238,31 +240,7 @@ class ResultModal extends HTMLElement {
           background: rgba(0, 0, 0, 0.4);
           backdrop-filter: blur(4px);
         }
-        .close-btn {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          border: 1px solid var(--bubble);
-          background: var(--card);
-          color: var(--muted);
-          font-size: 24px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10;
-          transition: all 0.2s;
-          padding: 0;
-          box-shadow: none;
-        }
-        .close-btn:hover {
-          background: var(--primary);
-          color: white;
-          transform: rotate(90deg);
-        }
+        
         .content {
           flex: 1;
           display: flex;
@@ -416,7 +394,6 @@ class ResultModal extends HTMLElement {
         }
       </style>
       <dialog>
-        <button class="close-btn" aria-label="Zapri">&times;</button>
         <div class="content"></div>
       </dialog>
     `;

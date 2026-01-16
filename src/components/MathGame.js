@@ -129,24 +129,45 @@ async function ensureNumsInURL() {
   return parseNumsFromURL();
 }
 
-function pickTargetSequence(nums, minK, maxK) {
+function pickTargetSequence(nums, minK, maxK, startSum = 0) {
   // 1. Določimo število ciljev na podlagi nastavitev
   const maxTargetsSetting = parseInt(localStorage.getItem('math-game-max-targets') || '3', 10);
-  const minCount = Math.ceil(maxTargetsSetting * 0.6);
+  const minCount = Math.max(1, Math.ceil(maxTargetsSetting * 0.4)); // Zmanjšana minimalna meja za večjo fleksibilnost
   const count = Math.floor(Math.random() * (maxTargetsSetting - minCount + 1)) + minCount;
   
   const targets = [];
-  let currentStart = 0;
+  let currentStart = startSum;
   
   // Za vsak cilj posebej izračunamo dostopnost iz prejšnje točke
   for (let i = 0; i < count; i++) {
     const dist = bfsFrom(currentStart, nums);
     const candidates = [];
+    
+    // Prilagodljiv kriterij: najprej iščemo idealne (razdalja >= 2)
     for (let t = 1; t <= 100; t++) {
-      // Razdalja med posameznimi cilji naj bo razumna
       const stepDist = dist[t];
-      if (stepDist >= 2 && stepDist <= maxK && !targets.includes(t)) {
+      if (stepDist >= 2 && stepDist <= maxK && !targets.includes(t) && t !== startSum) {
         candidates.push(t);
+      }
+    }
+    
+    // Če ni idealnih, dopustimo razdaljo 1 (neposreden skok)
+    if (candidates.length === 0) {
+      for (let t = 1; t <= 100; t++) {
+        const stepDist = dist[t];
+        if (stepDist === 1 && !targets.includes(t) && t !== startSum) {
+          candidates.push(t);
+        }
+      }
+    }
+
+    // Če še vedno ni kandidatov, poskusimo malce razširiti maxK (+1)
+    if (candidates.length === 0) {
+      for (let t = 1; t <= 100; t++) {
+        const stepDist = dist[t];
+        if (stepDist > 1 && stepDist <= (maxK + 1) && !targets.includes(t) && t !== startSum) {
+          candidates.push(t);
+        }
       }
     }
     
@@ -160,6 +181,84 @@ function pickTargetSequence(nums, minK, maxK) {
   
   // Pomešamo cilje, da igralec nima vedno naraščajočega zaporedja
   return targets.sort(() => Math.random() - 0.5);
+}
+
+function pickValidStartSum(nums, minK, maxK) {
+  // 1. Izračunamo "težnost" operacij (bias)
+  let sumVal = 0;
+  let absSumVal = 0;
+  
+  for (const n of nums) {
+    let v = n.val;
+    if (n.op === 'm' || n.op === 's') v = -v; 
+    // Opomba: množenje 't' obravnavamo kot pozitivno, deljenje 's' kot negativno (približek)
+    if (n.op === 't') v = v * 2; // Množenje močno poveča vrednost
+    
+    sumVal += v;
+    absSumVal += Math.abs(v);
+  }
+  
+  const bias = absSumVal === 0 ? 0 : sumVal / absSumVal;
+  
+  // 2. Določimo osnovni začetek (bias 1 -> 10, bias -1 -> 90)
+  // Omejimo bias med -1 in 1 za vsak slučaj
+  const clampedBias = Math.max(-1, Math.min(1, bias));
+  const startBase = 50 - (clampedBias * 40);
+  
+  // 3. Dodamo naključen interval (+/- 15)
+  const range = 15;
+  const randomOffset = (Math.random() * range * 2) - range;
+  let targetStart = Math.round(startBase + randomOffset);
+  
+  // Omejimo na [1, 100]
+  targetStart = Math.max(1, Math.min(100, targetStart));
+
+  // 4. Preverimo rešljivost iz te točke in okolice
+  // Najprej preverimo točno to točko
+  const checkReachable = (s) => {
+    const dists = bfsFrom(s, nums);
+    let reachableCount = 0;
+    for (let t = 1; t <= 100; t++) {
+      // Zmanjšamo strožost pogoja: razdalja 1 je zdaj dovoljena, maxK pa rahlo povečan
+      if (dists[t] >= 1 && dists[t] <= (maxK + 1)) reachableCount++;
+    }
+    // Zmanjšamo zahtevano število dosegljivih ciljev na 5 (prej 10)
+    return reachableCount >= 5;
+  };
+
+  if (checkReachable(targetStart)) return targetStart;
+
+  // Če ni v redu, iščemo v spirali okoli targetStart
+  for (let radius = 1; radius <= 20; radius++) {
+    for (const s of [targetStart - radius, targetStart + radius]) {
+      if (s >= 1 && s <= 100 && checkReachable(s)) {
+        return s;
+      }
+    }
+  }
+
+  // Fallback na staro metodo iskanja poljubne veljavne točke, če spirala odpove
+  const candidates = [];
+  for (let s = 1; s <= 100; s++) {
+    if (checkReachable(s)) candidates.push(s);
+  }
+  if (candidates.length > 0) {
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  // Zadnji poskus: Katerokoli število, ki omogoča vsaj en cilj
+  const emergencyCandidates = [];
+  for (let s = 1; s <= 100; s++) {
+    const dists = bfsFrom(s, nums);
+    if (Object.values(dists).some(d => d > 0 && d !== Infinity)) {
+      emergencyCandidates.push(s);
+    }
+  }
+  if (emergencyCandidates.length > 0) {
+    return emergencyCandidates[Math.floor(Math.random() * emergencyCandidates.length)];
+  }
+
+  return 1; // Končni fallback
 }
 
 function bfsFrom(startNode, nums, traps = []) {
@@ -189,14 +288,14 @@ function bfsFrom(startNode, nums, traps = []) {
   return dist;
 }
 
-function calculateOptimalPath(targets, nums, traps = []) {
+function calculateOptimalPath(targets, nums, traps = [], startSum = 0) {
   // Izračunamo najkrajšo pot, ki obišče vse cilje (permutacije)
   const permutations = getPermutations(targets);
   let minTotalSteps = Infinity;
 
   for (const p of permutations) {
     let currentSteps = 0;
-    let currentPos = 0;
+    let currentPos = startSum;
     let possible = true;
     
     for (const target of p) {
@@ -230,7 +329,7 @@ function getPermutations(arr) {
   return result;
 }
 
-function pickTraps(nums, targets, minK, maxK) {
+function pickTraps(nums, targets, minK, maxK, startSum = 0) {
   const traps = [];
   
   // Pridobi nastavljeno maksimalno število pasti (privzeto 10)
@@ -242,10 +341,10 @@ function pickTraps(nums, targets, minK, maxK) {
   
   const possibleTraps = [];
 
-  // Najdemo vsa dosegljiva števila (1-100), ki niso cilji
-  const reachable = bfsFrom(0, nums);
+  // Najdemo vsa dosegljiva števila (1-100), ki niso cilji in ni začetna vrednost
+  const reachable = bfsFrom(startSum, nums);
   for (let i = 1; i <= 100; i++) {
-    if (reachable[i] !== Infinity && !targets.includes(i)) {
+    if (reachable[i] !== Infinity && !targets.includes(i) && i !== startSum) {
       possibleTraps.push(i);
     }
   }
@@ -260,7 +359,7 @@ function pickTraps(nums, targets, minK, maxK) {
 
     // Začasno dodamo past in preverimo rešljivost
     const testTraps = [...traps, t];
-    const opt = calculateOptimalPath(targets, nums, testTraps);
+    const opt = calculateOptimalPath(targets, nums, testTraps, startSum);
 
     // Če je igra še vedno rešljiva in pot ni preveč ekstremno dolga (npr. > 30 korakov)
     // lahko past obdržimo. 
@@ -301,24 +400,28 @@ class MathGame extends HTMLElement {
     const maxK = this.maxStepsOverride !== null ? this.maxStepsOverride : settingsMaxSteps;
     const minK = Math.max(2, Math.ceil(maxK / 2));
 
-    this.targets = pickTargetSequence(this.nums, minK, maxK);
+    this.startSum = pickValidStartSum(this.nums, minK, maxK);
+    this.targets = pickTargetSequence(this.nums, minK, maxK, this.startSum);
+    
     if (!this.targets) {
       const urlHint = this.nums.map(n => n.op + n.val).join('');
       this.shadowRoot.innerHTML = `<p>Konfiguracija <code>?num=${urlHint}</code> ne omogoča doseči nobenega cilja v [0..100]. Spremeni parametre.</p>`;
       return;
     }
 
-    this.traps = pickTraps(this.nums, this.targets, minK, maxK);
+    this.traps = pickTraps(this.nums, this.targets, minK, maxK, this.startSum);
+    this.initialTraps = [...this.traps]; // Shranimo za reset
     this.achievedTargets = [];
-    this.minSteps = calculateOptimalPath(this.targets, this.nums, this.traps);
+    this.minSteps = calculateOptimalPath(this.targets, this.nums, this.traps, this.startSum);
     
     // Če BFS ne najde poti (teoretično ne bi smelo priti do tega, a za varnost)
     if (this.minSteps === Infinity) {
         this.traps = [];
-        this.minSteps = calculateOptimalPath(this.targets, this.nums, []);
+        this.initialTraps = [];
+        this.minSteps = calculateOptimalPath(this.targets, this.nums, [], this.startSum);
     }
 
-    this.sum = 0;
+    this.sum = this.startSum;
     this.clicks = 0;
     this.sound = sound;
     
@@ -511,10 +614,12 @@ class MathGame extends HTMLElement {
   }
 
   onReset() {
-    this.sum = 0;
+    this.sum = this.startSum || 1;
     this.clicks = 0;
     this.achievedTargets = [];
+    this.traps = [...(this.initialTraps || [])];
     this.gridEl.setValue(this.sum);
+    this.gridEl.setTraps(this.traps);
     this.targetEl.setTargets(this.targets, this.achievedTargets);
     this.stepsEl.update(this.clicks, this.minSteps);
     this.sound.click();

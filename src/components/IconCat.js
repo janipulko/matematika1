@@ -1,8 +1,10 @@
 
 
+import { AVATARS } from '../utils/avatars.js';
+
 class IconCat extends HTMLElement {
   static get observedAttributes() {
-    return ['size', 'label'];
+    return ['size', 'label', 'type'];
   }
 
   constructor() {
@@ -28,13 +30,14 @@ class IconCat extends HTMLElement {
         width: 24px;
         height: 24px;
         box-sizing: border-box;
+        overflow: visible;
       }
-      img {
+      svg.avatar-svg {
         width: 100%;
         height: 100%;
         display: block;
         user-select: none;
-        -webkit-user-drag: none;
+        overflow: visible;
       }
 
       /* Animacija veselja */
@@ -92,27 +95,26 @@ class IconCat extends HTMLElement {
     this._heartsContainer.style.overflow = 'visible';
     this._wrapper.appendChild(this._heartsContainer);
 
-    // Slika muceka
-    this._img = document.createElement('img');
-    this._img.src = 'assets/cat.svg';
-    this._img.alt = 'Cat';
-
+    // SVG element
+    this._svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    this._svg.classList.add('avatar-svg');
+    
     // Odstranimo cheer class po končani animaciji
-    this._img.addEventListener('animationend', (e) => {
+    this._svg.addEventListener('animationend', (e) => {
       if (e.animationName === 'cat-cheer') {
-        this._img.classList.remove('cheer');
+        this._svg.classList.remove('cheer');
       }
     });
 
-    this._wrapper.prepend(this._img);
+    this._wrapper.prepend(this._svg);
 
     this.shadowRoot.append(style, this._wrapper);
   }
 
   cheer() {
-    this._img.classList.remove('cheer');
-    void this._img.offsetWidth; // trigger reflow
-    this._img.classList.add('cheer');
+    this._svg.classList.remove('cheer');
+    void this._svg.offsetWidth; // trigger reflow
+    this._svg.classList.add('cheer');
     this._spawnHearts();
   }
 
@@ -146,6 +148,7 @@ class IconCat extends HTMLElement {
   }
 
   connectedCallback() {
+    this._renderAvatar();
     this._applySize();
     this._applyLabel();
   }
@@ -158,7 +161,18 @@ class IconCat extends HTMLElement {
       case 'label':
         this._applyLabel();
         break;
+      case 'type':
+        this._renderAvatar();
+        break;
     }
+  }
+
+  _renderAvatar() {
+    const type = this.getAttribute('type') || 'cat';
+    const avatar = AVATARS[type] || AVATARS.cat;
+    
+    this._svg.setAttribute('viewBox', avatar.viewBox);
+    this._svg.innerHTML = avatar.content;
   }
 
   _applySize() {
@@ -169,21 +183,20 @@ class IconCat extends HTMLElement {
       this._wrapper.style.width = `${size}px`;
       this._wrapper.style.height = `${size}px`;
     }
-    if (this._img) {
-      this._img.style.width = `${size}px`;
-      this._img.style.height = `${size}px`;
-    }
+    // SVG se samodejno prilagodi preko width: 100% v stilu
   }
 
   _applyLabel() {
     const label = this.getAttribute('label');
-    if (!this._img) return;
+    if (!this._svg) return;
     if (label && label.trim()) {
-      this._img.setAttribute('aria-label', label);
-      this._img.setAttribute('alt', label);
+      this._svg.setAttribute('aria-label', label);
+      this._svg.setAttribute('role', 'img');
+      this._svg.removeAttribute('aria-hidden');
     } else {
-      this._img.setAttribute('aria-hidden', 'true');
-      this._img.setAttribute('alt', '');
+      this._svg.setAttribute('aria-hidden', 'true');
+      this._svg.removeAttribute('aria-label');
+      this._svg.removeAttribute('role');
     }
   }
 }

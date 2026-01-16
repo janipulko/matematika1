@@ -1,13 +1,15 @@
 const USE_SW = true; // Ta spremenljivka se ne uporablja neposredno tukaj, ampak v play.html za nadzor registracije.
-const CACHE_NAME = 'math-game-v1.6.9';
+const CACHE_NAME = 'math-game-v1.7.8';
 const ASSETS = [
   './',
   'play.html',
+  'type.html',
   'unlock.html',
   'manifest.json',
   'icon.svg',
   'utils/soundManager.js',
   'utils/palettes.js',
+  'utils/avatars.js',
   'components/MathGame.js',
   'components/TargetDisplay.js',
   'components/ScoreGrid.js',
