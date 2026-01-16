@@ -1,6 +1,5 @@
 import './IconCat.js';
-import './IconTnt.js';
-import './BoomIcon.js';
+import './IconTrap.js';
 
 class ScoreGrid extends HTMLElement {
   constructor() {
@@ -33,16 +32,16 @@ class ScoreGrid extends HTMLElement {
       if (this.cat) {
         // Mačka je zdaj v celici in se prilagodi njeni velikosti. 
         // 110% velikosti celice je dovolj, da uhlji malce gledajo čez.
-        const catSize = Math.floor(cellSize * 1.1);
+        const catSize = Math.floor(cellSize * 0.8);
         this.cat.setAttribute('size', catSize);
       }
 
-      // Prilagodi velikost TNT ikon
-      const tntIcons = this.shadowRoot.querySelectorAll('icon-tnt');
-      const tntSize = Math.floor(cellSize * 0.8);
-      tntIcons.forEach(icon => icon.setAttribute('size', tntSize));
+      // Prilagodi velikost pasti
+      const trapIcons = this.shadowRoot.querySelectorAll('icon-trap');
+      const trapSize = Math.floor(cellSize * 0.8);
+      trapIcons.forEach(icon => icon.setAttribute('size', trapSize));
 
-      // Shranimo zadnjo izračunano velikost celice za nove TNT ikone
+      // Shranimo zadnjo izračunano velikost celice za nove pasti
       this._lastCellSize = cellSize;
     });
 
@@ -88,31 +87,31 @@ class ScoreGrid extends HTMLElement {
       const isTrap = traps.includes(i + 1);
 
       // Preverimo, če je bila tu prej past, ki je zdaj ni več
-      const hasOldTnt = !!cell.querySelector('icon-tnt');
+      const oldTrap = cell.querySelector('icon-trap');
 
-      if (hasOldTnt && !isTrap) {
+      if (oldTrap && !isTrap) {
         // Past je bila odstranjena -> sproži boom
-        this.showExplosion(i);
+        oldTrap.trigger();
       }
 
       cell.classList.toggle('trap', isTrap);
 
-      // Odstranimo obstoječo TNT ikono, če obstaja
-      const oldTnt = cell.querySelector('icon-tnt');
-      if (oldTnt) {
-        oldTnt.remove();
+      // Če pasti ni več, a oldTrap še vedno obstaja (in ni v stanju proženja), ga odstranimo
+      // Opomba: trigger() sam poskrbi za odstranitev po animaciji.
+      if (!isTrap && oldTrap && oldTrap.parentNode) {
+        // Če smo ravno sprožili trigger, ga pustimo, sicer pa odstranimo
       }
 
-      if (isTrap) {
+      if (isTrap && !oldTrap) {
         cell.title = `Past na številu ${i + 1}`;
-        // Dodamo TNT ikono
-        const tnt = document.createElement('icon-tnt');
-        // Uporabimo zadnjo znano velikost celice
-        const tntSize = this._lastCellSize ? Math.floor(
+        // Dodamo novo past
+        const trap = document.createElement('icon-trap');
+        trap.setAttribute('type', 'random');
+        const trapSize = this._lastCellSize ? Math.floor(
             this._lastCellSize * 0.8) : 20;
-        tnt.setAttribute('size', tntSize);
-        cell.appendChild(tnt);
-      } else {
+        trap.setAttribute('size', trapSize);
+        cell.appendChild(trap);
+      } else if (!isTrap) {
         cell.removeAttribute('title');
       }
     });
@@ -121,57 +120,6 @@ class ScoreGrid extends HTMLElement {
       // ResizeObserver bo samodejno zaznal če se kaj spremeni,
       // ampak ker smo dodali elemente v shadow DOM, je varno poklicati render velikosti
     }
-  }
-
-  showExplosion(index) {
-    const cell = this.cells[index];
-    if (!cell) {
-      return;
-    }
-
-    const grid = this.shadowRoot.querySelector('.grid-frame');
-    if (!grid) {
-      return;
-    }
-
-    const boom = document.createElement('boom-icon');
-    const size = this._lastCellSize ? Math.floor(this._lastCellSize * 2.5) : 48;
-    boom.setAttribute('size', size);
-    boom.setAttribute('variant', 'burst');
-    boom.setAttribute('autoplay', '');
-
-    // Barve prilagodimo tnt ikoni (oranžno-rdeča)
-    boom.setAttribute('start', '#ff8a00');
-    boom.setAttribute('end', '#ff0033');
-
-    // Izračunamo pozicijo celice glede na grid-frame
-    const cellRect = cell.getBoundingClientRect();
-    const gridRect = grid.getBoundingClientRect();
-
-    const left = cellRect.left - gridRect.left + (cellRect.width / 2);
-    const top = cellRect.top - gridRect.top + cellRect.height; // Dno celice
-
-    // Pozicioniranje
-    boom.style.position = 'absolute';
-    boom.style.left = `${left}px`;
-    boom.style.top = `${top}px`;
-    boom.style.transform = 'translate(-50%, -60%)'; // -60% da je center malo nad dnom celice
-    boom.style.pointerEvents = 'none';
-    boom.style.zIndex = '1000';
-
-    grid.appendChild(boom);
-
-    // Odstranimo po koncu animacije
-    boom.addEventListener('boomend', () => {
-      boom.remove();
-    });
-
-    // Varnostni izklop če boomend ne bi bil sprožen
-    setTimeout(() => {
-      if (boom.parentNode) {
-        boom.remove();
-      }
-    }, 1500);
   }
 
   flash() {
