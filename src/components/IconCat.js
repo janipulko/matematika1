@@ -1,6 +1,4 @@
-
-
-import { AVATARS } from '../utils/avatars.js';
+import {AVATARS} from '../utils/avatars.js';
 
 class IconCat extends HTMLElement {
   static get observedAttributes() {
@@ -9,7 +7,7 @@ class IconCat extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({mode: 'open'});
 
     // Root container
     this._wrapper = document.createElement('div');
@@ -98,7 +96,7 @@ class IconCat extends HTMLElement {
     // SVG element
     this._svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this._svg.classList.add('avatar-svg');
-    
+
     // Odstranimo cheer class po končani animaciji
     this._svg.addEventListener('animationend', (e) => {
       if (e.animationName === 'cat-cheer') {
@@ -119,30 +117,37 @@ class IconCat extends HTMLElement {
   }
 
   _spawnHearts() {
-    if (!this._heartsContainer) return;
+    if (!this._heartsContainer) {
+      return;
+    }
     this._heartsContainer.innerHTML = '';
-    
+
     const offsets = [-20, 0, 20];
     offsets.forEach(xOffset => {
-      const heart = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const heart = document.createElementNS('http://www.w3.org/2000/svg',
+          'svg');
       heart.setAttribute('viewBox', '0 0 24 24');
       heart.setAttribute('width', '12');
       heart.setAttribute('height', '12');
       heart.classList.add('heart');
       heart.style.setProperty('--tx', `${xOffset}px`);
-      
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg',
+          'path');
+      path.setAttribute('d',
+          'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
       heart.appendChild(path);
-      
+
       this._heartsContainer.appendChild(heart);
-      
+
       setTimeout(() => {
         heart.classList.add('heart-animate');
       }, Math.random() * 200);
 
       setTimeout(() => {
-        if (heart.parentNode) heart.remove();
+        if (heart.parentNode) {
+          heart.remove();
+        }
       }, 1200);
     });
   }
@@ -169,8 +174,9 @@ class IconCat extends HTMLElement {
 
   _renderAvatar() {
     const type = this.getAttribute('type') || 'cat';
-    const avatar = AVATARS[type] || AVATARS.cat;
-    
+    const keys = Object.keys(AVATARS);
+    const avatar = AVATARS[keys[Math.floor(Math.random() * keys.length)]];
+
     this._svg.setAttribute('viewBox', avatar.viewBox);
     this._svg.innerHTML = avatar.content;
   }
@@ -188,7 +194,9 @@ class IconCat extends HTMLElement {
 
   _applyLabel() {
     const label = this.getAttribute('label');
-    if (!this._svg) return;
+    if (!this._svg) {
+      return;
+    }
     if (label && label.trim()) {
       this._svg.setAttribute('aria-label', label);
       this._svg.setAttribute('role', 'img');
