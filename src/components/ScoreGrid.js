@@ -5,7 +5,7 @@ import './BoomIcon.js';
 class ScoreGrid extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({mode: 'open'});
     this.value = 0;
     this._ro = null;
   }
@@ -20,11 +20,11 @@ class ScoreGrid extends HTMLElement {
 
     // 🔥 STABILNA RESIZE LOGIKA
     this._ro = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
+      const {width, height} = entry.contentRect;
       const size = Math.floor(Math.min(width, height));
       grid.style.width = `${size}px`;
       grid.style.height = `${size}px`;
-      
+
       // Prilagodi velikost mačke glede na celico
       const padding = size * 0.05; // ocena
       const totalGap = 9 * (size * 0.005); // ocena gapa
@@ -56,7 +56,9 @@ class ScoreGrid extends HTMLElement {
   setValue(v) {
     const n = Math.max(0, Math.min(100, Math.floor(v)));
     this.value = n;
-    if (!this.cells) return;
+    if (!this.cells) {
+      return;
+    }
     this.cells.forEach((cell, i) => {
       cell.classList.toggle('filled', i < n);
     });
@@ -66,7 +68,7 @@ class ScoreGrid extends HTMLElement {
         const targetCell = this.cells[n - 1];
         if (targetCell) {
           this.cat.style.display = 'block';
-          
+
           // Premaknemo mačko v celico
           targetCell.appendChild(this.cat);
           // Ponastavimo margin če ga je kaj preneslo
@@ -79,31 +81,36 @@ class ScoreGrid extends HTMLElement {
   }
 
   setTraps(traps) {
-    if (!this.cells) return;
+    if (!this.cells) {
+      return;
+    }
     this.cells.forEach((cell, i) => {
       const isTrap = traps.includes(i + 1);
-      
+
       // Preverimo, če je bila tu prej past, ki je zdaj ni več
       const hasOldTnt = !!cell.querySelector('icon-tnt');
-      
+
       if (hasOldTnt && !isTrap) {
         // Past je bila odstranjena -> sproži boom
         this.showExplosion(i);
       }
 
       cell.classList.toggle('trap', isTrap);
-      
+
       // Odstranimo obstoječo TNT ikono, če obstaja
       const oldTnt = cell.querySelector('icon-tnt');
-      if (oldTnt) oldTnt.remove();
+      if (oldTnt) {
+        oldTnt.remove();
+      }
 
       if (isTrap) {
         cell.title = `Past na številu ${i + 1}`;
         // Dodamo TNT ikono
         const tnt = document.createElement('icon-tnt');
         // Uporabimo zadnjo znano velikost celice
-        const tntSize = this._lastCellSize ? Math.floor(this._lastCellSize * 0.8) : 20;
-        tnt.setAttribute('size', tntSize); 
+        const tntSize = this._lastCellSize ? Math.floor(
+            this._lastCellSize * 0.8) : 20;
+        tnt.setAttribute('size', tntSize);
         cell.appendChild(tnt);
       } else {
         cell.removeAttribute('title');
@@ -111,24 +118,28 @@ class ScoreGrid extends HTMLElement {
     });
     // Sprožimo resize observer, da se velikosti TNT ikon takoj popravijo
     if (this._ro && this.shadowRoot.querySelector('.grid-wrap')) {
-        // ResizeObserver bo samodejno zaznal če se kaj spremeni, 
-        // ampak ker smo dodali elemente v shadow DOM, je varno poklicati render velikosti
+      // ResizeObserver bo samodejno zaznal če se kaj spremeni,
+      // ampak ker smo dodali elemente v shadow DOM, je varno poklicati render velikosti
     }
   }
 
   showExplosion(index) {
     const cell = this.cells[index];
-    if (!cell) return;
+    if (!cell) {
+      return;
+    }
 
     const grid = this.shadowRoot.querySelector('.grid-frame');
-    if (!grid) return;
+    if (!grid) {
+      return;
+    }
 
     const boom = document.createElement('boom-icon');
     const size = this._lastCellSize ? Math.floor(this._lastCellSize * 2.5) : 48;
     boom.setAttribute('size', size);
     boom.setAttribute('variant', 'burst');
     boom.setAttribute('autoplay', '');
-    
+
     // Barve prilagodimo tnt ikoni (oranžno-rdeča)
     boom.setAttribute('start', '#ff8a00');
     boom.setAttribute('end', '#ff0033');
@@ -136,7 +147,7 @@ class ScoreGrid extends HTMLElement {
     // Izračunamo pozicijo celice glede na grid-frame
     const cellRect = cell.getBoundingClientRect();
     const gridRect = grid.getBoundingClientRect();
-    
+
     const left = cellRect.left - gridRect.left + (cellRect.width / 2);
     const top = cellRect.top - gridRect.top + cellRect.height; // Dno celice
 
@@ -157,13 +168,17 @@ class ScoreGrid extends HTMLElement {
 
     // Varnostni izklop če boomend ne bi bil sprožen
     setTimeout(() => {
-      if (boom.parentNode) boom.remove();
+      if (boom.parentNode) {
+        boom.remove();
+      }
     }, 1500);
   }
 
   flash() {
     const wrap = this.shadowRoot.querySelector('.grid-wrap');
-    if (!wrap) return;
+    if (!wrap) {
+      return;
+    }
     wrap.classList.remove('flash');
     void wrap.offsetWidth;
     wrap.classList.add('flash');
@@ -199,54 +214,46 @@ class ScoreGrid extends HTMLElement {
           place-items: center;
           position: relative;
         }
-        
+
         /* 🔥 KVADRAT Z OKVIRJEM */
         .grid-frame {
-            box-sizing: border-box;
-          
-            background: var(--card);
-            border-radius: var(--radius);
-            border: 2px solid var(--grid-stroke);
-            padding: clamp(4px, 1vh, 12px);
-          
-            display: grid;
-            position: relative;
-            overflow: visible; /* Za srčke */
-          }
+          box-sizing: border-box;
+
+          background: var(--card);
+          border-radius: var(--radius);
+          border: 2px solid var(--grid-stroke);
+          padding: clamp(4px, 1vh, 12px);
+
+          display: grid;
+          position: relative;
+          overflow: visible; /* Za srčke */
+
+
+          background: linear-gradient(var(--bubble) 0 0) left top    / 50% 50% no-repeat,
+          linear-gradient(var(--mul-bg) 0 0) right top    / 50% 50% no-repeat,
+          linear-gradient(var(--bg) 0 0) left bottom / 50% 50% no-repeat,
+          linear-gradient(var(--card) 0 0) right bottom / 50% 50% no-repeat;
+
+        }
+
 
         /* Črte za kvadrante */
         .quadrant-line {
           position: absolute;
           pointer-events: none;
           z-index: 5;
-          }
-
-        .quadrant-line.horizontal {
-          left: 0;
-          right: 0;
-          top: 50%;
-          border-top: 2px dashed var(--grid-stroke);
-          transform: translateY(calc(-50% + 0.5px));
         }
 
-        .quadrant-line.vertical {
-          top: 0;
-          bottom: 0;
-          left: 50%;
-          border-left: 2px dashed var(--grid-stroke);
-          transform: translateX(calc(-50% + 0.5px));
-        }
-          
-          .grid {
-            width: 100%;
-            height: 100%;
-          
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: clamp(1px, 0.4vh, 6px);
-            overflow: visible;
-          }
 
+        .grid {
+          width: 100%;
+          height: 100%;
+
+          display: grid;
+          grid-template-columns: repeat(10, 1fr);
+          gap: clamp(1px, 0.4vh, 6px);
+          overflow: visible;
+        }
 
 
         .cell {
@@ -266,13 +273,13 @@ class ScoreGrid extends HTMLElement {
         .cell.filled {
           background: var(--grid-fill);
           border-color: var(--primary);
-          box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.1);
+          box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
           z-index: 2; /* Višji z-index za trenutno/izbrano celico */
         }
 
         icon-cat {
           transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+          filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
           pointer-events: none;
           position: absolute;
           z-index: 100;
@@ -300,19 +307,23 @@ class ScoreGrid extends HTMLElement {
         }
 
         @keyframes flash {
-          0% { box-shadow: 0 0 0 0 rgba(239,83,80,0.3); }
-          50% { box-shadow: 0 0 0 8px rgba(239,83,80,0); }
-          100% { box-shadow: 0 0 0 0 rgba(239,83,80,0); }
+          0% {
+            box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 0 8px rgba(239, 83, 80, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(239, 83, 80, 0);
+          }
         }
       </style>
 
       <div class="grid-wrap">
         <div class="grid-frame">
-           <div class="quadrant-line horizontal"></div>
-           <div class="quadrant-line vertical"></div>
-           <div class="grid">
-             ${cellsHTML}
-            </div>
+          <div class="grid">
+            ${cellsHTML}
+          </div>
         </div>
         <icon-cat style="display: none;"></icon-cat>
       </div>
