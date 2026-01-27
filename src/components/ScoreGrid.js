@@ -1,12 +1,19 @@
 import './IconCat.js';
 import './IconTrap.js';
+import {AVATARS} from '../utils/avatars.js';
 
 class ScoreGrid extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({mode: 'open'});
     this.value = 0;
+    this._visualValue = 0;
+    this._animationFrame = null;
+    this._timer = null;
     this._ro = null;
+
+    const keys = Object.keys(AVATARS);
+    this.avatar = keys[Math.floor(Math.random() * keys.length)];
   }
 
   connectedCallback() {
@@ -50,11 +57,65 @@ class ScoreGrid extends HTMLElement {
 
   disconnectedCallback() {
     this._ro?.disconnect();
+    if (this._animationFrame) {
+      cancelAnimationFrame(this._animationFrame);
+    }
+    if (this._timer) {
+      clearTimeout(this._timer);
+    }
   }
 
-  setValue(v) {
+  setValue(v, animated = true) {
     const n = Math.max(0, Math.min(100, Math.floor(v)));
     this.value = n;
+    if (animated) {
+      this._startAnimation();
+    } else {
+      this._stopAnimation();
+      this._visualValue = n;
+      this._updateVisuals(n, false);
+    }
+  }
+
+  _stopAnimation() {
+    if (this._animationFrame) {
+      cancelAnimationFrame(this._animationFrame);
+      this._animationFrame = null;
+    }
+    if (this._timer) {
+      clearTimeout(this._timer);
+      this._timer = null;
+    }
+  }
+
+  _startAnimation() {
+    this._stopAnimation();
+
+    const animate = () => {
+      if (this._visualValue === this.value) {
+        this._animationFrame = null;
+        return;
+      }
+
+      const diff = this.value - this._visualValue;
+      const step = diff > 0 ? 1 : -1;
+      
+      this._visualValue += step;
+      this._updateVisuals(this._visualValue);
+
+      // Če gre za večji skok, malo pohitrimo
+      const remaining = Math.abs(this.value - this._visualValue);
+      const delay = remaining > 10 ? 30 : 60;
+
+      this._timer = setTimeout(() => {
+        this._animationFrame = requestAnimationFrame(animate);
+      }, delay); 
+    };
+
+    this._animationFrame = requestAnimationFrame(animate);
+  }
+
+  _updateVisuals(n, triggerTraps = true) {
     if (!this.cells) {
       return;
     }
@@ -67,11 +128,29 @@ class ScoreGrid extends HTMLElement {
         const targetCell = this.cells[n - 1];
         if (targetCell) {
           this.cat.style.display = 'block';
-
-          // Premaknemo mačko v celico
-          targetCell.appendChild(this.cat);
-          // Ponastavimo margin če ga je kaj preneslo
+          if (this.cat.parentElement !== targetCell) {
+            targetCell.appendChild(this.cat);
+          }
           this.cat.style.margin = '0';
+
+          // Če je v celici past, muc poskoči in past se sproži
+          // To preverimo VEDNO ko muc pristane v celici (tudi če je že bil tam, 
+          // npr. ob prvem izrisu, čeprav takrat pasti običajno ni)
+          const trap = targetCell.querySelector('icon-trap');
+          if (triggerTraps && trap && !trap.hasAttribute('data-triggered')) {
+            trap.setAttribute('data-triggered', 'true');
+            this.cat.jump();
+            // Sprožimo eksplozijo čez kratek čas, da se ujema s poskokom
+            setTimeout(() => {
+              trap.trigger();
+              // Obvestimo igro, da je bila past odstranjena
+              this.dispatchEvent(new CustomEvent('trap-triggered', {
+                detail: { index: n },
+                bubbles: true,
+                composed: true
+              }));
+            }, 100);
+          }
         }
       } else {
         this.cat.style.display = 'none';
@@ -85,41 +164,31 @@ class ScoreGrid extends HTMLElement {
     }
     this.cells.forEach((cell, i) => {
       const isTrap = traps.includes(i + 1);
-
-      // Preverimo, če je bila tu prej past, ki je zdaj ni več
       const oldTrap = cell.querySelector('icon-trap');
 
-      if (oldTrap && !isTrap) {
-        // Past je bila odstranjena -> sproži boom
-        oldTrap.trigger();
-      }
-
-      cell.classList.toggle('trap', isTrap);
-
-      // Če pasti ni več, a oldTrap še vedno obstaja (in ni v stanju proženja), ga odstranimo
-      // Opomba: trigger() sam poskrbi za odstranitev po animaciji.
-      if (!isTrap && oldTrap && oldTrap.parentNode) {
-        // Če smo ravno sprožili trigger, ga pustimo, sicer pa odstranimo
-      }
-
+      // Če je past v seznamu, a je ni na mreži, jo dodamo
       if (isTrap && !oldTrap) {
         cell.title = `Past na številu ${i + 1}`;
-        // Dodamo novo past
+        cell.classList.add('trap');
         const trap = document.createElement('icon-trap');
         trap.setAttribute('type', 'random');
         const trapSize = this._lastCellSize ? Math.floor(
             this._lastCellSize * 0.8) : 20;
         trap.setAttribute('size', trapSize);
         cell.appendChild(trap);
-      } else if (!isTrap) {
+      } 
+      // Če pasti ni v seznamu, a je na mreži (in ni v stanju proženja), jo odstranimo takoj
+      // To se zgodi ob resetu igre.
+      else if (!isTrap && oldTrap && !oldTrap.hasAttribute('data-triggered')) {
         cell.removeAttribute('title');
+        cell.classList.remove('trap');
+        oldTrap.remove();
+      }
+      else if (!isTrap) {
+        cell.removeAttribute('title');
+        cell.classList.remove('trap');
       }
     });
-    // Sprožimo resize observer, da se velikosti TNT ikon takoj popravijo
-    if (this._ro && this.shadowRoot.querySelector('.grid-wrap')) {
-      // ResizeObserver bo samodejno zaznal če se kaj spremeni,
-      // ampak ker smo dodali elemente v shadow DOM, je varno poklicati render velikosti
-    }
   }
 
   flash() {
@@ -273,7 +342,7 @@ class ScoreGrid extends HTMLElement {
             ${cellsHTML}
           </div>
         </div>
-        <icon-cat style="display: none;"></icon-cat>
+        <icon-cat type="${this.avatar}" style="display: none;"></icon-cat>
       </div>
     `;
   }

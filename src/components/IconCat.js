@@ -48,6 +48,16 @@ class IconCat extends HTMLElement {
         50% { transform: translateY(-35%) scale(1.1, 0.9); }
       }
 
+      /* Animacija ob stopu na past */
+      .jump {
+        animation: cat-jump 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      @keyframes cat-jump {
+        0%, 100% { transform: translateY(0) rotate(0); }
+        50% { transform: translateY(-50%) rotate(15deg); }
+      }
+
       /* Srca */
       .heart {
         position: absolute;
@@ -97,10 +107,12 @@ class IconCat extends HTMLElement {
     this._svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this._svg.classList.add('avatar-svg');
 
-    // Odstranimo cheer class po končani animaciji
+    // Odstranimo cheer in jump class po končani animaciji
     this._svg.addEventListener('animationend', (e) => {
       if (e.animationName === 'cat-cheer') {
         this._svg.classList.remove('cheer');
+      } else if (e.animationName === 'cat-jump') {
+        this._svg.classList.remove('jump');
       }
     });
 
@@ -114,6 +126,12 @@ class IconCat extends HTMLElement {
     void this._svg.offsetWidth; // trigger reflow
     this._svg.classList.add('cheer');
     this._spawnHearts();
+  }
+
+  jump() {
+    this._svg.classList.remove('jump');
+    void this._svg.offsetWidth; // trigger reflow
+    this._svg.classList.add('jump');
   }
 
   _spawnHearts() {
@@ -174,8 +192,7 @@ class IconCat extends HTMLElement {
 
   _renderAvatar() {
     const type = this.getAttribute('type') || 'cat';
-    const keys = Object.keys(AVATARS);
-    const avatar = AVATARS[keys[Math.floor(Math.random() * keys.length)]];
+    const avatar = AVATARS[type];
 
     this._svg.setAttribute('viewBox', avatar.viewBox);
     this._svg.innerHTML = avatar.content;

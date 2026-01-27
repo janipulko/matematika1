@@ -2,59 +2,42 @@ export const TRAPS = {
   trap: {
     trap: `
 
+
 <defs>
-    <!-- Kovinski gradient (svetlejši zgoraj → temnejši spodaj) -->
-    <linearGradient id="trapGradMetal" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"  stop-color="#E2E5E9"/>
-      <stop offset="100%" stop-color="#8A9097"/>
+    <linearGradient id="trapGradMetal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d9d9d9"/>
+      <stop offset="100%" stop-color="#7a7a7a"/>
     </linearGradient>
   </defs>
 
-  <g fill="url(#trapGradMetal)"
-     stroke="#2f2f2f"
-     stroke-width="0.6"
-     vector-effect="non-scaling-stroke"
-     stroke-linejoin="round"
-     stroke-linecap="round">
+  <g stroke="#000" stroke-width="0.6" vector-effect="non-scaling-stroke" fill="none">
+    
+    <!-- Osnovni temnejši kovinski sloj -->
+    <path fill="url(#trapGradMetal)"
+      d="M4 15
+         L7 10
+         L9 13
+         L12 9
+         L15 13
+         L17 10
+         L20 15
+         Q20 18 12 18
+         Q4 18 4 15Z" />
 
-    <!-- Levi krak (~+20°), večji zobje, težišče spodaj -->
-    <!-- Opomba: brez transformacij; točke so že “zarisane” v 24×24 mreži -->
-    <path d="M11.7 12.6
-             L3.4 13.6
-             L4.1 12.2
-             L4.9 11.1
-             L5.8 12.0
-             L6.7 11.0
-             L7.6 11.9
-             L8.6 11.0
-             L9.6 11.8
-             L10.6 11.0
-             L11.3 11.5
-             L11.6 11.3 Z"/>
-
-    <!-- Desni krak (~−20°), zrcalno -->
-    <path d="M12.3 12.6
-             L20.6 13.6
-             L19.9 12.2
-             L19.1 11.1
-             L18.2 12.0
-             L17.3 11.0
-             L16.4 11.9
-             L15.4 11.0
-             L14.4 11.8
-             L13.4 11.0
-             L12.7 11.5
-             L12.4 11.3 Z"/>
-
-    <!-- Sredinski obroč (rahlo večji, kot sva uvedla) -->
-    <circle cx="12" cy="12.6" r="1.3" fill="none" stroke="#5a5f66"/>
-
-    <!-- Svetlejši sheen po zgornjih robovih zob -->
-    <path d="M4.1 12.2 L4.9 11.1 L5.8 12.0 L6.7 11.0 L7.6 11.9 L8.6 11.0 L9.6 11.8 L10.6 11.0 L11.3 11.5"
-          fill="none" stroke="#ffffff" opacity="0.45"/>
-    <path d="M19.9 12.2 L19.1 11.1 L18.2 12.0 L17.3 11.0 L16.4 11.9 L15.4 11.0 L14.4 11.8 L13.4 11.0 L12.7 11.5"
-          fill="none" stroke="#ffffff" opacity="0.45"/>
+    <!-- Svetlejši highlight kovine -->
+    <path fill="rgba(255,255,255,0.35)"
+      d="M5.2 15.2
+         L7.4 11.5
+         L9 13.8
+         L12 10.2
+         L15 13.8
+         L16.6 11.5
+         L18.8 15.2
+         Q18.8 16.5 12 16.5
+         Q5.2 16.5 5.2 15.2Z" />
+  
   </g>
+
     `,
     trigger: `
      

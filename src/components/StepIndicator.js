@@ -62,8 +62,7 @@ class StepIndicator extends HTMLElement {
 
   getStarsLeft(clicks, minSteps) {
     const starCount = this.stars ? this.stars.length : 3;
-    let left = starCount - Math.max(0, clicks - minSteps);
-    return left < 0 ? 0 : left;
+    return starCount - Math.max(0, clicks - minSteps);
   }
 
   render() {

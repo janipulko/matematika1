@@ -5,9 +5,6 @@ class SettingsModal extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this._soundOn = true;
     this._showActive = true;
-    this._maxSteps = parseInt(localStorage.getItem('math-game-max-steps') || '10', 10);
-    this._maxTraps = parseInt(localStorage.getItem('math-game-max-traps') || '10', 10);
-    this._maxTargets = parseInt(localStorage.getItem('math-game-max-targets') || '3', 10);
     this._gameType = localStorage.getItem('math-game-type') || 'sum';
     this._needsReload = false;
   }
@@ -19,7 +16,14 @@ class SettingsModal extends HTMLElement {
 
   show() {
     const dialog = this.shadowRoot.querySelector('dialog');
-    if (dialog) dialog.showModal();
+    if (dialog) {
+      this._updateConfigLink();
+      dialog.showModal();
+    }
+  }
+
+  _updateConfigLink() {
+    // Optional: could do dynamic stuff here
   }
 
   close() {
@@ -37,21 +41,6 @@ class SettingsModal extends HTMLElement {
     this._updateActiveBtn();
   }
 
-  setMaxSteps(value) {
-    this._maxSteps = value;
-    this._updateMaxStepsDisplay();
-  }
-
-  setMaxTraps(value) {
-    this._maxTraps = value;
-    this._updateMaxTrapsDisplay();
-  }
-
-  setMaxTargets(value) {
-    this._maxTargets = value;
-    this._updateMaxTargetsDisplay();
-  }
-
   _updateMuteBtn() {
     const btn = this.shadowRoot.querySelector('.mute-btn');
     if (btn) {
@@ -66,27 +55,6 @@ class SettingsModal extends HTMLElement {
       btn.textContent = this._showActive ? '🎯 Aktiven gumb: DA' : '🎯 Aktiven gumb: NE';
       btn.classList.toggle('off', !this._showActive);
     }
-  }
-
-  _updateMaxStepsDisplay() {
-    const display = this.shadowRoot.querySelector('.max-steps-val');
-    const slider = this.shadowRoot.querySelector('#max-steps-slider');
-    if (display) display.textContent = this._maxSteps;
-    if (slider) slider.value = this._maxSteps;
-  }
-
-  _updateMaxTrapsDisplay() {
-    const display = this.shadowRoot.querySelector('.max-traps-val');
-    const slider = this.shadowRoot.querySelector('#max-traps-slider');
-    if (display) display.textContent = this._maxTraps;
-    if (slider) slider.value = this._maxTraps;
-  }
-
-  _updateMaxTargetsDisplay() {
-    const display = this.shadowRoot.querySelector('.max-targets-val');
-    const slider = this.shadowRoot.querySelector('#max-targets-slider');
-    if (display) display.textContent = this._maxTargets;
-    if (slider) slider.value = this._maxTargets;
   }
 
   async _hardReset() {
@@ -123,9 +91,6 @@ class SettingsModal extends HTMLElement {
     const activeBtn = this.shadowRoot.querySelector('.active-btn');
     const colorBtn = this.shadowRoot.querySelector('.color-btn');
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
-    const stepsSlider = this.shadowRoot.querySelector('#max-steps-slider');
-    const trapsSlider = this.shadowRoot.querySelector('#max-traps-slider');
-    const targetsSlider = this.shadowRoot.querySelector('#max-targets-slider');
 
     closeBtn.onclick = () => this.close();
     okBtn.onclick = () => this.close();
@@ -144,39 +109,6 @@ class SettingsModal extends HTMLElement {
       if (confirm('Ali želite popolno osvežiti aplikacijo? To bo ponovno naložilo vse datoteke, nastavitve in napredek pa bodo ohranjeni.')) {
         await this._hardReset();
       }
-    };
-
-    stepsSlider.oninput = (e) => {
-      this._maxSteps = parseInt(e.target.value, 10);
-      this._updateMaxStepsDisplay();
-    };
-
-    stepsSlider.onchange = (e) => {
-      const val = parseInt(e.target.value, 10);
-      localStorage.setItem('math-game-max-steps', val);
-      this._needsReload = true;
-    };
-
-    trapsSlider.oninput = (e) => {
-      this._maxTraps = parseInt(e.target.value, 10);
-      this._updateMaxTrapsDisplay();
-    };
-
-    trapsSlider.onchange = (e) => {
-      const val = parseInt(e.target.value, 10);
-      localStorage.setItem('math-game-max-traps', val);
-      this._needsReload = true;
-    };
-
-    targetsSlider.oninput = (e) => {
-      this._maxTargets = parseInt(e.target.value, 10);
-      this._updateMaxTargetsDisplay();
-    };
-
-    targetsSlider.onchange = (e) => {
-      const val = parseInt(e.target.value, 10);
-      localStorage.setItem('math-game-max-targets', val);
-      this._needsReload = true;
     };
 
     colorBtn.onclick = () => {
@@ -215,21 +147,28 @@ class SettingsModal extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
+        :host {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10000;
+          pointer-events: none;
+        }
         dialog {
+          pointer-events: auto;
           border: none;
           padding: 0;
           width: 92vw;
-          height: 92vh;
           max-width: 600px;
-          max-height: 800px;
+          max-height: 92vh;
           margin: auto;
           border-radius: var(--radius);
           background: var(--card);
           color: var(--ink);
           display: flex;
           flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
           overflow: hidden;
           box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
@@ -281,7 +220,7 @@ class SettingsModal extends HTMLElement {
           padding: 20px 0;
           -webkit-overflow-scrolling: touch;
         }
-        .mute-btn, .active-btn, .unlock-link, .color-btn, .refresh-btn {
+        .mute-btn, .active-btn, .unlock-link, .color-btn, .config-btn, .refresh-btn {
           appearance: none;
           border: 3px solid var(--primary);
           background: var(--bubble);
@@ -301,13 +240,18 @@ class SettingsModal extends HTMLElement {
           box-sizing: border-box;
           box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-        .mute-btn:hover, .active-btn:hover, .unlock-link:hover, .color-btn:hover, .refresh-btn:hover {
+        .mute-btn:hover, .active-btn:hover, .unlock-link:hover, .color-btn:hover, .config-btn:hover, .refresh-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 12px rgba(0,0,0,0.1);
           filter: brightness(1.05);
         }
-        .mute-btn:active, .active-btn:active, .unlock-link:active, .color-btn:active, .refresh-btn:active {
+        .mute-btn:active, .active-btn:active, .unlock-link:active, .color-btn:active, .config-btn:active, .refresh-btn:active {
           transform: scale(0.96);
+        }
+        .config-btn {
+          background: var(--accent);
+          border-color: var(--accent-d);
+          color: var(--on-accent);
         }
         .refresh-btn {
           border-color: #ff9800;
@@ -402,29 +346,9 @@ class SettingsModal extends HTMLElement {
           <button class="close-btn">&times;</button>
         </div>
         <div class="content">
+          <a href="./configurator.html" class="config-btn">⚙️ Konfigurator</a>
           <a href="./type.html" class="unlock-link">🎮 Izberi igro</a>
           <a href="./unlock.html" class="unlock-link">🔓 Moja zbirka</a>
-          <div class="slider-container">
-            <div class="slider-label">
-              <span>Maks. korakov:</span>
-              <span class="max-steps-val">${this._maxSteps}</span>
-            </div>
-            <input type="range" id="max-steps-slider" min="2" max="10" value="${this._maxSteps}">
-          </div>
-          <div class="slider-container">
-            <div class="slider-label">
-              <span>Maks. pasti:</span>
-              <span class="max-traps-val">${this._maxTraps}</span>
-            </div>
-            <input type="range" id="max-traps-slider" min="0" max="25" value="${this._maxTraps}">
-          </div>
-          <div class="slider-container">
-            <div class="slider-label">
-              <span>Maks. ciljev:</span>
-              <span class="max-targets-val">${this._maxTargets}</span>
-            </div>
-            <input type="range" id="max-targets-slider" min="1" max="5" value="${this._maxTargets}">
-          </div>
           <button class="mute-btn"></button>
           <button class="active-btn"></button>
           <button class="color-btn">🎨 Barve aplikacije</button>

@@ -15,6 +15,12 @@ class UnlockPage extends HTMLElement {
 
   initUnlocked() {
     const type = localStorage.getItem('math-game-type') || 'sum';
+    
+    if (type === 'custom') {
+      this.currentStep = 0;
+      return;
+    }
+
     const key = `math-game-step-${type}`;
     const stored = localStorage.getItem(key);
     if (stored) {
@@ -28,6 +34,12 @@ class UnlockPage extends HTMLElement {
   async generateGroups() {
     const groupsContainer = this.shadowRoot.querySelector('.groups');
     const type = localStorage.getItem('math-game-type') || 'sum';
+    
+    if (type === 'custom') {
+      this.generateCustomGroups(groupsContainer);
+      return;
+    }
+
     const dataPath = type === 'groups' ? 'data/groups.json' : 'data/sum.json';
     
     try {
@@ -81,14 +93,76 @@ class UnlockPage extends HTMLElement {
     }
 
     this.shadowRoot.addEventListener('unlock-combo', (e) => {
+      // Če dogodek prihaja iz custom gumba, ga ignoriramo tukaj, ker ga obdeluje generateCustomGroups
+      if (e.target.dataset.customParams) return;
+      
       const step = e.target.getAttribute('data-step');
       this.handleUnlock(e.detail.combo, e.detail.cost, e.detail.isUnlocked, parseInt(step, 10));
     });
   }
 
+  generateCustomGroups(container) {
+    const myGames = JSON.parse(localStorage.getItem('math-game-my-games') || '[]');
+    
+    const section = document.createElement('section');
+    section.innerHTML = `
+      <div class="group-header">
+        <h2>Moje shranjene igre</h2>
+        <p>Tukaj so igre, ki si jih sam sestavil v konfiguratorju.</p>
+        <a href="configurator.html" class="config-btn">+ Sestavi novo igro</a>
+      </div>
+      <div class="grid"></div>
+    `;
+    const grid = section.querySelector('.grid');
+
+    if (myGames.length === 0) {
+      grid.innerHTML = `<p style="grid-column: 1/-1; padding: 20px; background: var(--bubble); border-radius: var(--radius); color: var(--muted);">Še nimaš shranjenih iger. Pojdi v konfigurator in si sestavi svojo!</p>`;
+    }
+
+    myGames.forEach((game, index) => {
+      const btn = document.createElement('combo-button');
+      // Za lastne igre predpostavimo, da so vedno odklenjene (isUnlocked = true)
+      let comboStr = typeof game === 'string' ? game : game.num;
+      
+      // Če imamo objekt z dodatnimi parametri, jih dodamo v combo niz za ComboButton
+      if (typeof game === 'object' && game !== null) {
+        if (!comboStr.includes('st') && game.steps) comboStr += `st${game.steps}`;
+        if (!comboStr.includes('tr') && game.traps !== undefined) comboStr += `tr${game.traps}`;
+        if (!comboStr.includes('go') && game.targets) comboStr += `go${game.targets}`;
+      }
+
+      btn.setCombo(comboStr, 0, true);
+      btn.setAttribute('data-step', index);
+      // Dodamo metapodatke za igro
+      btn.dataset.customParams = typeof game === 'string' ? game : JSON.stringify(game);
+      grid.appendChild(btn);
+    });
+
+    container.appendChild(section);
+
+    // Ker dogodek mehurčka (bubbles: true), ga ulovimo na shadowRoot
+    this.shadowRoot.addEventListener('unlock-combo', (e) => {
+      const customParams = e.target.dataset.customParams;
+      if (customParams) {
+        if (customParams.startsWith('{')) {
+          const game = JSON.parse(customParams);
+          // Za custom igre preverimo če imajo vse parametre
+          const steps = game.steps || '10';
+          const traps = game.traps !== undefined ? game.traps : '3';
+          const targets = game.targets || '5';
+          location.href = `play.html?num=${game.num}&steps=${steps}&traps=${traps}&targets=${targets}&step=${e.target.getAttribute('data-step')}`;
+        } else {
+          const finalCombo = this.ensureParams(customParams);
+          location.href = `play.html?num=${finalCombo}&step=${e.target.getAttribute('data-step')}`;
+        }
+      }
+    });
+  }
+
   handleUnlock(combo, cost, isUnlocked, step) {
     if (isUnlocked) {
-      location.href = `play.html?step=${step}&num=${combo}`;
+      const finalCombo = this.ensureParams(combo);
+      location.href = `play.html?step=${step}&num=${finalCombo}`;
       return;
     }
 
@@ -102,8 +176,17 @@ class UnlockPage extends HTMLElement {
       const key = `math-game-step-${type}`;
       localStorage.setItem(key, step);
 
-      location.href = `play.html?step=${step}&num=${combo}`;
+      const finalCombo = this.ensureParams(combo);
+      location.href = `play.html?step=${step}&num=${finalCombo}`;
     }
+  }
+
+  ensureParams(combo) {
+    let finalCombo = combo;
+    if (!finalCombo.includes('st')) finalCombo += 'st4';
+    if (!finalCombo.includes('tr')) finalCombo += 'tr10';
+    if (!finalCombo.includes('go')) finalCombo += 'go5';
+    return finalCombo;
   }
 
   render() {
@@ -175,6 +258,28 @@ class UnlockPage extends HTMLElement {
         }
         .group-header {
           margin-bottom: 20px;
+        }
+        .config-btn {
+          display: inline-flex;
+          align-items: center;
+          margin-top: 15px;
+          padding: 10px 20px;
+          background: var(--accent);
+          color: var(--ink);
+          text-decoration: none;
+          font-weight: bold;
+          border-radius: var(--radius-sm);
+          box-shadow: 0 4px 0px rgba(0,0,0,0.1);
+          transition: all 0.2s;
+        }
+        .config-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 0px rgba(0,0,0,0.1);
+          filter: brightness(1.05);
+        }
+        .config-btn:active {
+          transform: translateY(0);
+          box-shadow: 0 2px 0px rgba(0,0,0,0.1);
         }
         h2 {
           margin: 0;

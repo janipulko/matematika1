@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Konfigurator igre</title>
+  <style>
+    :root {
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --ink: #223;
+      --primary: #26C6DA;
+      --bubble: #e5eef6;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-attachment: fixed;
+    }
+  </style>
+  <script type="module">
+    import { PALETTES } from './utils/palettes.js';
+    import { initDynamicBackground } from './utils/background.js';
+    import './components/CustomNumberInput.js';
+
+    (function() {
+      const paletteId = localStorage.getItem('math-game-palette') || 'fruit';
+      const palette = PALETTES[paletteId] || PALETTES.fruit;
+      const root = document.documentElement;
+      for (const [prop, val] of Object.entries(palette.colors)) {
+        root.style.setProperty(prop, val);
+      }
+      if (palette.type === 'dark') {
+        root.style.setProperty('--pos-bg', '#1B5E20'); root.style.setProperty('--pos-ink', '#C8E6C9');
+        root.style.setProperty('--neg-bg', '#B71C1C'); root.style.setProperty('--neg-ink', '#FFCDD2');
+        root.style.setProperty('--mul-bg', '#01579B'); root.style.setProperty('--mul-ink', '#E1F5FE');
+        root.style.setProperty('--div-bg', '#E65100'); root.style.setProperty('--div-ink', '#FFF3E0');
+        root.style.setProperty('--on-primary', '#000000');
+      } else {
+        root.style.setProperty('--pos-bg', '#C8E6C9'); root.style.setProperty('--pos-ink', '#194d23');
+        root.style.setProperty('--neg-bg', '#FFCDD2'); root.style.setProperty('--neg-ink', '#7a1c1c');
+        root.style.setProperty('--mul-bg', '#E1F5FE'); root.style.setProperty('--mul-ink', '#01579B');
+        root.style.setProperty('--div-bg', '#FFF3E0'); root.style.setProperty('--div-ink', '#E65100');
+        root.style.setProperty('--on-primary', '#FFFFFF');
+      }
+
+      initDynamicBackground();
+    })();
+  </script>
+  <style>
+    :root {
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      --muted: #6b7280;
+      --primary-d: #1aa7b7;
+      --accent: #FFD54F;
+    }
+    body {
+      font-family: system-ui, sans-serif;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: var(--card);
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+    h1 {
+      color: var(--primary-d);
+      margin-top: 0;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+    }
+    .section h2 {
+      font-size: 1.2rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      justify-items: center;
+    }
+    @media (max-width: 480px) {
+      .inputs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .slider-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .slider-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary);
+    }
+    .val-display {
+      font-weight: 900;
+      font-size: 1.2rem;
+      min-width: 30px;
+      color: var(--primary-d);
+    }
+    .play-btn {
+      background: var(--primary);
+      color: var(--on-primary);
+      border: none;
+      padding: 20px 40px;
+      font-size: 1.5rem;
+      font-weight: 900;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .play-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      filter: brightness(1.1);
+    }
+    .play-btn:active {
+      transform: scale(0.98);
+    }
+    .back-link {
+      margin-top: 20px;
+      display: inline-block;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Konfigurator igre</h1>
+    
+    <div class="section">
+      <h2>Izberi svoje številke</h2>
+      <div class="inputs-grid">
+        <custom-number-input id="in1"></custom-number-input>
+        <custom-number-input id="in2"></custom-number-input>
+        <custom-number-input id="in3"></custom-number-input>
+        <custom-number-input id="in4"></custom-number-input>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="slider-group">
+        <label>Maks. število korakov</label>
+        <div class="slider-row">
+          <input type="range" id="steps-slider" min="0" max="10" value="4">
+          <span class="val-display" id="steps-val">4</span>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <label>Maks. število pasti</label>
+        <div class="slider-row">
+          <input type="range" id="traps-slider" min="0" max="30" value="10">
+          <span class="val-display" id="traps-val">10</span>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <label>Maks. število ciljev</label>
+        <div class="slider-row">
+          <input type="range" id="targets-slider" min="1" max="5" value="5">
+          <span class="val-display" id="targets-val">5</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="play-btn" id="play-btn">IGRAJ!</button>
+    <a href="play.html" class="back-link">← Nazaj v igro</a>
+  </div>
+
+  <script>
+    const stepsSlider = document.getElementById('steps-slider');
+    const trapsSlider = document.getElementById('traps-slider');
+    const targetsSlider = document.getElementById('targets-slider');
+
+    stepsSlider.oninput = () => document.getElementById('steps-val').textContent = stepsSlider.value;
+    trapsSlider.oninput = () => document.getElementById('traps-val').textContent = trapsSlider.value;
+    targetsSlider.oninput = () => document.getElementById('targets-val').textContent = targetsSlider.value;
+
+    document.getElementById('play-btn').onclick = () => {
+      const i1 = document.getElementById('in1').value;
+      const i2 = document.getElementById('in2').value;
+      const i3 = document.getElementById('in3').value;
+      const i4 = document.getElementById('in4').value;
+      
+      const basicNums = [i1, i2, i3, i4].filter(v => v !== '').join('');
+      
+      if (!basicNums) {
+        alert('Izberi vsaj eno številko!');
+        return;
+      }
+
+      const steps = parseInt(stepsSlider.value, 10);
+      const traps = parseInt(trapsSlider.value, 10);
+      const targets = parseInt(targetsSlider.value, 10);
+
+      // Sestavi polni niz parametrov
+      // p1m3st5tr10go5
+      const fullCombo = `${basicNums}st${steps}tr${traps}go${targets}`;
+
+      // Shrani v Moje igre (kot niz)
+      const myGames = JSON.parse(localStorage.getItem('math-game-my-games') || '[]');
+      
+      // Preveri če že obstaja
+      const exists = myGames.some(g => (typeof g === 'string' ? g === fullCombo : g.num === basicNums && g.steps === steps && g.traps === traps && g.targets === targets));
+      
+      if (!exists) {
+        myGames.push(fullCombo);
+        localStorage.setItem('math-game-my-games', JSON.stringify(myGames));
+      }
+
+      // Preusmerimo na igro s parametri
+      window.location.href = `play.html?num=${fullCombo}`;
+    };
+  </script>
+</body>
+</html>

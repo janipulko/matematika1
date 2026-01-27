@@ -75,18 +75,30 @@ class ColorSettingsModal extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
+        :host {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10001;
+          pointer-events: none;
+        }
         dialog {
+          pointer-events: auto;
           border: none;
           padding: 0;
-          width: 100vw;
-          height: 100vh;
-          max-width: 100vw;
-          max-height: 100vh;
-          margin: 0;
+          width: 92vw;
+          max-width: 600px;
+          max-height: 92vh;
+          margin: auto;
+          border-radius: var(--radius, 16px);
           background: var(--card);
           color: var(--ink);
           display: flex;
           flex-direction: column;
+          overflow: hidden;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         dialog[open] {
           display: flex;

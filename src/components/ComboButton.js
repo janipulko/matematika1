@@ -13,16 +13,32 @@ class ComboButton extends HTMLElement {
   }
 
   render() {
-    // combo format: "p2p4p10" -> [{op:'p', val:2}, ...]
-    const regex = /([pmts])(\d+)/g;
+    // combo format: "p2p4st5tr10go5" -> [{op:'p', val:2}, ...]
+    // Samo osnovne operacije p, m, t, s
+    const regex = /(st|tr|go|[pmts])(\d+)/g;
     const items = [];
+    const params = { st: null, tr: null, go: null };
     let match;
     while ((match = regex.exec(this.combo)) !== null) {
-      items.push({ op: match[1], val: match[2] });
+      const op = match[1];
+      const val = match[2];
+      if (op === 'st' || op === 'tr' || op === 'go') {
+        params[op] = val;
+        continue;
+      }
+      
+      items.push({ op, val });
     }
 
     const currentStars = parseInt(localStorage.getItem('math-game-total-stars') || '0', 10);
     const canAfford = this.isUnlocked || currentStars >= this.cost;
+
+    // Default values if not in combo string
+    const displaySteps = params.st || '';
+    const displayTraps = params.tr || '';
+    const displayTargets = params.go || '';
+
+    const hasConfig = displaySteps && displayTraps && displayTargets;
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -32,7 +48,7 @@ class ComboButton extends HTMLElement {
         button {
           width: 100%;
           height: 100%;
-          min-height: 110px;
+          min-height: 130px;
           background: var(--card);
           color: var(--ink);
           border: 4px solid var(--bubble);
@@ -44,7 +60,7 @@ class ComboButton extends HTMLElement {
           flex-direction: column;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
+          gap: 8px;
           position: relative;
           overflow: hidden;
           box-sizing: border-box;
@@ -90,6 +106,28 @@ class ComboButton extends HTMLElement {
         .op-t { background: var(--mul-bg); color: var(--mul-ink); }
         .op-s { background: var(--div-bg); color: var(--div-ink); }
 
+        .game-info {
+          display: flex;
+          gap: 10px;
+          font-size: 11px;
+          color: var(--muted);
+          background: var(--bg);
+          padding: 4px 8px;
+          border-radius: 8px;
+          width: 100%;
+          justify-content: center;
+          box-sizing: border-box;
+        }
+        .info-item {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+        }
+        .info-icon {
+          font-style: normal;
+          font-size: 14px;
+        }
+
         .cost {
           font-size: 12px;
           font-weight: bold;
@@ -116,6 +154,28 @@ class ComboButton extends HTMLElement {
             </div>
           `).join('')}
         </div>
+
+        <div class="game-info">
+          ${hasConfig ? `
+          <div class="info-item" title="Koraki">
+            <span class="info-icon">👣</span>
+            <span>${displaySteps}</span>
+          </div>
+          <div class="info-item" title="Pasti">
+            <span class="info-icon">⚠️</span>
+            <span>${displayTraps}</span>
+          </div>
+          <div class="info-item" title="Cilji">
+            <span class="info-icon">🎯</span>
+            <span>${displayTargets}</span>
+          </div>
+          ` : `
+          <div class="info-item" style="color: var(--neg-bg)">
+            <span>⚠️ Nepopopolna konfiguracija</span>
+          </div>
+          `}
+        </div>
+
         ${this.isUnlocked 
           ? `<div class="badge-unlocked">Odklenjeno ✓</div>`
           : `<div class="cost">Cena: <span>${this.cost}</span> ★</div>`

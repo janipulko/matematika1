@@ -193,6 +193,10 @@ class ResultModal extends HTMLElement {
   }
 
   renderFailure(container) {
+    const title = document.createElement('h2');
+    title.textContent = 'Game Over';
+    container.appendChild(title);
+
     const emoji = document.createElement('div');
     emoji.className = 'sad-emoji';
     emoji.textContent = '😢';
@@ -217,6 +221,12 @@ class ResultModal extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         :host {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          z-index: 10002;
           --modal-bg: var(--card);
         }
         dialog {

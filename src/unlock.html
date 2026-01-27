@@ -17,12 +17,12 @@
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--bg), var(--bubble));
       background-attachment: fixed;
     }
   </style>
   <script type="module">
     import { PALETTES } from './utils/palettes.js';
+    import { initDynamicBackground } from './utils/background.js';
     (function() {
       const paletteId = localStorage.getItem('math-game-palette') || 'fruit';
       const palette = PALETTES[paletteId] || PALETTES.fruit;
@@ -59,6 +59,8 @@
       else if (pId === 'stellar') root.style.setProperty('--on-primary', '#000000');
       else if (pId === 'cold_night') root.style.setProperty('--on-primary', '#000000');
       else if (pId === 'starry_dark') root.style.setProperty('--on-primary', '#000000');
+
+      initDynamicBackground();
     })();
   </script>
   <style>
@@ -96,9 +98,6 @@
     body {
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.4), transparent 40%),
-      radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.3), transparent 40%),
-      var(--bg);
       background-attachment: fixed;
       color: var(--ink);
     }

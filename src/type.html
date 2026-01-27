@@ -16,12 +16,12 @@
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--bg), var(--bubble));
       background-attachment: fixed;
     }
   </style>
   <script type="module">
     import { PALETTES } from './utils/palettes.js';
+    import { initDynamicBackground } from './utils/background.js';
     (function() {
       const paletteId = localStorage.getItem('math-game-palette') || 'fruit';
       const palette = PALETTES[paletteId] || PALETTES.fruit;
@@ -34,6 +34,8 @@
       } else {
         root.style.setProperty('--on-primary', '#FFFFFF');
       }
+
+      initDynamicBackground();
     })();
   </script>
   <style>
@@ -122,6 +124,7 @@
   <div class="container">
     <h1>Izberi igro</h1>
     <div class="options">
+      <button class="type-btn" data-type="custom" style="border-color: var(--accent); background: #fffcf0;">⭐ Moje igre</button>
       <button class="type-btn" data-type="sum">➕ Seštevanje</button>
       <button class="type-btn" data-type="groups">🔢 Skupine</button>
     </div>
