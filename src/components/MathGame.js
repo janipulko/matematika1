@@ -5,6 +5,7 @@ import './ControlsBar.js';
 import './SettingsModal.js';
 import './ColorSettingsModal.js';
 import './ResultModal.js';
+import './SessionScore.js';
 import {sound} from '../utils/soundManager.js';
 
 // ============================================
@@ -472,6 +473,7 @@ class MathGame extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({mode: 'open'});
+    this.sessionStars = 0;
   }
 
   async connectedCallback() {
@@ -479,13 +481,24 @@ class MathGame extends HTMLElement {
       return;
     }
 
-    // Pridobimo korak iz URL-ja
+    this._attachEventListeners();
+
     const params = new URLSearchParams(location.search);
+    await this.initGame(params);
+
+    this.initialized = true;
+  }
+
+  async initGame(params) {
+    // Odstranimo morebitni obstoječi result-modal
+    const oldModal = this.shadowRoot.querySelector('result-modal');
+    if (oldModal) {
+      oldModal.remove();
+    }
+
+    // Pridobimo korak iz URL-ja
     const stepInUrl = params.get('step');
     if (stepInUrl !== null) {
-      // Če je v URL-ju, ga shranimo kot trenutni (če je večji od shranjenega)
-      // Ali pa samo sledimo navodilu, da je to trenutna igra.
-      // Za zdaj samo nastavimo lastnost.
       this.currentStepIndex = parseInt(stepInUrl, 10);
     }
 
@@ -494,7 +507,8 @@ class MathGame extends HTMLElement {
       return;
     }
 
-    if (parsed.maxStepsOverride === null || parsed.maxTrapsOverride === null || parsed.maxTargetsOverride === null) {
+    if (parsed.maxStepsOverride === null || parsed.maxTrapsOverride === null
+        || parsed.maxTargetsOverride === null) {
       this.error = 'Igra ni ustrezno konfigurirana. Manjkajo parametri za korake, pasti ali cilje.';
       this.render();
       return;
@@ -509,7 +523,8 @@ class MathGame extends HTMLElement {
     const minK = Math.max(1, Math.ceil(maxK / 2));
 
     this.startSum = pickValidStartSum(this.nums, minK, maxK);
-    this.targets = pickTargetSequence(this.nums, minK, maxK, this.startSum, this.maxTargetsOverride);
+    this.targets = pickTargetSequence(this.nums, minK, maxK, this.startSum,
+        this.maxTargetsOverride);
 
     if (!this.targets) {
       const urlHint = this.nums.map(n => n.op + n.val).join('');
@@ -517,10 +532,12 @@ class MathGame extends HTMLElement {
       return;
     }
 
-    const maxTraps = this.maxTrapsOverride !== null ? this.maxTrapsOverride : parseInt(
-        localStorage.getItem('math-game-max-traps') || '10', 10);
+    const maxTraps = this.maxTrapsOverride !== null ? this.maxTrapsOverride
+        : parseInt(
+            localStorage.getItem('math-game-max-traps') || '10', 10);
 
-    this.traps = pickTraps(this.nums, this.targets, minK, maxK, this.startSum, maxTraps);
+    this.traps = pickTraps(this.nums, this.targets, minK, maxK, this.startSum,
+        maxTraps);
     this.initialTraps = [...this.traps]; // Shranimo za reset
     this.achievedTargets = [];
     this.minSteps = calculateOptimalPath(this.targets, this.nums, this.traps,
@@ -554,8 +571,6 @@ class MathGame extends HTMLElement {
     }
 
     this.render();
-    this._attachEventListeners();
-    this.initialized = true;
   }
 
   _attachEventListeners() {
@@ -563,6 +578,15 @@ class MathGame extends HTMLElement {
       // Ob spremembi igre preprosto osvežimo stran brez parametrov, 
       // da ensureNumsInURL prebere nov tip in pravilni step
       location.href = location.pathname;
+    });
+
+    this.addEventListener('stars-earned', (e) => {
+      this.sessionStars += e.detail.stars;
+      const scoreEl = document.querySelector('session-score');
+      if (scoreEl) {
+        scoreEl.setAttribute('value', this.sessionStars);
+        scoreEl.bump();
+      }
     });
 
     this.addEventListener('settings-changed', () => {
@@ -592,19 +616,41 @@ class MathGame extends HTMLElement {
     modal.show();
   });
 
-  this.shadowRoot.addEventListener('next-level', () => {
-    const params = new URLSearchParams(location.search);
-    const stepInUrl = params.get('step');
-    if (stepInUrl !== null) {
-      const nextStep = parseInt(stepInUrl, 10) + 1;
-      params.set('step', nextStep);
-      // Odstranimo num, da se bo v ensureNumsInURL naložil nov combo za ta step
-      params.delete('num');
-      location.assign(`${location.pathname}?${params.toString()}`);
-      return;
-    }
-    location.reload();
-  });
+    this.shadowRoot.addEventListener('next-level', (e) => {
+      const params = new URLSearchParams(location.search);
+      const stepInUrl = params.get('step');
+
+      // Če nam dogodek poda konkretne parametre, jih uporabimo
+      if (e.detail && e.detail.step !== undefined) {
+        params.set('step', e.detail.step);
+        if (e.detail.num) {
+          params.set('num', e.detail.num);
+        } else {
+          params.delete('num');
+        }
+        const newUrl = `${location.pathname}?${params.toString()}`;
+        history.pushState({}, '', newUrl);
+        this.initGame(params);
+        return;
+      }
+
+      if (stepInUrl !== null) {
+        const nextStep = parseInt(stepInUrl, 10) + 1;
+        params.set('step', nextStep);
+        // Odstranimo num, da se bo v ensureNumsInURL naložil nov combo za ta step
+        params.delete('num');
+
+        const newUrl = `${location.pathname}?${params.toString()}`;
+        history.pushState({}, '', newUrl);
+        this.initGame(params);
+        return;
+      }
+      location.reload();
+    });
+    this.shadowRoot.addEventListener('replay-game', () => {
+      const params = new URLSearchParams(location.search);
+      this.initGame(params);
+    });
     this.shadowRoot.addEventListener('reset-game', () => {
       this.onReset();
     });
@@ -744,12 +790,6 @@ class MathGame extends HTMLElement {
         modal.setSound(this.sound.enabled);
         modal.setActiveIndicator(this.showActiveIndicator);
         this.shadowRoot.appendChild(modal);
-        modal.setMaxSteps(
-            parseInt(localStorage.getItem('math-game-max-steps') || '10', 10));
-        modal.setMaxTraps(
-            parseInt(localStorage.getItem('math-game-max-traps') || '10', 10));
-        modal.setMaxTargets(
-            parseInt(localStorage.getItem('math-game-max-targets') || '3', 10));
         modal.show();
       }
     };
@@ -794,7 +834,7 @@ class MathGame extends HTMLElement {
       
       const resultModal = document.createElement('result-modal');
       this.shadowRoot.appendChild(resultModal);
-      resultModal.show(false);
+      resultModal.show(false, 0, 3, this.sessionStars);
       return;
     }
 
@@ -807,7 +847,7 @@ class MathGame extends HTMLElement {
       this.sound.nope();
       const resultModal = document.createElement('result-modal');
       this.shadowRoot.appendChild(resultModal);
-      resultModal.show(false);
+      resultModal.show(false, 0, 3, this.sessionStars);
       return;
     }
 
@@ -818,6 +858,12 @@ class MathGame extends HTMLElement {
   }
 
   onReset() {
+    this.sessionStars = 0;
+    const scoreEl = document.querySelector('session-score');
+    if (scoreEl) {
+      scoreEl.setAttribute('value', 0);
+    }
+
     this.sum = this.startSum || 1;
     this.clicks = 0;
     this.achievedTargets = [];
@@ -854,7 +900,7 @@ class MathGame extends HTMLElement {
         this.shadowRoot.appendChild(resultModal);
 
         this.sound.victory(stars);
-        await resultModal.show(true, stars, maxStars);
+        await resultModal.show(true, stars, maxStars, this.sessionStars);
       } else {
         // Le vmesni cilj
         if (this.gridEl && this.gridEl.cat) {
@@ -873,7 +919,7 @@ class MathGame extends HTMLElement {
       // Game Over ob napačni potrditvi
       const resultModal = document.createElement('result-modal');
       this.shadowRoot.appendChild(resultModal);
-      resultModal.show(false);
+      resultModal.show(false, 0, 3, this.sessionStars);
       return;
     }
   }

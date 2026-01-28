@@ -1,4 +1,6 @@
 
+import './BaseModal.js';
+
 class SettingsModal extends HTMLElement {
   constructor() {
     super();
@@ -11,24 +13,19 @@ class SettingsModal extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    this._attachEventListeners();
   }
 
   show() {
-    const dialog = this.shadowRoot.querySelector('dialog');
-    if (dialog) {
-      this._updateConfigLink();
-      dialog.showModal();
+    this._attachEventListeners();
+    const modal = this.shadowRoot.querySelector('base-modal');
+    if (modal) {
+      modal.show();
     }
   }
 
-  _updateConfigLink() {
-    // Optional: could do dynamic stuff here
-  }
-
   close() {
-    const dialog = this.shadowRoot.querySelector('dialog');
-    if (dialog) dialog.close();
+    const modal = this.shadowRoot.querySelector('base-modal');
+    if (modal) modal.close();
   }
 
   setSound(enabled) {
@@ -84,18 +81,16 @@ class SettingsModal extends HTMLElement {
   }
 
   _attachEventListeners() {
-    const dialog = this.shadowRoot.querySelector('dialog');
-    const closeBtn = this.shadowRoot.querySelector('.close-btn');
+    const modal = this.shadowRoot.querySelector('base-modal');
     const okBtn = this.shadowRoot.querySelector('.btn-ok');
     const muteBtn = this.shadowRoot.querySelector('.mute-btn');
     const activeBtn = this.shadowRoot.querySelector('.active-btn');
     const colorBtn = this.shadowRoot.querySelector('.color-btn');
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
 
-    closeBtn.onclick = () => this.close();
     okBtn.onclick = () => this.close();
     
-    dialog.onclose = () => {
+    modal.addEventListener('modal-closed', () => {
       if (this._needsReload) {
         this.dispatchEvent(new CustomEvent('settings-changed', {
           bubbles: true,
@@ -103,7 +98,7 @@ class SettingsModal extends HTMLElement {
         }));
       }
       this.remove();
-    };
+    });
 
     refreshBtn.onclick = async () => {
       if (confirm('Ali želite popolno osvežiti aplikacijo? To bo ponovno naložilo vse datoteke, nastavitve in napredek pa bodo ohranjeni.')) {
@@ -138,87 +133,17 @@ class SettingsModal extends HTMLElement {
         detail: { enabled: this._showActive } 
       }));
     };
-
-    dialog.onclick = (e) => {
-      if (e.target === dialog) this.close();
-    };
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        :host {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 10000;
-          pointer-events: none;
-        }
-        dialog {
-          pointer-events: auto;
-          border: none;
-          padding: 0;
-          width: 92vw;
-          max-width: 600px;
-          max-height: 92vh;
-          margin: auto;
-          border-radius: var(--radius);
-          background: var(--card);
-          color: var(--ink);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        dialog[open] {
-          display: flex;
-        }
-        dialog::backdrop {
-          background: rgba(0, 0, 0, 0.4);
-          backdrop-filter: blur(4px);
-        }
-        .header {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 20px 0;
-          position: relative;
-          width: 100%;
-          background: var(--card);
-          z-index: 10;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-          flex-shrink: 0;
-        }
-        h2 {
-          margin: 0;
-          font-size: clamp(24px, 5vw, 40px);
-          color: var(--primary-d);
-        }
-        .close-btn {
-          position: absolute;
-          right: 20px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: none;
-          border: none;
-          font-size: 2.5rem;
-          cursor: pointer;
-          color: var(--muted);
-          padding: 0;
-          line-height: 1;
-        }
-        .content {
+        .inner-content {
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 20px;
           width: 100%;
-          flex: 1;
-          overflow-y: auto;
-          padding: 20px 0;
-          -webkit-overflow-scrolling: touch;
         }
         .mute-btn, .active-btn, .unlock-link, .color-btn, .config-btn, .refresh-btn {
           appearance: none;
@@ -232,7 +157,7 @@ class SettingsModal extends HTMLElement {
           transition: all 0.2s;
           font-size: clamp(18px, 4vw, 24px);
           width: 320px;
-          max-width: 80%;
+          max-width: 90%;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
@@ -262,68 +187,10 @@ class SettingsModal extends HTMLElement {
           color: var(--muted);
           opacity: 0.8;
         }
-        .slider-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-          width: 320px;
-          max-width: 80%;
-          background: var(--bubble);
-          padding: 20px;
-          border-radius: var(--radius);
-          border: 3px solid var(--primary);
-          box-sizing: border-box;
-        }
-        .slider-label {
-          font-weight: 900;
-          color: var(--primary-d);
-          font-size: 1.2rem;
-          display: flex;
-          justify-content: space-between;
-          width: 100%;
-        }
-        select {
-          width: 100%;
-          padding: 10px;
-          border-radius: var(--radius);
-          border: 2px solid var(--primary);
-          background: white;
-          font-size: 1.1rem;
-          color: var(--primary-d);
-          font-family: inherit;
-          font-weight: bold;
-          cursor: pointer;
-        }
-        input[type=range] {
-          width: 100%;
-          appearance: none;
-          background: transparent;
-          cursor: pointer;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-          background: var(--primary-l, #eee);
-          height: 12px;
-          border-radius: 6px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-          appearance: none;
-          height: 28px;
-          width: 28px;
-          background: var(--primary);
-          border-radius: 50%;
-          margin-top: -8px;
-          border: 3px solid white;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
         .footer {
-          padding: 20px 0;
+          padding: 20px 0 0 0;
           text-align: center;
           width: 100%;
-          background: var(--card);
-          z-index: 10;
-          box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-          flex-shrink: 0;
         }
         .btn-ok {
           background: var(--primary);
@@ -340,12 +207,8 @@ class SettingsModal extends HTMLElement {
           transform: scale(0.95);
         }
       </style>
-      <dialog>
-        <div class="header">
-          <h2>Nastavitve</h2>
-          <button class="close-btn">&times;</button>
-        </div>
-        <div class="content">
+      <base-modal modal-title="Nastavitve">
+        <div class="inner-content">
           <a href="./configurator.html" class="config-btn">⚙️ Konfigurator</a>
           <a href="./type.html" class="unlock-link">🎮 Izberi igro</a>
           <a href="./unlock.html" class="unlock-link">🔓 Moja zbirka</a>
@@ -357,7 +220,7 @@ class SettingsModal extends HTMLElement {
         <div class="footer">
           <button class="btn-ok">V redu</button>
         </div>
-      </dialog>
+      </base-modal>
     `;
 
     this._updateMuteBtn();

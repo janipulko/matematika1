@@ -1,5 +1,6 @@
 
 import { PALETTES, applyPalette } from '../utils/palettes.js';
+import './BaseModal.js';
 
 class ColorSettingsModal extends HTMLElement {
   constructor() {
@@ -9,35 +10,24 @@ class ColorSettingsModal extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    this._attachEventListeners();
   }
 
   show() {
-    const dialog = this.shadowRoot.querySelector('dialog');
-    if (dialog) dialog.showModal();
+    this._attachEventListeners();
+    const modal = this.shadowRoot.querySelector('base-modal');
+    if (modal) modal.show();
   }
 
   close() {
-    const dialog = this.shadowRoot.querySelector('dialog');
-    if (dialog) dialog.close();
+    const modal = this.shadowRoot.querySelector('base-modal');
+    if (modal) modal.close();
   }
 
   _attachEventListeners() {
-    const dialog = this.shadowRoot.querySelector('dialog');
-    const closeBtn = this.shadowRoot.querySelector('.close-btn');
     const okBtn = this.shadowRoot.querySelector('.btn-ok');
 
-    closeBtn.onclick = () => this.close();
     okBtn.onclick = () => this.close();
     
-    dialog.onclose = () => {
-      this.remove();
-    };
-
-    dialog.onclick = (e) => {
-      if (e.target === dialog) this.close();
-    };
-
     // Poslušalci za gumbe palet
     this.shadowRoot.querySelectorAll('.palette-btn').forEach(btn => {
       btn.onclick = () => {
@@ -75,71 +65,7 @@ class ColorSettingsModal extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
-        :host {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 10001;
-          pointer-events: none;
-        }
-        dialog {
-          pointer-events: auto;
-          border: none;
-          padding: 0;
-          width: 92vw;
-          max-width: 600px;
-          max-height: 92vh;
-          margin: auto;
-          border-radius: var(--radius, 16px);
-          background: var(--card);
-          color: var(--ink);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        dialog[open] {
-          display: flex;
-        }
-        dialog::backdrop {
-          background: rgba(0, 0, 0, 0.4);
-          backdrop-filter: blur(4px);
-        }
-        .header {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 20px;
-          position: sticky;
-          top: 0;
-          background: var(--card);
-          z-index: 10;
-          border-bottom: 1px solid var(--bubble);
-        }
-        h2 {
-          margin: 0;
-          font-size: clamp(24px, 5vw, 32px);
-          color: var(--primary-d);
-        }
-        .close-btn {
-          position: absolute;
-          right: 20px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: none;
-          border: none;
-          font-size: 2.5rem;
-          cursor: pointer;
-          color: var(--muted);
-          padding: 0;
-          line-height: 1;
-        }
-        .content {
-          flex: 1;
-          overflow-y: auto;
-          padding: 20px;
+        .inner-content {
           display: flex;
           flex-direction: column;
           gap: 30px;
@@ -204,10 +130,8 @@ class ColorSettingsModal extends HTMLElement {
           color: var(--ink);
         }
         .footer {
-          padding: 20px;
+          padding: 20px 0 0 0;
           text-align: center;
-          background: var(--card);
-          border-top: 1px solid var(--bubble);
         }
         .btn-ok {
           background: var(--primary);
@@ -224,12 +148,8 @@ class ColorSettingsModal extends HTMLElement {
           transform: scale(0.95);
         }
       </style>
-      <dialog>
-        <div class="header">
-          <h2>Izbira barv</h2>
-          <button class="close-btn">&times;</button>
-        </div>
-        <div class="content">
+      <base-modal modal-title="Izbira barv">
+        <div class="inner-content">
           <div style="width: 100%; max-width: 800px;">
             <div class="section-title">Svetle barve ☀️</div>
             <div class="palette-grid">
@@ -247,7 +167,7 @@ class ColorSettingsModal extends HTMLElement {
         <div class="footer">
           <button class="btn-ok">V redu</button>
         </div>
-      </dialog>
+      </base-modal>
     `;
   }
 }

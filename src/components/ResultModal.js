@@ -1,3 +1,5 @@
+import './BaseModal.js';
+
 class ResultModal extends HTMLElement {
   constructor() {
     super();
@@ -6,10 +8,7 @@ class ResultModal extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    this.dialog = this.shadowRoot.querySelector('dialog');
-    this.dialog.onclose = () => {
-      this.remove();
-    };
+    this.modal = this.shadowRoot.querySelector('base-modal');
 
     this._canClose = false;
     // Preprečimo takojšnje zapiranje: modal se lahko zapre šele, ko uporabnik 
@@ -18,6 +17,10 @@ class ResultModal extends HTMLElement {
     this._handleKeyUp = this._handleKeyUp.bind(this);
     window.addEventListener('keydown', this._handleKeyDown, true);
     window.addEventListener('keyup', this._handleKeyUp, true);
+
+    this.modal.addEventListener('modal-closed', () => {
+      this.remove();
+    });
   }
 
   disconnectedCallback() {
@@ -44,8 +47,8 @@ class ResultModal extends HTMLElement {
     }
   }
 
-  async show(isSuccess, stars = 0, maxStars = 3) {
-    const content = this.shadowRoot.querySelector('.content');
+  async show(isSuccess, stars = 0, maxStars = 3, sessionStars = 0) {
+    const content = this.shadowRoot.querySelector('.inner-content');
     content.innerHTML = '';
 
     if (isSuccess) {
@@ -55,17 +58,24 @@ class ResultModal extends HTMLElement {
       const newTotal = currentTotal + stars;
       localStorage.setItem('math-game-total-stars', newTotal);
 
+      // Obvestimo okolico o novih zvezdicah
+      this.dispatchEvent(new CustomEvent('stars-earned', {
+        detail: { stars },
+        bubbles: true,
+        composed: true
+      }));
+
       await this.renderSuccess(content, stars, newTotal, maxStars);
     } else {
-      this.renderFailure(content);
+      this.renderFailure(content, sessionStars);
     }
 
-    this.dialog.showModal();
+    this.modal.show();
   }
 
   close() {
-    if (this.dialog) {
-      this.dialog.close();
+    if (this.modal) {
+      this.modal.close();
     }
   }
 
@@ -109,7 +119,12 @@ class ResultModal extends HTMLElement {
     if (isAlreadyUnlocked) {
       btn.innerHTML = '<span>Naslednji korak ➔</span>';
       btn.onclick = () => {
-        location.href = `play.html?step=${nextStep}&num=${nextCombo}`;
+        this.close();
+        this.dispatchEvent(new CustomEvent('next-level', {
+          bubbles: true,
+          composed: true,
+          detail: {step: nextStep, num: nextCombo}
+        }));
       };
     } else {
       const cost = 10;
@@ -124,7 +139,12 @@ class ResultModal extends HTMLElement {
         const newTotal = totalStars - cost;
         localStorage.setItem('math-game-total-stars', newTotal);
         localStorage.setItem(stepKey, nextStep);
-        location.href = `play.html?step=${nextStep}&num=${nextCombo}`;
+        this.close();
+        this.dispatchEvent(new CustomEvent('next-level', {
+          bubbles: true,
+          composed: true,
+          detail: {step: nextStep, num: nextCombo}
+        }));
       };
     }
 
@@ -172,7 +192,10 @@ class ResultModal extends HTMLElement {
     btn.textContent = 'Naprej';
     btn.onclick = () => {
       this.close();
-      location.reload();
+      this.dispatchEvent(new CustomEvent('replay-game', {
+        bubbles: true,
+        composed: true
+      }));
     };
     buttonGroup.appendChild(btn);
     container.appendChild(buttonGroup);
@@ -192,7 +215,7 @@ class ResultModal extends HTMLElement {
     }, 100);
   }
 
-  renderFailure(container) {
+  renderFailure(container, sessionStars = 0) {
     const title = document.createElement('h2');
     title.textContent = 'Game Over';
     container.appendChild(title);
@@ -202,66 +225,54 @@ class ResultModal extends HTMLElement {
     emoji.textContent = '😢';
     container.appendChild(emoji);
 
+    if (sessionStars > 0) {
+      const scoreInfo = document.createElement('div');
+      scoreInfo.className = 'total-stars';
+      scoreInfo.innerHTML = `V tej seji: ${sessionStars} 🌟`;
+      container.appendChild(scoreInfo);
+    }
+
     const buttonGroup = document.createElement('div');
     buttonGroup.className = 'button-group';
 
-    const btn = document.createElement('button');
-    btn.className = 'btn-retry';
-    btn.textContent = 'Poskusi ponovno';
-    btn.onclick = () => {
+    const btnRetry = document.createElement('button');
+    btnRetry.className = 'btn-retry';
+    btnRetry.textContent = 'Poskusi ponovno';
+    btnRetry.onclick = () => {
       this.close();
       this.dispatchEvent(
           new CustomEvent('reset-game', {bubbles: true, composed: true}));
     };
-    buttonGroup.appendChild(btn);
+    buttonGroup.appendChild(btnRetry);
+
+    const btnReplay = document.createElement('button');
+    btnReplay.className = 'btn-next';
+    btnReplay.textContent = 'Nova igra';
+    btnReplay.onclick = () => {
+      this.close();
+      this.dispatchEvent(new CustomEvent('replay-game', {
+        bubbles: true,
+        composed: true
+      }));
+    };
+    buttonGroup.appendChild(btnReplay);
+
     container.appendChild(buttonGroup);
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        :host {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          z-index: 10002;
-          --modal-bg: var(--card);
-        }
-        dialog {
-          border: none;
-          padding: 0;
-          width: 100vw;
-          height: 100vh;
-          max-width: 100vw;
-          max-height: 100vh;
-          margin: 0;
-          background: radial-gradient(circle at 50% 20%, var(--card), var(--bubble));
-          box-sizing: border-box;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        }
-        dialog[open] {
-          display: flex;
-        }
-        dialog::backdrop {
-          background: rgba(0, 0, 0, 0.4);
-          backdrop-filter: blur(4px);
-        }
-        
-        .content {
+        .inner-content {
           flex: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: space-evenly;
-          padding: 40px 20px;
+          padding: 20px 0;
           box-sizing: border-box;
           width: 100%;
-          height: 100%;
-          overflow: hidden;
+          min-height: 80vh;
         }
         h2 {
           margin: 0;
@@ -402,10 +413,13 @@ class ResultModal extends HTMLElement {
           filter: brightness(1.1);
           transform: translateY(-2px);
         }
+        base-modal {
+          --radius: 0px; /* Full screen look */
+        }
       </style>
-      <dialog>
-        <div class="content"></div>
-      </dialog>
+      <base-modal hide-close>
+        <div class="inner-content"></div>
+      </base-modal>
     `;
   }
 }

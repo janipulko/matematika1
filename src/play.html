@@ -160,6 +160,13 @@
     .reset-trigger {
       left: 15px;
     }
+    session-score {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
     .settings-trigger:hover, .reset-trigger:hover {
       background: var(--primary);
       color: var(--on-primary, white);
@@ -180,6 +187,7 @@
       }
       .settings-trigger { right: 10px; }
       .reset-trigger { left: 10px; }
+      session-score { top: 5px; }
     }
 
 
@@ -187,6 +195,7 @@
   <script type="module" src="components/MathGame.js"></script>
 </head>
 <body>
+<session-score></session-score>
 <button class="reset-trigger" title="Ponastavi" onclick="document.querySelector('math-game').onReset()">↺</button>
 <button class="settings-trigger" title="Nastavitve" onclick="document.querySelector('math-game').settingsTrigger.click()">⚙️</button>
 <div class="app">
