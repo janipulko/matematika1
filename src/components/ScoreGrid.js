@@ -120,7 +120,11 @@ class ScoreGrid extends HTMLElement {
       return;
     }
     this.cells.forEach((cell, i) => {
-      cell.classList.toggle('filled', i < n);
+      const isFilled = i < n;
+      const isWaiting = !isFilled && i < this.value;
+      
+      cell.classList.toggle('filled', isFilled);
+      cell.classList.toggle('waiting', isWaiting);
     });
 
     if (this.cat) {
@@ -292,6 +296,12 @@ class ScoreGrid extends HTMLElement {
           border-color: var(--primary);
           box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
           z-index: 2; /* Višji z-index za trenutno/izbrano celico */
+        }
+
+        .cell.waiting {
+          background: color-mix(in oklab, var(--grid-fill), transparent 70%);
+          border-color: color-mix(in oklab, var(--primary), transparent 50%);
+          z-index: 1;
         }
 
         icon-cat {

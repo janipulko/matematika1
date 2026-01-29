@@ -52,20 +52,25 @@ class ResultModal extends HTMLElement {
     content.innerHTML = '';
 
     if (isSuccess) {
-      // Posodobi skupno število zvezdic v localStorage
-      const currentTotal = parseInt(
-          localStorage.getItem('math-game-total-stars') || '0', 10);
-      const newTotal = currentTotal + stars;
-      localStorage.setItem('math-game-total-stars', newTotal);
+      // Zahtevamo dodajanje zvezdic preko providerja
+      this.dispatchEvent(new CustomEvent('stars-request-add', {
+        detail: { amount: stars },
+        bubbles: true,
+        composed: true
+      }));
 
-      // Obvestimo okolico o novih zvezdicah
+      // Obvestimo okolico o novih zvezdicah za vizualne efekte
       this.dispatchEvent(new CustomEvent('stars-earned', {
         detail: { stars },
         bubbles: true,
         composed: true
       }));
 
-      await this.renderSuccess(content, stars, newTotal, maxStars);
+      // Počakamo trenutek, da se storage posodobi pred renderiranjem
+      setTimeout(async () => {
+        const totalStars = parseInt(localStorage.getItem('math-game-total-stars') || '0', 10);
+        await this.renderSuccess(content, stars, totalStars, maxStars);
+      }, 0);
     } else {
       this.renderFailure(content, sessionStars);
     }
@@ -77,78 +82,6 @@ class ResultModal extends HTMLElement {
     if (this.modal) {
       this.modal.close();
     }
-  }
-
-  async renderNextStepButton(container, totalStars) {
-    const params = new URLSearchParams(location.search);
-    const type = localStorage.getItem('math-game-type') || 'sum';
-    const dataPath = type === 'groups' ? 'data/groups.json' : 'data/sum.json';
-    const stepKey = `math-game-step-${type}`;
-
-    const currentStep = parseInt(
-        params.get('step') || localStorage.getItem(stepKey) || '0', 10);
-    const nextStep = currentStep + 1;
-
-    // Pridobimo podatke o naslednjem koraku
-    let nextCombo = null;
-    try {
-      const response = await fetch(dataPath);
-      const groups = await response.json();
-      let count = 0;
-      for (const group of groups) {
-        if (nextStep < count + group.combos.length) {
-          nextCombo = group.combos[nextStep - count];
-          break;
-        }
-        count += group.combos.length;
-      }
-    } catch (e) {
-      console.error("Napaka pri nalaganju za naslednji korak:", e);
-    }
-
-    if (!nextCombo) {
-      return;
-    } // Ni več korakov
-
-    const btn = document.createElement('button');
-    btn.className = 'btn-reward'; // Uporabimo isti stil kot prej
-
-    const maxUnlockedStep = parseInt(localStorage.getItem(stepKey) || '0', 10);
-    const isAlreadyUnlocked = nextStep <= maxUnlockedStep;
-
-    if (isAlreadyUnlocked) {
-      btn.innerHTML = '<span>Naslednji korak ➔</span>';
-      btn.onclick = () => {
-        this.close();
-        this.dispatchEvent(new CustomEvent('next-level', {
-          bubbles: true,
-          composed: true,
-          detail: {step: nextStep, num: nextCombo}
-        }));
-      };
-    } else {
-      const cost = 10;
-      btn.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; line-height: 1.2;">
-          <span>Odkleni korak ${nextStep + 1}</span>
-          <span style="font-size: 0.8em; opacity: 0.9;">(${cost} ★)</span>
-        </div>
-      `;
-      btn.disabled = totalStars < cost;
-      btn.onclick = () => {
-        const newTotal = totalStars - cost;
-        localStorage.setItem('math-game-total-stars', newTotal);
-        localStorage.setItem(stepKey, nextStep);
-        this.close();
-        this.dispatchEvent(new CustomEvent('next-level', {
-          bubbles: true,
-          composed: true,
-          detail: {step: nextStep, num: nextCombo}
-        }));
-      };
-    }
-
-    container.appendChild(btn);
   }
 
   async renderSuccess(container, starsCount, totalStars, maxStars = 3) {
@@ -183,9 +116,6 @@ class ResultModal extends HTMLElement {
 
     const buttonGroup = document.createElement('div');
     buttonGroup.className = 'button-group';
-
-    // Gumb za naslednji korak
-    await this.renderNextStepButton(buttonGroup, totalStars);
 
     const btn = document.createElement('button');
     btn.className = 'btn-next';

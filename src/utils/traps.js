@@ -3,176 +3,222 @@ export const TRAPS = {
     trap: `
 
 
-<defs>
-    <linearGradient id="trapGradMetal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#d9d9d9"/>
-      <stop offset="100%" stop-color="#7a7a7a"/>
+ <defs>
+    <!-- Osnovni vertikalni gradient (svetlejši zgoraj, temnejši spodaj) -->
+    <linearGradient id="trapGradJaw_static_v2" x1="0" y1="10" x2="0" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ECEFF1"/>
+      <stop offset="100%" stop-color="#90A4AE"/>
+    </linearGradient>
+
+    <!-- Sheen (svetlejši pas zgoraj) -->
+    <linearGradient id="trapGradJawSheen_static_v2" x1="0" y1="10" x2="0" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
-  <g stroke="#000" stroke-width="0.6" vector-effect="non-scaling-stroke" fill="none">
-    
-    <!-- Osnovni temnejši kovinski sloj -->
-    <path fill="url(#trapGradMetal)"
-      d="M4 15
-         L7 10
-         L9 13
-         L12 9
-         L15 13
-         L17 10
-         L20 15
-         Q20 18 12 18
-         Q4 18 4 15Z" />
+  <g id="trapJaw">
+    <!-- ===== Osnovni zobati trak (manj zob, višje konice) ===== -->
+    <path
+      fill="url(#trapGradJaw_static_v2)"
+      stroke="#263238"
+      stroke-width="0.6"
+      vector-effect="non-scaling-stroke"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+      d="M3 15
+         L5 11.6 L7 15
+         L9 11.6 L11 15
+         L13 11.6 L15 15
+         L17 11.6 L19 15
+         L21 11.6 L21 17
+         L3 17 Z"/>
 
-    <!-- Svetlejši highlight kovine -->
-    <path fill="rgba(255,255,255,0.35)"
-      d="M5.2 15.2
-         L7.4 11.5
-         L9 13.8
-         L12 10.2
-         L15 13.8
-         L16.6 11.5
-         L18.8 15.2
-         Q18.8 16.5 12 16.5
-         Q5.2 16.5 5.2 15.2Z" />
-  
+    <!-- ===== Svetlejši zgornji pas (sheen / highlight) ===== -->
+    <path
+      fill="url(#trapGradJawSheen_static_v2)"
+      stroke="#263238"
+      stroke-width="0.6"
+      vector-effect="non-scaling-stroke"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+      opacity="0.85"
+      d="M3 15
+         L5 11.6 L7 15
+         L9 11.6 L11 15
+         L13 11.6 L15 15
+         L17 11.6 L19 15
+         L21 11.6 L21 16
+         L3 16 Z"/>
   </g>
+
 
     `,
     trigger: `
      
 
+ <defs>
+    <!-- Temni gradient za osnovni sloj (črna -> temno siva) -->
+    <linearGradient id="trapGradShards" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="100%" stop-color="#222222"/>
+    </linearGradient>
 
-  <defs>
-    <linearGradient id="trapGradMetal" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"  stop-color="#E2E5E9"/>
-      <stop offset="100%" stop-color="#8A9097"/>
+    <!-- Svetlejši gradient za “sheen” (nizek opacity) -->
+    <linearGradient id="trapGradSheen" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
     </linearGradient>
 
     <style>
-      /* Past zbledi po kratkem dodatnem “ščipu” */
-      @keyframes trapFade {
-        0%   { opacity: 1; transform: translateY(0) scale(1); }
-        30%  { opacity: .98; transform: translateY(0.1px) scale(.992); }
-        100% { opacity: 0; transform: translateY(0.5px) scale(.95); }
-      }
-      /* Iz ~140° zapremo še ~8° (±4° na krak) */
-      @keyframes jawCloseL {
-        0%   { transform: rotate(0deg); }
-        100% { transform: rotate(8deg); }
-      }
-      @keyframes jawCloseR {
-        0%   { transform: rotate(0deg); }
-        100% { transform: rotate(-8deg); }
+      /* Globalni keyframes: kratka eksplozija z rahlim prehodom in razpadom */
+      @keyframes trapExplode {
+        0%   { transform: translate(0,0) scale(0.85) rotate(0deg); opacity: 0; }
+        12%  { transform: translate(0,0) scale(1.00) rotate(0deg); opacity: 1; }
+        100% { transform: translate(0,0) scale(1.00) rotate(0deg); opacity: 0; }
       }
 
-      /* X-prah – izlet v 6 smereh */
-      @keyframes xBurst1 {
-        0%   { opacity: 0; transform: translate(0,0) scale(0.45) rotate(0deg); }
-        12%  { opacity: 1; }
-        100% { opacity: 0; transform: translate(-7px,-4px) scale(1) rotate(-20deg); }
+      /* Osnovna nastavitev za celotno skupino – eksplozija */
+      g.trap-explode {
+        transform-origin: center center;
+        animation: trapExplode 0.6s cubic-bezier(.2,.9,.2,1.1) both;
       }
-      @keyframes xBurst2 {
-        0%   { opacity: 0; transform: translate(0,0) scale(0.45) rotate(0deg); }
-        12%  { opacity: 1; }
-        100% { opacity: 0; transform: translate(7px,-4px) scale(1) rotate(22deg); }
-      }
-      @keyframes xBurst3 {
-        0%   { opacity: 0; transform: translate(0,0) scale(0.45) rotate(0deg); }
-        12%  { opacity: 1; }
-        100% { opacity: 0; transform: translate(-6px,3.8px) scale(1) rotate(18deg); }
-      }
-      @keyframes xBurst4 {
-        0%   { opacity: 0; transform: translate(0,0) scale(0.45) rotate(0deg); }
-        12%  { opacity: 1; }
-        100% { opacity: 0; transform: translate(6.5px,3.5px) scale(1) rotate(-18deg); }
-      }
-      @keyframes xBurst5 {
-        0%   { opacity: 0; transform: translate(0,0) scale(0.45) rotate(0deg); }
-        12%  { opacity: 1; }
-        100% { opacity: 0; transform: translate(0,-7px) scale(1) rotate(12deg); }
-      }
-      @keyframes xBurst6 {
-        0%   { opacity: 0; transform: translate(0,0) scale(0.45) rotate(0deg); }
-        12%  { opacity: 1; }
-        100% { opacity: 0; transform: translate(0,6.8px) scale(1) rotate(-12deg); }
+
+      /* Vsak drobec (shard) ima lasten mikro-gib (SAMO NA <g>!), brez transformacij v pathih */
+      /* Harmonično razmetani v vse smeri, z rahlo varianco in zamikom */
+      @keyframes move-s1 { 100% { transform: translate(-6px,-5px) rotate(-18deg); } }
+      @keyframes move-s2 { 100% { transform: translate( 5px,-6px) rotate( 22deg); } }
+      @keyframes move-s3 { 100% { transform: translate(-4px, 6px) rotate(-14deg); } }
+      @keyframes move-s4 { 100% { transform: translate( 6px, 5px) rotate( 18deg); } }
+      @keyframes move-s5 { 100% { transform: translate(-7px, 2px) rotate(-28deg); } }
+      @keyframes move-s6 { 100% { transform: translate( 2px,-7px) rotate( 16deg); } }
+      @keyframes move-s7 { 100% { transform: translate( 0px, 7px) rotate( -8deg); } }
+      @keyframes move-s8 { 100% { transform: translate( 7px, 0px) rotate( 24deg); } }
+      @keyframes move-s9 { 100% { transform: translate(-5px, 0px) rotate(-20deg); } }
+      @keyframes move-s10{ 100% { transform: translate( 0px,-5px) rotate( 12deg); } }
+
+      /* Časi, da eksplozija deluje organsko (pri vseh ostane ≤ 0.6s skupno) */
+      g.s1  { animation: move-s1 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s2  { animation: move-s2 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s3  { animation: move-s3 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s4  { animation: move-s4 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s5  { animation: move-s5 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s6  { animation: move-s6 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s7  { animation: move-s7 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s8  { animation: move-s8 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s9  { animation: move-s9 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+      g.s10 { animation: move-s10 0.6s cubic-bezier(.2,.9,.2,1.1) both; }
+
+      /* Voljaven standard stroke-a */
+      .trap-stroke {
+        stroke: #111;
+        stroke-width: 0.6;
+        vector-effect: non-scaling-stroke;
       }
     </style>
   </defs>
 
-  <!-- PAST: izhodišče ~140°, nato kratko dodatno zapiranje in fade -->
-  <g id="trapAll"
-     style="animation: trapFade 640ms cubic-bezier(.2,.9,.2,1.1) both 70ms;"
-     stroke-width="0.6" vector-effect="non-scaling-stroke"
-     stroke-linejoin="round" stroke-linecap="round">
+  <!-- Glavna skupina: tu je samo 1 animacija (opacity/pop), drobci imajo svoje mikro-gibe v lastnih <g> -->
+  <g class="trap-explode" style="transform-origin: center center; animation: trapExplode 0.6s cubic-bezier(.2,.9,.2,1.1) both;">
 
-    <!-- Levi krak (rotacijsko iz središča tečaja) -->
-    <g style="transform-origin: 12px 12.6px; animation: jawCloseL 300ms cubic-bezier(.3,1.1,.2,1) both;">
-      <g fill="url(#trapGradMetal)" stroke="#2f2f2f">
-        <path d="M11.7 12.6
-                 L3.4 13.6
-                 L4.1 12.2
-                 L4.9 11.1
-                 L5.8 12.0
-                 L6.7 11.0
-                 L7.6 11.9
-                 L8.6 11.0
-                 L9.6 11.8
-                 L10.6 11.0
-                 L11.3 11.5
-                 L11.6 11.3 Z"/>
-        <path d="M4.1 12.2 L4.9 11.1 L5.8 12.0 L6.7 11.0 L7.6 11.9 L8.6 11.0 L9.6 11.8 L10.6 11.0 L11.3 11.5"
-              fill="none" stroke="#ffffff" opacity="0.45"/>
-      </g>
+    <!-- BLOK DROBTIN — vsak shard je lasten <g> (animacija je samo na <g>, pathi brez transformacij) -->
+    <!-- Vsak shard ima 2 sloja: base (temen) + sheen (svetlejši) -->
+
+    <!-- s1 -->
+    <g class="s1">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M11.0 11.5 L11.8 10.9 L12.3 11.6 L11.4 12.1 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M11.1 11.4 L11.6 11.1 L11.9 11.5 L11.5 11.7 Z"/>
     </g>
 
-    <!-- Desni krak -->
-    <g style="transform-origin: 12px 12.6px; animation: jawCloseR 300ms cubic-bezier(.3,1.1,.2,1) both;">
-      <g fill="url(#trapGradMetal)" stroke="#2f2f2f">
-        <path d="M12.3 12.6
-                 L20.6 13.6
-                 L19.9 12.2
-                 L19.1 11.1
-                 L18.2 12.0
-                 L17.3 11.0
-                 L16.4 11.9
-                 L15.4 11.0
-                 L14.4 11.8
-                 L13.4 11.0
-                 L12.7 11.5
-                 L12.4 11.3 Z"/>
-        <path d="M19.9 12.2 L19.1 11.1 L18.2 12.0 L17.3 11.0 L16.4 11.9 L15.4 11.0 L14.4 11.8 L13.4 11.0 L12.7 11.5"
-              fill="none" stroke="#ffffff" opacity="0.45"/>
-      </g>
+    <!-- s2 -->
+    <g class="s2">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M12.2 11.1 L13.0 10.6 L13.5 11.2 L12.6 11.7 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M12.3 11.0 L12.8 10.8 L13.1 11.1 L12.7 11.3 Z"/>
     </g>
 
-    <!-- Sredinski obroč -->
-    <circle cx="12" cy="12.6" r="1.3" fill="none" stroke="#5a5f66"/>
+    <!-- s3 -->
+    <g class="s3">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M11.4 12.6 L12.0 12.0 L12.6 12.4 L12.0 13.0 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M11.6 12.4 L11.9 12.2 L12.2 12.4 L11.9 12.7 Z"/>
+    </g>
+
+    <!-- s4 -->
+    <g class="s4">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M12.9 12.2 L13.8 11.8 L14.0 12.6 L13.1 13.0 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M13.0 12.1 L13.5 11.9 L13.6 12.3 L13.2 12.5 Z"/>
+    </g>
+
+    <!-- s5 -->
+    <g class="s5">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M10.6 12.0 L11.2 11.3 L11.6 12.0 L11.0 12.6 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M10.8 11.8 L11.0 11.6 L11.3 12.0 L11.0 12.2 Z"/>
+    </g>
+
+    <!-- s6 -->
+    <g class="s6">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M12.0 10.4 L12.7 10.0 L12.9 10.6 L12.2 11.0 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M12.1 10.3 L12.5 10.1 L12.6 10.4 L12.2 10.6 Z"/>
+    </g>
+
+    <!-- s7 -->
+    <g class="s7">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M11.7 13.2 L12.4 12.9 L12.6 13.6 L11.9 13.9 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M11.8 13.1 L12.2 13.0 L12.3 13.3 L12.0 13.5 Z"/>
+    </g>
+
+    <!-- s8 -->
+    <g class="s8">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M13.3 11.3 L14.1 10.9 L14.3 11.6 L13.5 12.0 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M13.4 11.2 L13.8 11.0 L13.9 11.4 L13.5 11.6 Z"/>
+    </g>
+
+    <!-- s9 -->
+    <g class="s9">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M10.2 11.6 L10.9 11.2 L11.0 11.8 L10.4 12.1 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M10.3 11.5 L10.6 11.3 L10.7 11.6 L10.4 11.8 Z"/>
+    </g>
+
+    <!-- s10 -->
+    <g class="s10">
+      <path class="trap-stroke" fill="url(#trapGradShards)"
+            d="M11.6 10.8 L12.3 10.4 L12.5 11.0 L11.8 11.3 Z"/>
+      <path class="trap-stroke" fill="url(#trapGradSheen)"
+            d="M11.7 10.7 L12.1 10.5 L12.2 10.8 L11.9 11.0 Z"/>
+    </g>
+
+    <!-- Dodatni drobni prah (mehkejši občutek eksplozije) -->
+    <g class="s2">
+      <path class="trap-stroke" fill="#111"
+            d="M12.8 12.8 L13.0 12.6 L13.2 12.8 L13.0 13.0 Z"/>
+    </g>
+    <g class="s5">
+      <path class="trap-stroke" fill="#111"
+            d="M11.0 10.8 L11.2 10.7 L11.3 10.9 L11.1 11.0 Z"/>
+    </g>
+    <g class="s7">
+      <path class="trap-stroke" fill="#111"
+            d="M12.0 13.6 L12.2 13.5 L12.3 13.7 L12.1 13.8 Z"/>
+    </g>
+
   </g>
-
-  <!-- X 'prah' – črni -->
-  <g stroke="#0F0F0F" stroke-width="0.6" vector-effect="non-scaling-stroke"
-     stroke-linecap="round" fill="none">
-    <g style="transform-origin: 12px 12px; animation: xBurst1 620ms cubic-bezier(.2,.9,.2,1.1) both 120ms;">
-      <path d="M11.4 11.4 L12.6 12.6 M12.6 11.4 L11.4 12.6"/>
-    </g>
-    <g style="transform-origin: 12px 12px; animation: xBurst2 620ms cubic-bezier(.2,.9,.2,1.1) both 120ms;">
-      <path d="M11.4 11.4 L12.6 12.6 M12.6 11.4 L11.4 12.6"/>
-    </g>
-    <g style="transform-origin: 12px 12px; animation: xBurst3 620ms cubic-bezier(.2,.9,.2,1.1) both 120ms;">
-      <path d="M11.4 11.4 L12.6 12.6 M12.6 11.4 L11.4 12.6"/>
-    </g>
-    <g style="transform-origin: 12px 12px; animation: xBurst4 620ms cubic-bezier(.2,.9,.2,1.1) both 120ms;">
-      <path d="M11.4 11.4 L12.6 12.6 M12.6 11.4 L11.4 12.6"/>
-    </g>
-    <g style="transform-origin: 12px 12px; animation: xBurst5 620ms cubic-bezier(.2,.9,.2,1.1) both 120ms;">
-      <path d="M11.4 11.4 L12.6 12.6 M12.6 11.4 L11.4 12.6"/>
-    </g>
-    <g style="transform-origin: 12px 12px; animation: xBurst6 620ms cubic-bezier(.2,.9,.2,1.1) both 120ms;">
-      <path d="M11.4 11.4 L12.6 12.6 M12.6 11.4 L11.4 12.6"/>
-    </g>
-  </g>
-
 
 
     `

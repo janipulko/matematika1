@@ -6,7 +6,12 @@ import './SettingsModal.js';
 import './ColorSettingsModal.js';
 import './ResultModal.js';
 import './SessionScore.js';
+import {GameProvider} from '../utils/game-provider.js';
 import {sound} from '../utils/soundManager.js';
+import {StarsProvider} from '../utils/stars-provider.js';
+import {getContainerBgAnimation} from '../utils/container-backgrounds.js';
+
+import {initDynamicBackground} from '../utils/background.js';
 
 // ============================================
 // Pomagala: URL parsing, BFS, zvok, random
@@ -78,103 +83,26 @@ function parseNumsFromURL() {
   };
 }
 
-function getGameDataPath() {
-  const type = localStorage.getItem('math-game-type') || 'sum';
-  return type === 'groups' ? 'data/groups.json' : 'data/sum.json';
-}
-
-function getStepKey() {
-  const type = localStorage.getItem('math-game-type') || 'sum';
-  return `math-game-step-${type}`;
-}
-
-async function getNumsForStep(stepIndex) {
-  try {
-    const response = await fetch(getGameDataPath());
-    const groups = await response.json();
-    let count = 0;
-    for (const group of groups) {
-      if (stepIndex < count + group.combos.length) {
-        return group.combos[stepIndex - count];
-      }
-      count += group.combos.length;
-    }
-  } catch (e) {
-    console.error("Napaka pri nalaganju podatkov:", e);
-  }
-  return 'p10p5p1'; // Fallback
-}
-
-async function findStepForCombo(combo) {
-  try {
-    const response = await fetch(getGameDataPath());
-    const groups = await response.json();
-    let stepCounter = 0;
-    for (const group of groups) {
-      const idx = group.combos.indexOf(combo);
-      if (idx !== -1) {
-        return stepCounter + idx;
-      }
-      stepCounter += group.combos.length;
-    }
-  } catch (e) {
-    console.error("Napaka pri iskanju koraka za combo:", e);
-  }
-  return null;
-}
-
 async function ensureNumsInURL() {
   const params = new URLSearchParams(location.search);
   let raw = params.get('num');
-  let step = params.get('step');
 
-  // Če imamo num in nastavitve (iz konfiguratorja), ne potrebujemo stepa
+  // Če imamo num in nastavitve (iz konfiguratorja), ne potrebujemo ničesar več
   if (raw && (params.has('steps') || (raw.includes('st') && raw.includes('tr') && raw.includes('go')))) {
     return parseNumsFromURL();
   }
 
-  // 1. Če ni ničesar, preusmeri na shranjen korak
-  if (!raw && !step) {
-    const savedStep = parseInt(localStorage.getItem(getStepKey()) || '0', 10);
-    const combo = await getNumsForStep(savedStep);
-    const finalCombo = combo.includes('st') ? combo : `${combo}st4tr10go5`;
-    params.set('step', savedStep);
-    params.set('num', finalCombo);
-    location.assign(`${location.pathname}?${params.toString()}`);
+  // Če nimamo ničesar, uporabimo privzeto igro
+  if (!raw) {
+    const defaultParams = GameProvider.gameToParams(GameProvider.DEFAULT_GAME);
+    location.assign(`${location.pathname}?${defaultParams}`);
     return null;
   }
 
-  // 2. Če je samo step, pridobi num
-  if (step && !raw) {
-    const combo = await getNumsForStep(parseInt(step, 10));
-    const finalCombo = combo.includes('st') ? combo : `${combo}st4tr10go5`;
-    params.set('num', finalCombo);
-    location.assign(`${location.pathname}?${params.toString()}`);
-    return null;
-  }
-
-  // 3. Če je samo num, poskusi najti ustrezen step
-  if (raw && !step) {
-    const foundStep = await findStepForCombo(raw);
-    let finalRaw = raw;
-    
-    if (foundStep !== null) {
-      if (!finalRaw.includes('st')) finalRaw += 'st4tr10go5';
-      params.set('step', foundStep);
-      params.set('num', finalRaw);
-      location.assign(`${location.pathname}?${params.toString()}`);
-      return null;
-    }
-    
-    // Če koraka ne najdemo, preverimo konfiguracijo
-    if (!finalRaw.includes('st') && !params.has('steps')) {
-        // Brez konfiguracije in brez stepa - to je custom igra, ki nima parametrov
-        // V tem primeru bomo pustili da gre čez in bo render() pokazal napako
-        return parseNumsFromURL();
-    }
-
-    params.set('step', '0');
-    location.assign(`${location.pathname}?${params.toString()}`);
+  // Če imamo samo num, dodamo privzete vrednosti za korake, pasti in cilje
+  if (raw && !params.has('steps') && !raw.includes('st')) {
+    const finalRaw = `${raw}st10tr3go5`;
+    location.assign(`${location.pathname}?num=${finalRaw}`);
     return null;
   }
 
@@ -571,6 +499,18 @@ class MathGame extends HTMLElement {
     }
 
     this.render();
+    initDynamicBackground();
+
+    // Nastavimo trenutni rekord za to igro
+    const gameId = new URLSearchParams(location.search).get('num');
+    if (gameId) {
+      const record = StarsProvider.getRecord(gameId);
+      const scoreEl = document.querySelector('session-score');
+      if (scoreEl) {
+        scoreEl.setAttribute('record', record);
+        scoreEl.setAttribute('value', this.sessionStars);
+      }
+    }
   }
 
   _attachEventListeners() {
@@ -586,6 +526,22 @@ class MathGame extends HTMLElement {
       if (scoreEl) {
         scoreEl.setAttribute('value', this.sessionStars);
         scoreEl.bump();
+      }
+      
+      // Spoti preverimo če smo presegli rekord
+      const gameId = new URLSearchParams(location.search).get('num');
+      if (gameId) {
+        StarsProvider.saveRecord(gameId, this.sessionStars);
+      }
+    });
+
+    document.addEventListener('record-updated', (e) => {
+      const gameId = new URLSearchParams(location.search).get('num');
+      if (e.detail.gameId === gameId) {
+        const scoreEl = document.querySelector('session-score');
+        if (scoreEl) {
+          scoreEl.setAttribute('record', e.detail.score);
+        }
       }
     });
 
@@ -705,6 +661,8 @@ class MathGame extends HTMLElement {
       return;
     }
 
+    const containerAnim = getContainerBgAnimation();
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -714,16 +672,11 @@ class MathGame extends HTMLElement {
           box-sizing: border-box;
         }
 
+        ${containerAnim}
+
         .container {
           display: flex;
           flex-direction: column;
-
-          background: linear-gradient(
-              135deg,
-              color-mix(in oklab, var(--card), var(--bubble) 12%) 0%,
-              color-mix(in oklab, var(--card), var(--bg) 10%) 50%,
-              color-mix(in oklab, var(--card), var(--accent) 8%) 100%
-          );
 
           border-radius: var(--radius);
           box-shadow: var(--shadow);

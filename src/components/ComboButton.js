@@ -30,6 +30,7 @@ class ComboButton extends HTMLElement {
       items.push({ op, val });
     }
 
+    // Začetna vrednost, preden dobimo posodobitev iz providerja
     const currentStars = parseInt(localStorage.getItem('math-game-total-stars') || '0', 10);
     const canAfford = this.isUnlocked || currentStars >= this.cost;
 
@@ -185,6 +186,15 @@ class ComboButton extends HTMLElement {
 
     this.shadowRoot.querySelector('button').onclick = () => {
       if (canAfford) {
+        // Če še ni odklenjeno in stane več kot 0, zahtevamo porabo zvezdic
+        if (!this.isUnlocked && this.cost > 0) {
+          this.dispatchEvent(new CustomEvent('stars-request-spend', {
+            detail: { amount: this.cost },
+            bubbles: true,
+            composed: true
+          }));
+        }
+
         this.dispatchEvent(new CustomEvent('unlock-combo', {
           detail: { combo: this.combo, cost: this.cost, isUnlocked: this.isUnlocked },
           bubbles: true,
@@ -192,6 +202,22 @@ class ComboButton extends HTMLElement {
         }));
       }
     };
+  }
+  
+  connectedCallback() {
+    this._starsUpdatedHandler = (e) => {
+      const totalStars = e.detail.totalStars;
+      const canAfford = this.isUnlocked || totalStars >= this.cost;
+      const btn = this.shadowRoot.querySelector('button');
+      if (btn) {
+        btn.disabled = !canAfford;
+      }
+    };
+    document.addEventListener('stars-updated', this._starsUpdatedHandler);
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener('stars-updated', this._starsUpdatedHandler);
   }
 }
 
