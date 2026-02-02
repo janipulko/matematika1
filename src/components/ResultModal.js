@@ -185,7 +185,7 @@ class ResultModal extends HTMLElement {
         composed: true
       }));
     };
-    buttonGroup.appendChild(btnReplay);
+    //buttonGroup.appendChild(btnReplay);
 
     container.appendChild(buttonGroup);
   }

@@ -29,7 +29,7 @@ class SessionScore extends HTMLElement {
   render() {
     const iconSize = 'clamp(18px, 4vw, 24px)';
     const fontSize = 'clamp(16px, 3.5vw, 20px)';
-    const recordFontSize = 'clamp(10px, 2.5vw, 12px)';
+    const recordFontSize = 'clamp(16px, 3.5vw, 20px)';
 
     this.shadowRoot.innerHTML = `
       <style>

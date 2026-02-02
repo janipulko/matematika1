@@ -70,7 +70,7 @@
       padding: 30px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      width: 100%;
+      width: calc(100% - 40px);
       max-width: 600px;
       text-align: center;
     }
@@ -175,7 +175,7 @@
       <div class="slider-group">
         <label>Maks. število korakov</label>
         <div class="slider-row">
-          <input type="range" id="steps-slider" min="0" max="10" value="4">
+          <input type="range" id="steps-slider" min="1" max="10" value="4">
           <span class="val-display" id="steps-val">4</span>
         </div>
       </div>
