@@ -85,7 +85,6 @@ class SettingsModal extends HTMLElement {
     const okBtn = this.shadowRoot.querySelector('.btn-ok');
     const muteBtn = this.shadowRoot.querySelector('.mute-btn');
     const activeBtn = this.shadowRoot.querySelector('.active-btn');
-    const colorBtn = this.shadowRoot.querySelector('.color-btn');
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
 
     okBtn.onclick = () => this.close();
@@ -104,14 +103,6 @@ class SettingsModal extends HTMLElement {
       if (confirm('Ali želite popolno osvežiti aplikacijo? To bo ponovno naložilo vse datoteke, nastavitve in napredek pa bodo ohranjeni.')) {
         await this._hardReset();
       }
-    };
-
-    colorBtn.onclick = () => {
-      this.close();
-      this.dispatchEvent(new CustomEvent('open-color-settings', {
-        bubbles: true,
-        composed: true
-      }));
     };
 
     muteBtn.onclick = () => {
@@ -210,11 +201,9 @@ class SettingsModal extends HTMLElement {
       <base-modal modal-title="Nastavitve">
         <div class="inner-content">
           <a href="./configurator.html" class="config-btn">⚙️ Konfigurator</a>
-          <a href="./type.html" class="unlock-link">🎮 Izberi igro</a>
-          <a href="./unlock.html" class="unlock-link">🔓 Moja zbirka</a>
+                <a href="./unlock.html" class="unlock-link">🔓 Moja zbirka</a>
           <button class="mute-btn"></button>
           <button class="active-btn"></button>
-          <button class="color-btn">🎨 Barve aplikacije</button>
           <button class="refresh-btn">🔄 Osveži aplikacijo</button>
         </div>
         <div class="footer">

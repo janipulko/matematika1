@@ -47,11 +47,18 @@ class ResultModal extends HTMLElement {
     }
   }
 
-  async show(isSuccess, stars = 0, maxStars = 3, sessionStars = 0) {
+  async show(isSuccess, stars = 0, maxStars = 3, sessionStars = 0, gameId = null) {
     const content = this.shadowRoot.querySelector('.inner-content');
     content.innerHTML = '';
 
     if (isSuccess) {
+      // Preverimo in shranimo rekord še tukaj, za vsak primer
+      let isNewRecord = false;
+      if (gameId) {
+        const { StarsProvider } = await import('../utils/stars-provider.js');
+        isNewRecord = StarsProvider.saveRecord(gameId, sessionStars);
+      }
+
       // Zahtevamo dodajanje zvezdic preko providerja
       this.dispatchEvent(new CustomEvent('stars-request-add', {
         detail: { amount: stars },
@@ -69,7 +76,7 @@ class ResultModal extends HTMLElement {
       // Počakamo trenutek, da se storage posodobi pred renderiranjem
       setTimeout(async () => {
         const totalStars = parseInt(localStorage.getItem('math-game-total-stars') || '0', 10);
-        await this.renderSuccess(content, stars, totalStars, maxStars);
+        await this.renderSuccess(content, stars, totalStars, maxStars, sessionStars, isNewRecord);
       }, 0);
     } else {
       this.renderFailure(content, sessionStars);
@@ -84,7 +91,7 @@ class ResultModal extends HTMLElement {
     }
   }
 
-  async renderSuccess(container, starsCount, totalStars, maxStars = 3) {
+  async renderSuccess(container, starsCount, totalStars, maxStars = 3, sessionStars = 0, isNewRecord = false) {
     const title = document.createElement('h2');
     title.textContent = 'Bravo! Odlično ti gre!';
     container.appendChild(title);
@@ -107,6 +114,26 @@ class ResultModal extends HTMLElement {
     }
 
     container.appendChild(starsContainer);
+
+    // Prikaz rezultata seje in rekorda
+    const scoreContainer = document.createElement('div');
+    scoreContainer.className = 'score-info';
+    scoreContainer.style.textAlign = 'center';
+    scoreContainer.style.margin = '10px 0';
+
+    const currentScore = document.createElement('div');
+    currentScore.className = 'session-stars-result';
+    currentScore.innerHTML = `V tej igri: <span>${sessionStars}</span> ★`;
+    scoreContainer.appendChild(currentScore);
+
+    if (isNewRecord) {
+      const recordMsg = document.createElement('div');
+      recordMsg.className = 'new-record-msg';
+      recordMsg.textContent = 'NOV REKORD!';
+      scoreContainer.appendChild(recordMsg);
+    }
+
+    container.appendChild(scoreContainer);
 
     // Prikaz skupnega seštevka zvezdic
     const totalContainer = document.createElement('div');
@@ -266,6 +293,30 @@ class ResultModal extends HTMLElement {
         }
         .total-stars span {
           color: var(--primary-d);
+        }
+        .session-stars-result {
+          font-size: clamp(20px, 5vw, 32px);
+          font-weight: 800;
+          color: var(--ink);
+          margin-bottom: 5px;
+        }
+        .session-stars-result span {
+          color: var(--primary-d);
+        }
+        .new-record-msg {
+          font-size: clamp(18px, 4vw, 24px);
+          font-weight: 900;
+          color: var(--accent-d);
+          background: var(--accent);
+          padding: 4px 16px;
+          border-radius: var(--radius-sm);
+          display: inline-block;
+          animation: pulse-gold 1.5s infinite ease-in-out;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        @keyframes pulse-gold {
+          0%, 100% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.1); filter: brightness(1.1); }
         }
         .button-group {
           display: flex;

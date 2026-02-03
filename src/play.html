@@ -26,9 +26,10 @@
   <script type="module">
     import { PALETTES } from './utils/palettes.js';
     import { initDynamicBackground } from './utils/background.js';
-    (function() {
-      const paletteId = localStorage.getItem('math-game-palette') || 'fruit';
-      const palette = PALETTES[paletteId] || PALETTES.fruit;
+    export function applyRandomPalette() {
+      const keys = Object.keys(PALETTES);
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      const palette = PALETTES[randomKey];
       const root = document.documentElement;
       for (const [prop, val] of Object.entries(palette.colors)) {
         root.style.setProperty(prop, val);
@@ -53,7 +54,7 @@
         root.style.setProperty('--grid-stroke', '#dfe7ef');
       }
       
-      const pId = paletteId;
+      const pId = randomKey;
       if (pId === 'material') root.style.setProperty('--on-primary', '#000000');
       else if (pId === 'ocean_night') root.style.setProperty('--on-primary', '#FFFFFF');
       else if (pId === 'blackberry') root.style.setProperty('--on-primary', '#FFFFFF');
@@ -62,9 +63,15 @@
       else if (pId === 'stellar') root.style.setProperty('--on-primary', '#000000');
       else if (pId === 'cold_night') root.style.setProperty('--on-primary', '#000000');
       else if (pId === 'starry_dark') root.style.setProperty('--on-primary', '#000000');
+      
+      /* window.currentPaletteId = pId; */
+    }
 
+    (function() {
+      applyRandomPalette();
       initDynamicBackground();
     })();
+    window.applyRandomPalette = applyRandomPalette;
   </script>
   <style>
     /* ===========================
@@ -249,5 +256,6 @@
     });
   }
 </script>
+<script src="utils/music.js"></script>
 </body>
 </html>

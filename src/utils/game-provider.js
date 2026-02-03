@@ -1,4 +1,3 @@
-
 export const GameProvider = {
   // Privzeta igra, ki je vedno na voljo
   DEFAULT_GAME: {
@@ -13,12 +12,13 @@ export const GameProvider = {
    * Pridobi vse shranjene igre iz localStorage + privzeto igro.
    */
   getAllGames() {
-    const myGamesRaw = JSON.parse(localStorage.getItem('math-game-my-games') || '[]');
-    
+    const myGamesRaw = JSON.parse(
+        localStorage.getItem('math-game-my-games') || '[]');
+
     // Normalizacija shranjenih iger (nekatere so lahko le nizi, druge objekti)
     const myGames = myGamesRaw.map(game => {
       if (typeof game === 'string') {
-        return { num: game, title: 'Shranjena igra' };
+        return {num: game, title: 'Shranjena igra'};
       }
       return game;
     });
@@ -34,9 +34,6 @@ export const GameProvider = {
    */
   gameToParams(game) {
     const num = game.num;
-    const steps = game.steps || 10;
-    const traps = game.traps !== undefined ? game.traps : 3;
-    const targets = game.targets || 5;
-    return `num=${num}&steps=${steps}&traps=${traps}&targets=${targets}`;
+    return `num=${num}`;
   }
 };

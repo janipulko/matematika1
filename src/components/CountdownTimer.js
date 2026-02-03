@@ -1,12 +1,16 @@
 
+import { sound } from '../utils/soundManager.js';
+
 class CountdownTimer extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.timeLeft = 30;
-    this.maxTime = 30;
+    this.timeLeft = 60;
+    this.maxTime = 60;
     this.timerId = null;
     this.lastTick = 0;
+    this.nextTickTime = 0; // Namesto nextTickThreshold
+    this.tickCount = 0;
   }
 
   static get observedAttributes() {
@@ -15,7 +19,7 @@ class CountdownTimer extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'initial-time' && newValue !== oldValue) {
-      this.maxTime = parseFloat(newValue) || 30;
+      this.maxTime = parseFloat(newValue) || 60;
       if (this.getAttribute('current-time') === null) {
         this.timeLeft = this.maxTime;
       }
@@ -39,11 +43,42 @@ class CountdownTimer extends HTMLElement {
   start() {
     this.stop();
     this.lastTick = performance.now();
+    this.nextTickTime = this.timeLeft;
+    
     const tick = (now) => {
       const delta = (now - this.lastTick) / 1000;
       this.lastTick = now;
       
       this.timeLeft -= delta;
+      
+      // Izračun intervala tiktakanja
+      let interval = 1;
+      const ratio = this.timeLeft / this.maxTime;
+      
+      if (this.timeLeft <= 5) {
+        interval = 0.25; // 4/sekundo
+      } else if (ratio <= 0.25) {
+        interval = 0.5;  // 2/sekundo
+      } else if (ratio <= 0.5) {
+        interval = 1 / 1.5; // 1.5/sekundo (približno 0.66s)
+      }
+
+      // Tiktakanje
+      if (this.timeLeft <= this.nextTickTime) {
+        if (this.tickCount % 2 === 0) {
+          sound.tick();
+        } else {
+          sound.tock();
+        }
+        this.tickCount++;
+        // Naslednji tick je za 'interval' sekund manj od trenutnega cilja
+        this.nextTickTime -= interval;
+        
+        // Če smo preveč zaostali (npr. zaradi bonusa), ulovimo čas
+        if (this.nextTickTime < this.timeLeft - interval) {
+          this.nextTickTime = this.timeLeft;
+        }
+      }
       
       if (this.timeLeft <= 0) {
         this.timeLeft = 0;
@@ -71,12 +106,15 @@ class CountdownTimer extends HTMLElement {
 
   reset() {
     this.timeLeft = this.maxTime;
+    this.nextTickTime = this.timeLeft;
+    this.tickCount = 0;
     this.updateBar();
     this.start();
   }
 
   addBonus(seconds = 3) {
     this.timeLeft = Math.min(this.timeLeft + seconds, this.maxTime);
+    this.nextTickTime = this.timeLeft;
     this.updateBar();
   }
 

@@ -77,6 +77,14 @@ class Sound {
     this.beep({ freq: 180, dur: 0.15, type: 'sawtooth', gain: 0.25 });
     setTimeout(() => this.beep({ freq: 140, dur: 0.2, type: 'sawtooth', gain: 0.2 }), 100);
   }
+
+  tick() {
+    this.beep({ freq: 800, dur: 0.01, type: 'sine', gain: 0.05, attack: 0.001, release: 0.01 });
+  }
+
+  tock() {
+    this.beep({ freq: 600, dur: 0.01, type: 'sine', gain: 0.05, attack: 0.001, release: 0.01 });
+  }
 }
 
 export const sound = new Sound();

@@ -525,6 +525,9 @@ class MathGame extends HTMLElement {
     }
 
     this.render();
+    if (window.applyRandomPalette) {
+      window.applyRandomPalette();
+    }
     initDynamicBackground();
 
   }
@@ -678,7 +681,7 @@ class MathGame extends HTMLElement {
         <div class="error-container">
           <h2>⚠️ Napaka</h2>
           <p>${this.error}</p>
-          <a href="type.html" class="btn-home">Nazaj na izbiro</a>
+          <a href="unlock.html" class="btn-home">Nazaj na izbiro</a>
         </div>
       `;
       return;
@@ -750,7 +753,7 @@ class MathGame extends HTMLElement {
           <score-grid></score-grid>
         </div>
         <div class="section section-countdown">
-          <countdown-timer initial-time="30" ${this.currentCountTime !== undefined ? `current-time="${this.currentCountTime}"` : ''}></countdown-timer>
+          <countdown-timer initial-time="60" ${this.currentCountTime !== undefined ? `current-time="${this.currentCountTime}"` : ''}></countdown-timer>
         </div>
         <div class="section section-steps">
           <step-indicator></step-indicator>
@@ -891,7 +894,17 @@ class MathGame extends HTMLElement {
         this.shadowRoot.appendChild(resultModal);
 
         this.sound.victory(stars);
-        await resultModal.show(true, stars, maxStars, this.sessionStars);
+        const params = new URLSearchParams(location.search);
+        const gameId = params.get('num');
+        
+        // Shranimo napredek (korak), če je na voljo
+        const step = params.get('step');
+        if (step !== null) {
+          const gameType = params.get('type') || 'generic';
+          localStorage.setItem(`math-game-step-${gameType}`, step);
+        }
+
+        await resultModal.show(true, stars, maxStars, this.sessionStars, gameId);
       } else {
         // Le vmesni cilj
         if (this.gridEl && this.gridEl.cat) {

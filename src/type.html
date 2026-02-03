@@ -125,8 +125,6 @@
     <h1>Izberi igro</h1>
     <div class="options">
       <button class="type-btn" data-type="custom" style="border-color: var(--accent); background: #fffcf0;">⭐ Moje igre</button>
-      <button class="type-btn" data-type="sum">➕ Seštevanje</button>
-      <button class="type-btn" data-type="groups">🔢 Skupine</button>
     </div>
     <a href="play.html" class="back-link">← Nazaj v igro</a>
   </div>
@@ -134,9 +132,6 @@
   <script>
     document.querySelectorAll('.type-btn').forEach(btn => {
       btn.onclick = () => {
-        const type = btn.dataset.type;
-        localStorage.setItem('math-game-type', type);
-        // Preusmerimo na unlock.html, da igralec izbere, kje želi začeti
         window.location.href = 'unlock.html';
       };
     });
