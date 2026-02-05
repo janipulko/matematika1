@@ -36,11 +36,31 @@ class IconCat extends HTMLElement {
         display: block;
         user-select: none;
         overflow: visible;
+
+        /* 🔥 Nova idle animacija (pozibavanje) */
+        animation: cat-idle 1.4s ease-in-out infinite;
+        transform-origin: 50% 66%;
+        will-change: transform;
+      }
+
+      @keyframes cat-idle {
+        0%, 100% { 
+          transform: scale(1, 1) rotate(0deg); 
+        }
+        25% {
+          transform: scale(1.05, 0.95) rotate(-2deg);
+        }
+        50% { 
+          transform: scale(1, 1) rotate(0deg); 
+        }
+        75% {
+          transform: scale(0.95, 1.05) rotate(2deg);
+        }
       }
 
       /* Animacija veselja */
       .cheer {
-        animation: cat-cheer 0.6s cubic-bezier(0.36, 0, 0.66, -0.56) 2;
+        animation: cat-cheer 0.6s cubic-bezier(0.36, 0, 0.66, -0.56) 2 !important;
       }
 
       @keyframes cat-cheer {
@@ -50,7 +70,7 @@ class IconCat extends HTMLElement {
 
       /* Animacija ob stopu na past */
       .jump {
-        animation: cat-jump 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: cat-jump 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
       }
 
       @keyframes cat-jump {
@@ -123,14 +143,12 @@ class IconCat extends HTMLElement {
 
   cheer() {
     this._svg.classList.remove('cheer');
-    void this._svg.offsetWidth; // trigger reflow
     this._svg.classList.add('cheer');
     this._spawnHearts();
   }
 
   jump() {
     this._svg.classList.remove('jump');
-    void this._svg.offsetWidth; // trigger reflow
     this._svg.classList.add('jump');
   }
 

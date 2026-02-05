@@ -1,129 +1,141 @@
-
-
 export const PALETTES = {
-  // SVETLE PALETE
-  candy: {
-    id: 'candy',
-    name: 'Candy Land',
-    type: 'light',
+
+// 1. CVETOČE ČEŠNJE (Sakura Night) - Japonski mir, kontrast rjavega lesa in nežnih cvetov
+  sakura_night: {
+    id: 'sakura_night',
+    name: 'Japonski vrt',
+    type: 'dark',
     colors: {
-      '--bg': '#FFB6C1',
-      '--card': '#FFFFFF',
-      '--ink': '#34495E',
-      '--primary': '#6A1B9A',     // temnejša vijolična (kontrastno)
-      '--primary-d': '#4A148C',   // hover/active še temnejši
-      '--accent': '#FFD54F',
-      '--muted': '#7F8C8D',
-      '--bubble': '#FADBD8'
-    }
-  },
-  ocean: {
-    id: 'ocean',
-    name: 'Ocean Adventure',
-    type: 'light',
-    colors: {
-      '--bg': '#00B4D8',
-      '--card': '#FFFFFF',
-      '--ink': '#112D4E',
-      '--primary': '#002F6C',     // globlja modra za visoko kontrastnost
-      '--primary-d': '#00224F',
-      '--accent': '#FFD54F',
-      '--muted': '#3F72AF',
-      '--bubble': '#CAF0F8'
-    }
-  },
-  forest: {
-    id: 'forest',
-    name: 'Forest Friends',
-    type: 'light',
-    colors: {
-      '--bg': '#A3D9A5',
-      '--card': '#FFFFFF',
-      '--ink': '#334D3A',
-      '--primary': '#0B4F6C',     // temen teal (bolj kontrasten kot rumeni odtenki)
-      '--primary-d': '#083B52',
-      '--accent': '#66BB6A',
-      '--muted': '#4E6E5D',
-      '--bubble': '#E8F5E9'
-    }
-  },
-  rainbow: {
-    id: 'rainbow',
-    name: 'Rainbow Dreams',
-    type: 'light',
-    colors: {
-      '--bg': '#FFD1DC',
-      '--card': '#FFFFFF',
-      '--ink': '#2C3E50',
-      '--primary': '#0D47A1',     // material blue 900 (visok kontrast)
-      '--primary-d': '#0A3780',
-      '--accent': '#F7DC6F',
-      '--muted': '#7D8387',
-      '--bubble': '#EBDEF0'
-    }
-  },
-  fresh: {
-    id: 'fresh',
-    name: 'Sveže živahno',
-    type: 'light',
-    colors: {
-      '--bg': '#C6EBC5',
-      '--card': '#FFFFFF',
-      '--ink': '#22313F',
-      '--primary': '#1E3A8A',     // indigo 700 (močnejši kontrast)
-      '--primary-d': '#162D6A',
-      '--accent': '#A1EEBD',
-      '--muted': '#5D6D7E',
-      '--bubble': '#F2FFE9'
-    }
-  },
-  summer: {
-    id: 'summer',
-    name: 'Poletni žarek',
-    type: 'light',
-    colors: {
-      '--bg': '#FFF455',
-      '--card': '#FFFFFF',
-      '--ink': '#2C3E50',
-      '--primary': '#2B6EA6',     // precej temen (varno nad pragom)
-      '--primary-d': '#1F537D',
-      '--accent': '#FFC470',
-      '--muted': '#5D6D7E',
-      '--bubble': '#FFFFE0'
-    }
-  },
-  cute: {
-    id: 'cute',
-    name: 'Srčkana vesela',
-    type: 'light',
-    colors: {
-      '--bg': '#FFEAA7',
-      '--card': '#FFFFFF',
-      '--ink': '#1B2631',
-      '--primary': '#A84300',     // temna oranžna (ne več pastelna)
-      '--primary-d': '#8E3B00',
-      '--accent': '#81ECEC',
-      '--muted': '#566573',
-      '--bubble': '#FFF9E1'
-    }
-  },
-  fruit: {
-    id: 'fruit',
-    name: 'Mirna sadna',
-    type: 'light',
-    colors: {
-      '--bg': '#F9F07A',
-      '--card': '#FFFFFF',
-      '--ink': '#1C2833',
-      '--primary': '#255E6B',     // temen teal za kontrast na svetlo rumenem
-      '--primary-d': '#1D4A54',
-      '--accent': '#FF9F66',
-      '--muted': '#5D6D7E',
-      '--bubble': '#FEFDEB'
+      '--bg': '#2D1E1E',       // Temen lesni ton
+      '--card': '#1C1212',     // Globoka snov drevesa
+      '--ink': '#FFF0F5',      // Nežna bela (cvetni lističi)
+      '--primary': '#FFB7C5',  // Sakura rožnata
+      '--primary-d': '#E098A7',
+      '--accent': '#A7D08C',   // Mlado zeleno listje
+      '--muted': '#8D7B7B',    // Megla pod goro Fuji
+      '--bubble': '#3D2B2B'
     }
   },
 
-  // TEMNE PALETE
+  // 2. DŽUNGLA (Amazonia) - Globoke zelene plasti in eksotični ptiči
+  amazon_jungle: {
+    id: 'amazon_jungle',
+    name: 'Skrita džungla',
+    type: 'dark',
+    colors: {
+      '--bg': '#0B1A13',       // Globoka senca krošenj
+      '--card': '#050F0A',     // Srce gozda
+      '--ink': '#E8F5E9',      // Svetloba, ki prodre skozi liste
+      '--primary': '#4CAF50',  // Živo zelena
+      '--primary-d': '#388E3C',
+      '--accent': '#FFC107',   // Kljun eksotične ptice (zlato)
+      '--muted': '#4E6B5E',    // Mah in lišaji
+      '--bubble': '#142E22'
+    }
+  },
+
+  // 3. SONČNI ZAHOD (Cyber Sunset) - Prehod iz ognjene v vijolično nebo
+  sunset_horizon: {
+    id: 'sunset_horizon',
+    name: 'Zadnji žarek',
+    type: 'dark',
+    colors: {
+      '--bg': '#2D033B',       // Večerno nebo
+      '--card': '#16001E',     // Silhueta obzorja
+      '--ink': '#FFE5E5',      // Odsev na oblakih
+      '--primary': '#FF6000',  // Sončni ogenj
+      '--primary-d': '#D35400',
+      '--accent': '#FFD700',   // Zadnji zlat sij
+      '--muted': '#810CA1',    // Somrak
+      '--bubble': '#410B53'
+    }
+  },
+
+  // 4. MESTO PONOČI (Neon Metropolis) - Hladno steklo in utripajoči neon
+  neon_city: {
+    id: 'neon_city',
+    name: 'Neon klic',
+    type: 'dark',
+    colors: {
+      '--bg': '#0D1117',       // Temen asfalt
+      '--card': '#010409',     // Steklo nebotičnika
+      '--ink': '#F0F6FC',      // Digitalni zasloni
+      '--primary': '#58A6FF',  // Modri neon
+      '--primary-d': '#1F6FEB',
+      '--accent': '#FF007F',   // Rožnata reklama
+      '--muted': '#484F58',    // Megla nad mestom
+      '--bubble': '#161B22'
+    }
+  },
+
+  // 5. SLADKARIJE (Candy Factory) - Pasteli, ki spominjajo na lizike in sladkorno peno
+  candy_land: {
+    id: 'candy_land',
+    name: 'Sladki svet',
+    type: 'dark',
+    colors: {
+      '--bg': '#4D2A4F',       // Borovničev žele
+      '--card': '#311D3F',     // Čokoladni preliv
+      '--ink': '#FFFFFF',      // Sladkor v prahu
+      '--primary': '#FF85B3',  // Žvečilni gumi rožnata
+      '--primary-d': '#E06A9A',
+      '--accent': '#7FD1B9',   // Meta bonbon
+      '--muted': '#A29BB7',    // Sladkorna pena
+      '--bubble': '#603663'
+    }
+  },
+
+  // 6. LUNAPARK (Carnival Night) - Energija, luči in veselje pod luno
+  carnival_night: {
+    id: 'carnival_night',
+    name: 'Lunapark',
+    type: 'dark',
+    colors: {
+      '--bg': '#1A1A40',       // Globoko modro nebo
+      '--card': '#11112D',     // Konstrukcija vrtiljaka
+      '--ink': '#FFF9C4',      // Svetloba žarnic
+      '--primary': '#F44336',  // Šotorsko rdeča
+      '--primary-d': '#C62828',
+      '--accent': '#FFEB3B',   // Zlata vstopnica
+      '--muted': '#7986CB',    // Nočni sij
+      '--bubble': '#27275C'
+    }
+  },
+
+  // 7. POLARNI SIJ (Aurora Borealis) - Ples magičnih barv na severu
+  aurora_night: {
+    id: 'aurora_night',
+    name: 'Polarni ples',
+    type: 'dark',
+    colors: {
+      '--bg': '#011627',       // Arktična noč
+      '--card': '#010C16',     // Ledeni ocean
+      '--ink': '#E0FBFC',      // Sneg pod luno
+      '--primary': '#2EC4B6',  // Aurora turkizna
+      '--primary-d': '#249B91',
+      '--accent': '#9B5DE5',   // Vijolično valovanje
+      '--muted': '#415A77',    // Temne skale
+      '--bubble': '#022C44'
+    }
+  },
+
+  // 8. PUŠČAVSKI SOMRAK (Sahara Twilight) - Topel pesek in ohlajajoče nebo
+  sahara_twilight: {
+    id: 'sahara_twilight',
+    name: 'Peščeni mir',
+    type: 'dark',
+    colors: {
+      '--bg': '#432818',       // Globok rjav pesek
+      '--card': '#2E1A0F',     // Podzemna jama v puščavi
+      '--ink': '#FFE6A7',      // Svetloba zvezd na sipinah
+      '--primary': '#BB9457',  // Barva sipin
+      '--primary-d': '#997B46',
+      '--accent': '#6F1D1B',   // Kanček puščavske rože
+      '--muted': '#99582A',    // Suha trava
+      '--bubble': '#5A371F'
+    }
+  },
+
   starry_dark: {
     id: 'starry_dark',
     name: 'Noč zvezdna',
@@ -246,11 +258,11 @@ export const PALETTES = {
   }
 };
 
-
-
 export function applyPalette(paletteId) {
   const palette = PALETTES[paletteId];
-  if (!palette) return;
+  if (!palette) {
+    return;
+  }
 
   const root = document.documentElement;
   Object.entries(palette.colors).forEach(([property, value]) => {
@@ -267,10 +279,10 @@ export function applyPalette(paletteId) {
     root.style.setProperty('--mul-ink', '#E1F5FE');
     root.style.setProperty('--div-bg', '#E65100');
     root.style.setProperty('--div-ink', '#FFF3E0');
-    
+
     root.style.setProperty('--on-primary', '#000000');
     root.style.setProperty('--on-accent', '#000000');
-    
+
     root.style.setProperty('--grid-fill', palette.colors['--primary']);
     root.style.setProperty('--grid-stroke', 'rgba(255,255,255,0.1)');
   } else {
@@ -308,6 +320,6 @@ export function applyPalette(paletteId) {
   } else if (paletteId === 'starry_dark') {
     root.style.setProperty('--on-primary', '#000000');
   }
-  
+
   localStorage.setItem('math-game-palette', paletteId);
 }

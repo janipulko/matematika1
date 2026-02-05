@@ -13,10 +13,10 @@ export const animations = {
   /**
    * 1) CLOUDS – tvoja izvorna animacija (radialni mehurčki)
    */
-  clouds: `
+  neonStorm: `
     body {
       position: relative;
-      overflow-x: hidden;
+      overflow: hidden;
       background: var(--bg) !important;
       isolation: isolate;
     }
@@ -24,45 +24,51 @@ export const animations = {
     body::before, body::after {
       content: "";
       position: fixed;
-      top: -100%;
-      left: -100%;
-      width: 300%;
-      height: 300%;
+      inset: -100%;
       z-index: -2;
       pointer-events: none;
+      background-size: 300% 300%;
+      will-change: background-position, transform, filter, opacity;
     }
 
     body::before {
-      opacity: 0.45;
-      background: radial-gradient(circle at center, var(--bubble) 0%, transparent 70%);
-      animation: moveClouds 40s ease-in-out infinite;
+      opacity: 0.9;
+      filter: blur(70px) saturate(2);
+      mix-blend-mode: overlay;
+      background:
+        linear-gradient(100deg, var(--primary) 0%, var(--accent) 50%, var(--primary-d) 100%);
+      animation: neonSweepA 8s ease-in-out infinite;
     }
 
     body::after {
-      opacity: 0.25;
-      background: radial-gradient(circle at center, var(--primary) 0%, transparent 60%);
-      animation: moveClouds 60s ease-in-out infinite reverse;
+      opacity: 0.7;
+      filter: blur(90px) saturate(2.2) contrast(1.1);
+      mix-blend-mode: hard-light;
+      background:
+        linear-gradient(-100deg, var(--accent) 0%, var(--bubble) 50%, var(--primary) 100%);
+      animation: neonSweepB 10s ease-in-out infinite reverse;
     }
 
-    @keyframes moveClouds {
-      0%   { transform: translate(0, 0) scale(1); }
-      33%  { transform: translate(5%, 10%) scale(1.1); }
-      66%  { transform: translate(-5%, 5%) scale(0.9); }
-      100% { transform: translate(0, 0) scale(1); }
+    @keyframes neonSweepA {
+      0%   { background-position: 0% 40%; transform: scale(1.1); }
+      50%  { background-position: 100% 60%; transform: scale(1.2); }
+      100% { background-position: 0% 40%; transform: scale(1.1); }
+    }
+
+    @keyframes neonSweepB {
+      0%   { background-position: 100% 60%; transform: scale(1.15); }
+      50%  { background-position: 0% 40%;   transform: scale(1.25); }
+      100% { background-position: 100% 60%; transform: scale(1.15); }
     }
 
     @media (prefers-reduced-motion: reduce) {
       body::before, body::after { animation: none !important; }
     }
   `,
-
-  /**
-   * 2) NEON – linearni gradient glow s premikom
-   */
-  neon: `
+  vortex: `
     body {
       position: relative;
-      overflow-x: hidden;
+      overflow: hidden;
       background: var(--bg) !important;
       isolation: isolate;
     }
@@ -70,55 +76,120 @@ export const animations = {
     body::before, body::after {
       content: "";
       position: fixed;
-      top: -80%;
-      left: -80%;
-      width: 260%;
-      height: 260%;
+      inset: -110%;
       z-index: -2;
       pointer-events: none;
-      background-size: 200% 200%;
+      will-change: transform, filter, opacity;
     }
 
     body::before {
-      opacity: 0.5;
-      filter: blur(80px);
-      transform: scale(1.2);
-      background: linear-gradient(90deg, var(--primary), var(--accent));
-      animation: glowShift 12s ease-in-out infinite;
+      opacity: 0.8;
+      filter: blur(70px) saturate(2.1);
+      mix-blend-mode: hard-light;
+      background:
+        conic-gradient(
+          from 0deg at 50% 50%,
+          var(--primary),
+          var(--accent),
+          var(--bubble),
+          var(--primary-d),
+          var(--primary)
+        );
+      animation: vortexRotate 12s linear infinite;
     }
 
     body::after {
-      opacity: 0.35;
-      filter: blur(100px);
-      transform: scale(1.35);
-      background: linear-gradient(90deg, var(--accent), var(--primary-d));
-      animation: glowShiftReverse 16s ease-in-out infinite;
+      opacity: 0.7;
+      filter: blur(90px) saturate(2.3);
+      mix-blend-mode: overlay;
+      background:
+        radial-gradient(40% 40% at 25% 25%, var(--accent), transparent 65%),
+        radial-gradient(35% 35% at 75% 30%, var(--primary), transparent 65%),
+        radial-gradient(45% 45% at 50% 75%, var(--primary-d), transparent 65%);
+      animation: vortexPulse 16s ease-in-out infinite alternate;
     }
 
-    @keyframes glowShift {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    @keyframes vortexRotate {
+      0%   { transform: rotate(0deg) scale(1.05); }
+      50%  { transform: rotate(180deg) scale(1.22); }
+      100% { transform: rotate(360deg) scale(1.05); }
     }
 
-    @keyframes glowShiftReverse {
-      0%   { background-position: 100% 50%; }
-      50%  { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+    @keyframes vortexPulse {
+      0%   { transform: translate(-7%, -5%) scale(1.1); }
+      50%  { transform: translate(7%, 6%)    scale(1.27); }
+      100% { transform: translate(-7%, -5%) scale(1.1); }
     }
 
     @media (prefers-reduced-motion: reduce) {
       body::before, body::after { animation: none !important; }
     }
   `,
-
-  /**
-   * 3) SWEEP – rotirajoči konični gradient + rahli clouds
-   */
-  sweep: `
+  auroraMax: `
     body {
       position: relative;
-      overflow-x: hidden;
+      overflow: hidden;
+      background: var(--bg) !important;
+      isolation: isolate;
+    }
+
+    /* Aurora trakovi */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -120%;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.85;
+      filter: blur(90px) saturate(2.1) hue-rotate(8deg);
+      mix-blend-mode: overlay;
+      background:
+        radial-gradient(50% 35% at 20% 40%, var(--accent), transparent 60%),
+        radial-gradient(40% 30% at 65% 25%, var(--primary), transparent 60%),
+        radial-gradient(45% 40% at 70% 70%, var(--bubble), transparent 65%);
+      animation: auroraFlow 18s ease-in-out infinite alternate;
+    }
+
+    /* Dodatna globina z conic gradientom */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -110%;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.65;
+      filter: blur(75px) saturate(1.9);
+      mix-blend-mode: hard-light;
+      background:
+        conic-gradient(
+          from 45deg at 50% 50%,
+          var(--primary-d),
+          var(--accent),
+          var(--primary),
+          var(--accent),
+          var(--primary-d)
+        );
+      animation: auroraSpin 22s linear infinite reverse;
+    }
+
+    @keyframes auroraFlow {
+      0%   { transform: translate(-6%, 4%) scale(1.1); }
+      50%  { transform: translate(6%, -5%) scale(1.25); }
+      100% { transform: translate(-6%, 4%) scale(1.1); }
+    }
+
+    @keyframes auroraSpin {
+      0%   { transform: rotate(0deg) }
+      100% { transform: rotate(360deg) }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::before, body::after { animation: none !important; }
+    }
+  `, bokehPulseMax: `
+    body {
+      position: relative;
+      overflow: hidden;
       background: var(--bg) !important;
       isolation: isolate;
     }
@@ -126,54 +197,116 @@ export const animations = {
     body::before, body::after {
       content: "";
       position: fixed;
-      top: -90%;
-      left: -90%;
-      width: 280%;
-      height: 280%;
+      inset: -100%;
       z-index: -2;
       pointer-events: none;
+      will-change: transform, filter, opacity;
     }
 
     body::before {
-      opacity: 0.45;
-      filter: blur(80px);
-      transform-origin: 50% 50%;
-      background: conic-gradient(
-        from 0deg at 50% 50%,
-        var(--primary),
-        var(--accent),
-        var(--primary-d),
-        var(--primary)
-      );
-      animation: rotateSweep 20s linear infinite;
+      opacity: 0.85;
+      filter: blur(90px) saturate(2.2) contrast(1.2);
+      mix-blend-mode: hard-light;
+      background:
+        radial-gradient(30% 30% at 15% 30%, var(--accent), transparent 70%),
+        radial-gradient(35% 35% at 80% 20%, var(--primary), transparent 70%),
+        radial-gradient(28% 28% at 30% 80%, var(--bubble),  transparent 70%),
+        radial-gradient(32% 32% at 70% 70%, var(--primary-d), transparent 70%);
+      animation: bokehMaxA 20s ease-in-out infinite;
     }
 
     body::after {
-      opacity: 0.20;
-      filter: blur(100px);
-      background: radial-gradient(circle at center, var(--muted) 0%, transparent 65%);
-      animation: moveSweepClouds 24s ease-in-out infinite;
+      opacity: 0.7;
+      filter: blur(110px) saturate(2.4) brightness(1.1);
+      mix-blend-mode: overlay;
+      background:
+        radial-gradient(40% 40% at 50% 50%, var(--bubble), transparent 75%),
+        radial-gradient(28% 28% at 15% 75%, var(--accent), transparent 70%),
+        radial-gradient(30% 30% at 85% 50%, var(--primary), transparent 70%);
+      animation: bokehMaxB 26s ease-in-out infinite reverse;
     }
 
-    @keyframes rotateSweep {
-      to { transform: rotate(360deg); }
+    @keyframes bokehMaxA {
+      0%   { transform: translate(0%, 0%)   scale(1.15); }
+      50%  { transform: translate(6%, -5%)  scale(1.3); }
+      100% { transform: translate(0%, 0%)   scale(1.15); }
     }
 
-    @keyframes moveSweepClouds {
-      0%   { transform: translate(-3%, -4%) scale(1.0); }
-      50%  { transform: translate(4%, 3%)  scale(1.08); }
-      100% { transform: translate(-3%, -4%) scale(1.0); }
+    @keyframes bokehMaxB {
+      0%   { transform: translate(0%, 0%)   scale(1.2); }
+      50%  { transform: translate(-5%, 6%)  scale(1.35); }
+      100% { transform: translate(0%, 0%)   scale(1.2); }
     }
 
     @media (prefers-reduced-motion: reduce) {
       body::before, body::after { animation: none !important; }
     }
   `,
+  plasma: `
+    body {
+      position: relative;
+      overflow: hidden;
+      background: var(--bg) !important;
+      isolation: isolate;
+    }
 
-  /**
-   * 4) GRID – mreža + potujoč radialni pulz
-   */
-  grid: `
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      inset: -120%;
+      z-index: -2;
+      pointer-events: none;
+      will-change: transform, filter, opacity;
+    }
+
+    /* Glavni plazemski stožec (končni gradient) */
+    body::before {
+      opacity: 0.85;
+      filter: blur(60px) saturate(1.8) contrast(1.15);
+      mix-blend-mode: hard-light;
+      background:
+        conic-gradient(
+          from 0deg at 50% 50%,
+          var(--primary),
+          var(--accent),
+          var(--primary-d),
+          var(--bubble),
+          var(--accent),
+          var(--primary)
+        );
+      animation: plasmaSpin 14s linear infinite;
+    }
+
+    /* Radialni “plameni” */
+    body::after {
+      opacity: 0.75;
+      filter: blur(80px) saturate(2.2) brightness(1.05);
+      mix-blend-mode: overlay;
+      background:
+        radial-gradient(35% 35% at 20% 30%, var(--accent), transparent 70%),
+        radial-gradient(45% 45% at 80% 25%, var(--primary-d), transparent 70%),
+        radial-gradient(40% 40% at 50% 70%, var(--primary), transparent 70%);
+      animation: plasmaDrift 18s ease-in-out infinite alternate;
+    }
+
+    @keyframes plasmaSpin {
+      0%   { transform: rotate(0deg) scale(1.1); }
+      50%  { transform: rotate(180deg) scale(1.2); }
+      100% { transform: rotate(360deg) scale(1.1); }
+    }
+
+    @keyframes plasmaDrift {
+      0%   { transform: translate(-6%, -4%) scale(1.15); }
+      50%  { transform: translate(6%, 5%)   scale(1.28); }
+      100% { transform: translate(-6%, -4%) scale(1.15); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::before, body::after { animation: none !important; }
+    }
+  `,
+  grid:
+      `
     body {
       position: relative;
       overflow-x: hidden;
@@ -227,70 +360,8 @@ export const animations = {
     @media (prefers-reduced-motion: reduce) {
       body::before, body::after { animation: none !important; }
     }
-  `,
-
-  /**
-   * 5) BOKEH – več premikajočih se barvnih madežev
-   */
-  bokeh: `
-    body {
-      position: relative;
-      overflow-x: hidden;
-      background: var(--bg) !important;
-      isolation: isolate;
-    }
-
-    body::before, body::after {
-      content: "";
-      position: fixed;
-      top: -90%;
-      left: -90%;
-      width: 280%;
-      height: 280%;
-      z-index: -2;
-      pointer-events: none;
-    }
-
-    body::before {
-      opacity: 0.35;
-      filter: blur(80px);
-      transform: scale(1.2);
-      background:
-        radial-gradient(120px 120px at 20% 30%, var(--accent), transparent 70%),
-        radial-gradient(160px 160px at 80% 20%, var(--primary), transparent 70%),
-        radial-gradient(100px 100px at 30% 80%, var(--muted),  transparent 70%),
-        radial-gradient(140px 140px at 70% 70%, var(--primary-d), transparent 70%);
-      animation: bokehDriftA 26s ease-in-out infinite;
-    }
-
-    body::after {
-      opacity: 0.25;
-      filter: blur(100px);
-      transform: scale(1.3);
-      background:
-        radial-gradient(200px 200px at 50% 50%, var(--bubble), transparent 75%),
-        radial-gradient(140px 140px at 15% 75%, var(--accent), transparent 70%),
-        radial-gradient(120px 120px at 85% 50%, var(--primary), transparent 70%);
-      animation: bokehDriftB 34s ease-in-out infinite reverse;
-    }
-
-    @keyframes bokehDriftA {
-      0%   { transform: translate(0%, 0%)   scale(1.2); }
-      50%  { transform: translate(4%, -3%)  scale(1.3); }
-      100% { transform: translate(0%, 0%)   scale(1.2); }
-    }
-
-    @keyframes bokehDriftB {
-      0%   { transform: translate(0%, 0%)   scale(1.3); }
-      50%  { transform: translate(-3%, 3%)  scale(1.4); }
-      100% { transform: translate(0%, 0%)   scale(1.3); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      body::before, body::after { animation: none !important; }
-    }
-  `,
-};
+  `
+}
 
 const STYLE_ID = 'dynamic-bg-style-inline';
 
@@ -298,7 +369,7 @@ export function setDynamicBackgroundAnimation(name) {
   if (!animations[name]) {
     return null;
   }
-  
+
   // Shranimo zadnjo uporabljeno animacijo
   window._lastBodyBgKey = name;
 
@@ -319,7 +390,8 @@ export function initDynamicBackground() {
   let randomKey = keys[Math.floor(Math.random() * keys.length)];
 
   if (keys.length > 1 && randomKey === lastKey) {
-    randomKey = keys.filter(k => k !== lastKey)[Math.floor(Math.random() * (keys.length - 1))];
+    randomKey = keys.filter(k => k !== lastKey)[Math.floor(
+        Math.random() * (keys.length - 1))];
   }
 
   setDynamicBackgroundAnimation(randomKey);

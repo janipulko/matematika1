@@ -37,10 +37,12 @@ class ScoreGrid extends HTMLElement {
       const cellSize = (size - padding - totalGap) / 10;
 
       if (this.cat) {
-        // Mačka je zdaj v celici in se prilagodi njeni velikosti. 
-        // 110% velikosti celice je dovolj, da uhlji malce gledajo čez.
-        const catSize = Math.floor(cellSize * 0.8);
+        // Mačka je zdaj absolutno pozicionirana nad mrežo.
+        // Prilagodimo njeno velikost glede na celico.
+        const catSize = Math.floor(cellSize * 0.85);
         this.cat.setAttribute('size', catSize);
+        // Ponovno izračunamo pozicijo, če se je velikost spremenila
+        this._updateCatPosition(this._visualValue);
       }
 
       // Prilagodi velikost pasti
@@ -99,7 +101,7 @@ class ScoreGrid extends HTMLElement {
 
       const diff = this.value - this._visualValue;
       const step = diff > 0 ? 1 : -1;
-      
+
       this._visualValue += step;
       this._updateVisuals(this._visualValue);
 
@@ -109,7 +111,7 @@ class ScoreGrid extends HTMLElement {
 
       this._timer = setTimeout(() => {
         this._animationFrame = requestAnimationFrame(animate);
-      }, delay); 
+      }, delay);
     };
 
     this._animationFrame = requestAnimationFrame(animate);
@@ -121,35 +123,36 @@ class ScoreGrid extends HTMLElement {
     }
     this.cells.forEach((cell, i) => {
       const isFilled = i < n;
-      const isWaiting = !isFilled && i < this.value;
-      
-      cell.classList.toggle('filled', isFilled);
-      cell.classList.toggle('waiting', isWaiting);
+      // Celice "na čakanju" so tiste med trenutno vizualno vrednostjo n in ciljno vrednostjo this.value
+      const isWaiting = n < this.value 
+        ? (i >= n && i < this.value) // Gremo navzgor
+        : (i >= this.value && i < n); // Gremo navzdol
+
+      // Optimizacija: spremenimo razred le, če je potrebno
+      if (cell.classList.contains('filled') !== isFilled) {
+        cell.classList.toggle('filled', isFilled);
+      }
+      if (cell.classList.contains('waiting') !== isWaiting) {
+        cell.classList.toggle('waiting', isWaiting);
+      }
     });
 
     if (this.cat) {
       if (n > 0) {
-        const targetCell = this.cells[n - 1];
-        if (targetCell) {
-          this.cat.style.display = 'block';
-          if (this.cat.parentElement !== targetCell) {
-            targetCell.appendChild(this.cat);
-          }
-          this.cat.style.margin = '0';
+        this.cat.style.display = 'block';
+        this._updateCatPosition(n);
 
-          // Če je v celici past, muc poskoči in past se sproži
-          // To preverimo VEDNO ko muc pristane v celici (tudi če je že bil tam, 
-          // npr. ob prvem izrisu, čeprav takrat pasti običajno ni)
-          const trap = targetCell.querySelector('icon-trap');
-          if (triggerTraps && trap && !trap.hasAttribute('data-triggered')) {
+        if (triggerTraps) {
+          const targetCell = this.cells[n - 1];
+          const trap = targetCell ? targetCell.querySelector('icon-trap')
+              : null;
+          if (trap && !trap.hasAttribute('data-triggered')) {
             trap.setAttribute('data-triggered', 'true');
             this.cat.jump();
-            // Sprožimo eksplozijo čez kratek čas, da se ujema s poskokom
             setTimeout(() => {
               trap.trigger();
-              // Obvestimo igro, da je bila past odstranjena
               this.dispatchEvent(new CustomEvent('trap-triggered', {
-                detail: { index: n },
+                detail: {index: n},
                 bubbles: true,
                 composed: true
               }));
@@ -160,6 +163,36 @@ class ScoreGrid extends HTMLElement {
         this.cat.style.display = 'none';
       }
     }
+  }
+
+  _updateCatPosition(n) {
+    if (!this.cat || n <= 0 || !this.cells) {
+      return;
+    }
+
+    const index = n - 1;
+    const targetCell = this.cells[index];
+    const grid = this.shadowRoot.querySelector('.grid');
+
+    if (!targetCell || !grid) {
+      return;
+    }
+
+    // Pridobimo geometrijo grida in ciljne celice
+    const gridRect = grid.getBoundingClientRect();
+    const cellRect = targetCell.getBoundingClientRect();
+
+    // Izračunamo relativni položaj središča celice glede na grid
+    // translate3d bo premaknil zgornji levi kot mačke na to točko.
+    // Ker mačka nima določene width/height v % (zdaj uporablja piksle iz size),
+    // jo moramo centrirati ročno.
+    
+    const catRect = this.cat.getBoundingClientRect();
+    
+    const x = (cellRect.left - gridRect.left) + (cellRect.width / 2) - (catRect.width / 2)+catRect.width/3;
+    const y = (cellRect.top - gridRect.top) + (cellRect.height / 2) - (catRect.height / 2)+catRect.height/3;
+
+    this.cat.style.transform = `translate3d(calc(${x.toFixed(2)}px + var(--cat-offset-x)), calc(${y.toFixed(2)}px + var(--cat-offset-y)), 0)`;
   }
 
   setTraps(traps) {
@@ -180,15 +213,14 @@ class ScoreGrid extends HTMLElement {
             this._lastCellSize * 0.8) : 20;
         trap.setAttribute('size', trapSize);
         cell.appendChild(trap);
-      } 
-      // Če pasti ni v seznamu, a je na mreži (in ni v stanju proženja), jo odstranimo takoj
+      }
+          // Če pasti ni v seznamu, a je na mreži (in ni v stanju proženja), jo odstranimo takoj
       // To se zgodi ob resetu igre.
       else if (!isTrap && oldTrap && !oldTrap.hasAttribute('data-triggered')) {
         cell.removeAttribute('title');
         cell.classList.remove('trap');
         oldTrap.remove();
-      }
-      else if (!isTrap) {
+      } else if (!isTrap) {
         cell.removeAttribute('title');
         cell.classList.remove('trap');
       }
@@ -305,18 +337,22 @@ class ScoreGrid extends HTMLElement {
         }
 
         icon-cat {
-          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
-          pointer-events: none;
           position: absolute;
+          left: 0;
+          top: 0;
           z-index: 100;
-          /* Centriranje mačke, ki je večja od celice */
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          /* Zagotovimo, da se ne zamakne zaradi inline stilov */
-          margin: 0;
-          overflow: visible; /* Za srčke */
+          pointer-events: none;
+          will-change: transform;
+          transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          
+          /* Velikost se nastavlja dinamično preko atributa size */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          /* Fino nastavljanje zamika v pikslih */
+          --cat-offset-x: 0px;
+          --cat-offset-y: 0px;
         }
 
         .cell.trap {
@@ -350,9 +386,9 @@ class ScoreGrid extends HTMLElement {
         <div class="grid-frame">
           <div class="grid">
             ${cellsHTML}
+            <icon-cat type="${this.avatar}" style="display: none;"></icon-cat>
           </div>
         </div>
-        <icon-cat type="${this.avatar}" style="display: none;"></icon-cat>
       </div>
     `;
   }

@@ -425,7 +425,6 @@ class MathGame extends HTMLElement {
     this.setRecord();
   }
 
-
   setRecord = () => {
     const gameId = new URLSearchParams(location.search).get('num');
     if (gameId) {
@@ -437,7 +436,6 @@ class MathGame extends HTMLElement {
       }
     }
   }
-
 
   async initGame(params) {
     // Odstranimo morebitni obstoječi result-modal
@@ -753,7 +751,8 @@ class MathGame extends HTMLElement {
           <score-grid></score-grid>
         </div>
         <div class="section section-countdown">
-          <countdown-timer initial-time="60" ${this.currentCountTime !== undefined ? `current-time="${this.currentCountTime}"` : ''}></countdown-timer>
+          <countdown-timer initial-time="60" ${this.currentCountTime
+    !== undefined ? `current-time="${this.currentCountTime}"` : ''}></countdown-timer>
         </div>
         <div class="section section-steps">
           <step-indicator></step-indicator>
@@ -845,11 +844,13 @@ class MathGame extends HTMLElement {
   }
 
   onReset() {
+    const gameId = new URLSearchParams(location.search).get('num');
     this.sessionStars = 0;
     this.currentCountTime = undefined;
     const scoreEl = document.querySelector('session-score');
     if (scoreEl) {
       scoreEl.setAttribute('value', 0);
+      scoreEl.setAttribute('record', StarsProvider.getRecord(gameId));
     }
 
     this.sum = this.startSum || 1;
@@ -896,7 +897,7 @@ class MathGame extends HTMLElement {
         this.sound.victory(stars);
         const params = new URLSearchParams(location.search);
         const gameId = params.get('num');
-        
+
         // Shranimo napredek (korak), če je na voljo
         const step = params.get('step');
         if (step !== null) {
@@ -904,7 +905,8 @@ class MathGame extends HTMLElement {
           localStorage.setItem(`math-game-step-${gameType}`, step);
         }
 
-        await resultModal.show(true, stars, maxStars, this.sessionStars, gameId);
+        await resultModal.show(true, stars, maxStars, this.sessionStars,
+            gameId);
       } else {
         // Le vmesni cilj
         if (this.gridEl && this.gridEl.cat) {
