@@ -265,7 +265,7 @@ class ControlsBar extends HTMLElement {
         }
       </style>
       <div class="controls" role="group" aria-label="Kontrole operacij">
-      <div>test 123</div>
+     
       
 </div>
     `;

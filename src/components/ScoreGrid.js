@@ -124,9 +124,9 @@ class ScoreGrid extends HTMLElement {
     this.cells.forEach((cell, i) => {
       const isFilled = i < n;
       // Celice "na čakanju" so tiste med trenutno vizualno vrednostjo n in ciljno vrednostjo this.value
-      const isWaiting = n < this.value 
-        ? (i >= n && i < this.value) // Gremo navzgor
-        : (i >= this.value && i < n); // Gremo navzdol
+      const isWaiting = n < this.value
+          ? (i >= n && i < this.value) // Gremo navzgor
+          : (i >= this.value && i < n); // Gremo navzdol
 
       // Optimizacija: spremenimo razred le, če je potrebno
       if (cell.classList.contains('filled') !== isFilled) {
@@ -149,14 +149,14 @@ class ScoreGrid extends HTMLElement {
           if (trap && !trap.hasAttribute('data-triggered')) {
             trap.setAttribute('data-triggered', 'true');
             this.cat.jump();
-            setTimeout(() => {
-              trap.trigger();
-              this.dispatchEvent(new CustomEvent('trap-triggered', {
-                detail: {index: n},
-                bubbles: true,
-                composed: true
-              }));
-            }, 100);
+
+            trap.trigger();
+            this.dispatchEvent(new CustomEvent('trap-triggered', {
+              detail: {index: n},
+              bubbles: true,
+              composed: true
+            }));
+
           }
         }
       } else {
@@ -186,13 +186,20 @@ class ScoreGrid extends HTMLElement {
     // translate3d bo premaknil zgornji levi kot mačke na to točko.
     // Ker mačka nima določene width/height v % (zdaj uporablja piksle iz size),
     // jo moramo centrirati ročno.
-    
-    const catRect = this.cat.getBoundingClientRect();
-    
-    const x = (cellRect.left - gridRect.left) + (cellRect.width / 2) - (catRect.width / 2)+catRect.width/3;
-    const y = (cellRect.top - gridRect.top) + (cellRect.height / 2) - (catRect.height / 2)+catRect.height/3;
 
-    this.cat.style.transform = `translate3d(calc(${x.toFixed(2)}px + var(--cat-offset-x)), calc(${y.toFixed(2)}px + var(--cat-offset-y)), 0)`;
+    const catRect = this.cat.getBoundingClientRect();
+
+    const x = (cellRect.left - gridRect.left) + (cellRect.width / 2)
+        - (catRect.width / 2) + catRect.width / 3;
+    const y = (cellRect.top - gridRect.top) + (cellRect.height / 2)
+        - (catRect.height / 2) + catRect.height / 3;
+    
+    this.cat.style.left = x.toFixed(2) + 'px';
+    this.cat.style.top = y.toFixed(2) + 'px';
+
+    /*this.cat.style.transform = `translate3d(calc(${x.toFixed(
+        2)}px + var(--cat-offset-x)), calc(${y.toFixed(
+        2)}px + var(--cat-offset-y)), 0)`;*/
   }
 
   setTraps(traps) {
