@@ -193,7 +193,7 @@ class ScoreGrid extends HTMLElement {
         - (catRect.width / 2) + catRect.width / 3;
     const y = (cellRect.top - gridRect.top) + (cellRect.height / 2)
         - (catRect.height / 2) + catRect.height / 3;
-    
+
     this.cat.style.left = x.toFixed(2) + 'px';
     this.cat.style.top = y.toFixed(2) + 'px';
 
