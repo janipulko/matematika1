@@ -9,6 +9,13 @@
   <script type="module" src="unlock/UnlockPage.js"></script>
 </head>
 <body>
+<div id="loading-screen"
+     style="z-index: 99999; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: black">
+  <div
+      style="height: 100%; width: 100%; display: flex; justify-content: center; align-items: center;">
+    <img src="./icon.svg" alt="Logo" style="max-height: 33%; max-width: 33%">
+  </div>
+</div>
 <div class="container">
   <header>
     <a href="play.html" class="back-link">← Nazaj v igro</a>
@@ -16,7 +23,7 @@
   </header>
 
   <h1>Odkleni nove številke</h1>
-  
+
   <unlock-page></unlock-page>
 </div>
 

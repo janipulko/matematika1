@@ -176,6 +176,7 @@ export function applyPalette() {
 }
 
 export function applyPaletteByKey(key) {
+
   const p = PALETTES[key];
   if (!p) return;
 
@@ -222,6 +223,13 @@ export function applyPaletteByKey(key) {
   }
 
   localStorage.setItem('math-game-palette', key);
+
+  const removeLoadingScreen = () => {
+    const ls = document.querySelector("#loading-screen");
+    if(ls) ls.remove();
+  }
+
+  setTimeout(removeLoadingScreen, 200)
 }
 
 

@@ -21,9 +21,10 @@ const CHORD_DATA = {
   "Dm":    [NOTE_COEF["D"], NOTE_COEF["F"], NOTE_COEF["A"]],          // Rahla melanholija
   "Em":    [NOTE_COEF["E"], NOTE_COEF["G"], NOTE_COEF["B"]],          // Introspekcija
   "Fmaj":  [NOTE_COEF["F"], NOTE_COEF["A"], NOTE_COEF["C"]],          // Stabilnost, rast
-  "Gmaj":  [NOTE_COEF["G"], NOTE_COEF["B"], NOTE_COEF["D"]],          // Svetloba, težnja k vrnitvi
-  "Am":    [NOTE_COEF["A"], NOTE_COEF["C"], NOTE_COEF["E"]],          // Naravni mol, resnost
-  "Bdim":  [NOTE_COEF["B"], NOTE_COEF["D"], NOTE_COEF["F"]],          // Nestabilnost, "razpoka"
+  "Gmaj":  [NOTE_COEF["G"], NOTE_COEF["B"], NOTE_COEF["D"]],
+  "Am":    [NOTE_COEF["A"], NOTE_COEF["C"], NOTE_COEF["E"]],
+  "Bdim":  [NOTE_COEF["B"], NOTE_COEF["D"], NOTE_COEF["F"]],
+  "Bbmaj7": [NOTE_COEF["A#"], NOTE_COEF["D"], NOTE_COEF["F"], NOTE_COEF["A"]],
 
   // --- SEPTIMNI AKORDI (Večja kompleksnost vzorca) ---
   "Cmaj7": [NOTE_COEF["C"], NOTE_COEF["E"], NOTE_COEF["G"], NOTE_COEF["B"]],
@@ -37,6 +38,7 @@ const CHORD_DATA = {
   // --- DODATNA TEKSTURA (Za tiste posebne trenutke v igri) ---
   "Cadd9": [NOTE_COEF["C"], NOTE_COEF["E"], NOTE_COEF["G"], NOTE_COEF["D"]], // Zelo odprt, otroški zvok
   "Asus4": [NOTE_COEF["A"], NOTE_COEF["D"], NOTE_COEF["E"]],                // Lebdenje, neodločnost
+  "Gmaj":  [NOTE_COEF["G"], NOTE_COEF["B"], NOTE_COEF["D"]],                // Dodano za varnost
   "Gsus4": [NOTE_COEF["G"], NOTE_COEF["C"], NOTE_COEF["D"]],                // Napetost, ki čaka na razrešitev
   "Fadd9": [NOTE_COEF["F"], NOTE_COEF["A"], NOTE_COEF["C"], NOTE_COEF["G"]], // Zelo moderen, prostoren zvok
   "Am9":   [NOTE_COEF["A"], NOTE_COEF["C"], NOTE_COEF["E"], NOTE_COEF["G"], NOTE_COEF["B"]], // Sanjavo
@@ -226,7 +228,7 @@ function processStep() {
       cycleCounter = 0;
       currentSetIndex = (currentSetIndex + 1) % DYNAMICS_SETS.length;
       currentBassLineIndex = Math.floor(Math.random() * BASS_LINES.length);
-      console.log("Struktura: Nova dinamika in bas vzorec.");
+      console.log("Struktura: Nova dinamika in bas vzorec.", {currentSetIndex, currentBassLineIndex});
     }
   }
 
@@ -247,6 +249,11 @@ function processStep() {
   }
 
   const possibleNotes = CHORD_DATA[currentChord];
+  if (!possibleNotes) {
+    console.warn(`Akord ${currentChord} ni definiran v CHORD_DATA.`);
+    stepCounter++;
+    return;
+  }
   const coef = possibleNotes[Math.floor(Math.random() * possibleNotes.length)];
   const octave = Math.random() > 0.6 ? 16 : 8;
   const mFreq = coef * BASE_FREQ * octave;
@@ -279,7 +286,11 @@ function startContinuousMusic() {
 }
 
 function runTick() {
-  processStep(); // Izvede trenutni korak (zvok, logika)
+  try {
+    processStep(); // Izvede trenutni korak (zvok, logika)
+  } catch (e) {
+    console.error("Napaka v processStep:", e);
+  }
 
   // --- LOGIKA DRIFTA ---
   // Vsakih 32 korakov rahlo spremenimo tempo za bolj naraven občutek
