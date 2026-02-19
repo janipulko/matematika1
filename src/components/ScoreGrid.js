@@ -290,7 +290,7 @@ class ScoreGrid extends HTMLElement {
 
 
           background: linear-gradient(var(--bubble) 0 0) left top    / 50% 50% no-repeat,
-          linear-gradient(var(--mul-bg) 0 0) right top    / 50% 50% no-repeat,
+          linear-gradient(var(--bubble-2) 0 0) right top    / 50% 50% no-repeat,
           linear-gradient(var(--bg) 0 0) left bottom / 50% 50% no-repeat,
           linear-gradient(var(--card) 0 0) right bottom / 50% 50% no-repeat;
 

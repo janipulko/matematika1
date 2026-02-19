@@ -1,325 +1,228 @@
 export const PALETTES = {
-
-// 1. CVETOČE ČEŠNJE (Sakura Night) - Japonski mir, kontrast rjavega lesa in nežnih cvetov
+  // 1. CVETOČE ČEŠNJE (Sakura Night)
   sakura_night: {
     id: 'sakura_night',
     name: 'Japonski vrt',
-    type: 'dark',
-    colors: {
-      '--bg': '#2D1E1E',       // Temen lesni ton
-      '--card': '#1C1212',     // Globoka snov drevesa
-      '--ink': '#FFF0F5',      // Nežna bela (cvetni lističi)
-      '--primary': '#FFB7C5',  // Sakura rožnata
-      '--primary-d': '#E098A7',
-      '--accent': '#A7D08C',   // Mlado zeleno listje
-      '--muted': '#8D7B7B',    // Megla pod goro Fuji
-      '--bubble': '#3D2B2B'
-    }
+    base: [0, 20, 15],
+    primary: [348, 100, 86],
+    accent: [96, 40, 68],
+    muted: [0, 7, 52]
   },
 
-  // 2. DŽUNGLA (Amazonia) - Globoke zelene plasti in eksotični ptiči
+  // 2. DŽUNGLA (Amazonia)
   amazon_jungle: {
     id: 'amazon_jungle',
     name: 'Skrita džungla',
-    type: 'dark',
-    colors: {
-      '--bg': '#0B1A13',       // Globoka senca krošenj
-      '--card': '#050F0A',     // Srce gozda
-      '--ink': '#E8F5E9',      // Svetloba, ki prodre skozi liste
-      '--primary': '#4CAF50',  // Živo zelena
-      '--primary-d': '#388E3C',
-      '--accent': '#FFC107',   // Kljun eksotične ptice (zlato)
-      '--muted': '#4E6B5E',    // Mah in lišaji
-      '--bubble': '#142E22'
-    }
+    base: [150, 40, 7],
+    primary: [122, 39, 49],
+    accent: [45, 100, 51],
+    muted: [153, 16, 36]
   },
 
-  // 3. SONČNI ZAHOD (Cyber Sunset) - Prehod iz ognjene v vijolično nebo
+  // 3. SONČNI ZAHOD (Cyber Sunset)
   sunset_horizon: {
     id: 'sunset_horizon',
     name: 'Zadnji žarek',
-    type: 'dark',
-    colors: {
-      '--bg': '#2D033B',       // Večerno nebo
-      '--card': '#16001E',     // Silhueta obzorja
-      '--ink': '#FFE5E5',      // Odsev na oblakih
-      '--primary': '#FF6000',  // Sončni ogenj
-      '--primary-d': '#D35400',
-      '--accent': '#FFD700',   // Zadnji zlat sij
-      '--muted': '#810CA1',    // Somrak
-      '--bubble': '#410B53'
-    }
+    base: [287, 90, 12],
+    primary: [23, 100, 50],
+    accent: [51, 100, 50],
+    muted: [287, 86, 34]
   },
 
-  // 4. MESTO PONOČI (Neon Metropolis) - Hladno steklo in utripajoči neon
+  // 4. MESTO PONOČI (Neon Metropolis)
   neon_city: {
     id: 'neon_city',
     name: 'Neon klic',
-    type: 'dark',
-    colors: {
-      '--bg': '#0D1117',       // Temen asfalt
-      '--card': '#010409',     // Steklo nebotičnika
-      '--ink': '#F0F6FC',      // Digitalni zasloni
-      '--primary': '#58A6FF',  // Modri neon
-      '--primary-d': '#1F6FEB',
-      '--accent': '#FF007F',   // Rožnata reklama
-      '--muted': '#484F58',    // Megla nad mestom
-      '--bubble': '#161B22'
-    }
+    base: [215, 27, 7],
+    primary: [212, 100, 67],
+    accent: [330, 100, 50],
+    muted: [213, 10, 31]
   },
 
-  // 5. SLADKARIJE (Candy Factory) - Pasteli, ki spominjajo na lizike in sladkorno peno
+  // 5. SLADKARIJE (Candy Factory)
   candy_land: {
     id: 'candy_land',
     name: 'Sladki svet',
-    type: 'dark',
-    colors: {
-      '--bg': '#4D2A4F',       // Borovničev žele
-      '--card': '#311D3F',     // Čokoladni preliv
-      '--ink': '#FFFFFF',      // Sladkor v prahu
-      '--primary': '#FF85B3',  // Žvečilni gumi rožnata
-      '--primary-d': '#E06A9A',
-      '--accent': '#7FD1B9',   // Meta bonbon
-      '--muted': '#A29BB7',    // Sladkorna pena
-      '--bubble': '#603663'
-    }
+    base: [296, 30, 24],
+    primary: [338, 100, 76],
+    accent: [162, 45, 66],
+    muted: [254, 16, 66]
   },
 
-  // 6. LUNAPARK (Carnival Night) - Energija, luči in veselje pod luno
+  // 6. LUNAPARK (Carnival Night)
   carnival_night: {
     id: 'carnival_night',
     name: 'Lunapark',
-    type: 'dark',
-    colors: {
-      '--bg': '#1A1A40',       // Globoko modro nebo
-      '--card': '#11112D',     // Konstrukcija vrtiljaka
-      '--ink': '#FFF9C4',      // Svetloba žarnic
-      '--primary': '#F44336',  // Šotorsko rdeča
-      '--primary-d': '#C62828',
-      '--accent': '#FFEB3B',   // Zlata vstopnica
-      '--muted': '#7986CB',    // Nočni sij
-      '--bubble': '#27275C'
-    }
+    base: [240, 43, 18],
+    primary: [4, 90, 58],
+    accent: [54, 100, 62],
+    muted: [231, 48, 64]
   },
 
-  // 7. POLARNI SIJ (Aurora Borealis) - Ples magičnih barv na severu
+  // 7. POLARNI SIJ (Aurora Borealis)
   aurora_night: {
     id: 'aurora_night',
     name: 'Polarni ples',
-    type: 'dark',
-    colors: {
-      '--bg': '#011627',       // Arktična noč
-      '--card': '#010C16',     // Ledeni ocean
-      '--ink': '#E0FBFC',      // Sneg pod luno
-      '--primary': '#2EC4B6',  // Aurora turkizna
-      '--primary-d': '#249B91',
-      '--accent': '#9B5DE5',   // Vijolično valovanje
-      '--muted': '#415A77',    // Temne skale
-      '--bubble': '#022C44'
-    }
+    base: [207, 95, 8],
+    primary: [174, 62, 47],
+    accent: [266, 75, 63],
+    muted: [212, 29, 36]
   },
 
-  // 8. PUŠČAVSKI SOMRAK (Sahara Twilight) - Topel pesek in ohlajajoče nebo
+  // 8. PUŠČAVSKI SOMRAK (Sahara Twilight)
   sahara_twilight: {
     id: 'sahara_twilight',
     name: 'Peščeni mir',
-    type: 'dark',
-    colors: {
-      '--bg': '#432818',       // Globok rjav pesek
-      '--card': '#2E1A0F',     // Podzemna jama v puščavi
-      '--ink': '#FFE6A7',      // Svetloba zvezd na sipinah
-      '--primary': '#BB9457',  // Barva sipin
-      '--primary-d': '#997B46',
-      '--accent': '#6F1D1B',   // Kanček puščavske rože
-      '--muted': '#99582A',    // Suha trava
-      '--bubble': '#5A371F'
-    }
+    base: [22, 47, 18],
+    primary: [36, 41, 54],
+    accent: [1, 61, 27],
+    muted: [25, 57, 38]
   },
 
+  // 9. NOČ ZVEZDNA
   starry_dark: {
     id: 'starry_dark',
     name: 'Noč zvezdna',
-    type: 'dark',
-    colors: {
-      '--bg': '#4A4E6D',
-      '--card': '#22223B',
-      '--ink': '#F9FFC6',
-      '--primary': '#FFC2D1',     // svetlejša rožnata (dvignjen kontrast)
-      '--primary-d': '#FFA6BE',
-      '--accent': '#9A8C98',
-      '--muted': '#C9ADA7',
-      '--bubble': '#414461'
-    }
+    base: [232, 19, 36],
+    primary: [345, 100, 88],
+    accent: [310, 6, 57],
+    muted: [11, 24, 72]
   },
+
+  // 10. MATERIAL DARK
   material: {
     id: 'material',
     name: 'Material Dark',
-    type: 'dark',
-    colors: {
-      '--bg': '#121212',
-      '--card': '#1E1E1E',
-      '--ink': '#E0E0E0',
-      '--primary': '#BB86FC',
-      '--primary-d': '#9965F4',
-      '--accent': '#03DAC6',
-      '--muted': '#9E9E9E',
-      '--bubble': '#2C2C2C'
-    }
+    base: [0, 0, 7],
+    primary: [263, 98, 76],
+    accent: [174, 97, 43],
+    muted: [0, 0, 62]
   },
+
+  // 11. OCEAN NIGHT
   ocean_night: {
     id: 'ocean_night',
     name: 'Ocean Night',
-    type: 'dark',
-    colors: {
-      '--bg': '#003F53',
-      '--card': '#002B39',
-      '--ink': '#F0F0F0',
-      '--primary': '#00B4D8',
-      '--primary-d': '#0096B4',
-      '--accent': '#48CAE4',
-      '--muted': '#90E0EF',
-      '--bubble': '#004E66'
-    }
+    base: [195, 100, 16],
+    primary: [190, 100, 42],
+    accent: [190, 75, 59],
+    muted: [190, 80, 75]
   },
+
+  // 12. BLACKBERRY
   blackberry: {
     id: 'blackberry',
     name: 'Blackberry friendly',
-    type: 'dark',
-    colors: {
-      '--bg': '#121212',
-      '--card': '#1A1A1A',
-      '--ink': '#E0E0E0',
-      '--primary': '#8AB4F8',     // svetla modra namesto pretemne
-      '--primary-d': '#669DF6',
-      '--accent': '#CF6679',
-      '--muted': '#757575',
-      '--bubble': '#212121'
-    }
+    base: [0, 0, 7],
+    primary: [217, 89, 76],
+    accent: [349, 52, 61],
+    muted: [0, 0, 46]
   },
+
+  // 13. TEMNA PISANA
   dark_vibrant: {
     id: 'dark_vibrant',
     name: 'Temna pisana',
-    type: 'dark',
-    colors: {
-      '--bg': '#211951',
-      '--card': '#150E36',
-      '--ink': '#FFFFFF',
-      '--primary': '#74E291',
-      '--primary-d': '#5AC275',
-      '--accent': '#F7E987',
-      '--muted': '#A5A5A5',
-      '--bubble': '#2A2066'
-    }
+    base: [248, 53, 21],
+    primary: [136, 65, 67],
+    accent: [52, 90, 75],
+    muted: [0, 0, 65]
   },
+
+  // 14. NOČNA JESEN
   autumn_night: {
     id: 'autumn_night',
     name: 'Nočna jesen',
-    type: 'dark',
-    colors: {
-      '--bg': '#402B3A',
-      '--card': '#2E1F2A',
-      '--ink': '#F8F4EC',
-      '--primary': '#FF9BD2',
-      '--primary-d': '#E07FB4',
-      '--accent': '#D63484',
-      '--muted': '#A0909B',
-      '--bubble': '#4F3648'
-    }
+    base: [311, 20, 21],
+    primary: [327, 100, 80],
+    accent: [331, 66, 52],
+    muted: [318, 7, 59]
   },
+
+  // 15. ZVEZDNI DAN
   stellar: {
     id: 'stellar',
     name: 'Zvezdni dan',
-    type: 'dark',
-    colors: {
-      '--bg': '#280274',
-      '--card': '#1C0152',
-      '--ink': '#E9F6FF',
-      '--primary': '#FDE767',
-      '--primary-d': '#D9C557',
-      '--accent': '#FF90BC',
-      '--muted': '#9186B1',
-      '--bubble': '#350394'
-    }
+    base: [260, 97, 23],
+    primary: [51, 98, 70],
+    accent: [336, 100, 78],
+    muted: [256, 21, 61]
   },
+
+  // 16. HLADNA NOČ
   cold_night: {
     id: 'cold_night',
     name: 'Hladna noč',
-    type: 'dark',
-    colors: {
-      '--bg': '#0C359E',
-      '--card': '#08256E',
-      '--ink': '#FFF67E',
-      '--primary': '#FFB5DA',
-      '--primary-d': '#E09BBF',
-      '--accent': '#EE99C2',
-      '--muted': '#8EA2D9',
-      '--bubble': '#1044CC'
-    }
+    base: [223, 86, 33],
+    primary: [330, 100, 86],
+    accent: [331, 69, 77],
+    muted: [224, 52, 70]
   }
 };
 
-export function applyPalette(paletteId) {
-  const palette = PALETTES[paletteId];
-  if (!palette) {
-    return;
-  }
+function getRandomKey() {
+  const keys = Object.keys(PALETTES);
+  return keys[Math.floor(Math.random() * keys.length)];
+}
+
+export function applyRandomPalette() {
+  applyPaletteByKey(getRandomKey())
+}
+
+export function applyPalette() {
+  const paletteId = localStorage.getItem('math-game-palette');
+  const key = paletteId || getRandomKey();
+  applyPaletteByKey(key);
+}
+
+export function applyPaletteByKey(key) {
+  const p = PALETTES[key];
+  if (!p) return;
 
   const root = document.documentElement;
-  Object.entries(palette.colors).forEach(([property, value]) => {
-    root.style.setProperty(property, value);
-  });
+  const [bh, bs, bl] = p.base;
+  const [ph, ps, pl] = p.primary;
+  const [ah, as, al] = p.accent;
+  const [mh, ms, ml] = p.muted;
 
-  // Prilagodi barve operacij glede na tip palete za optimalen kontrast
-  if (palette.type === 'dark') {
-    root.style.setProperty('--pos-bg', '#1B5E20');
-    root.style.setProperty('--pos-ink', '#C8E6C9');
-    root.style.setProperty('--neg-bg', '#B71C1C');
-    root.style.setProperty('--neg-ink', '#FFCDD2');
-    root.style.setProperty('--mul-bg', '#01579B');
-    root.style.setProperty('--mul-ink', '#E1F5FE');
-    root.style.setProperty('--div-bg', '#E65100');
-    root.style.setProperty('--div-ink', '#FFF3E0');
+  const colors = {
+    '--bg': `hsla(${bh}, ${bs}%, ${bl}%, 1)`,
+    '--card': `hsla(${bh}, ${bs + 5}%, ${bl - 5}%, 1)`,
+    '--bubble': `hsla(${bh}, ${bs}%, ${bl + 10}%, 1)`,
+    '--bubble-2': `hsla(${bh}, ${bs -10}%, ${bl - 6}%, 0.7)`,
+    '--ink': `hsla(${ph}, 20%, 95%, 1)`,
+    
+    '--primary': `hsla(${ph}, ${ps}%, ${pl}%, 1)`,
+    '--primary-d': `hsla(${ph}, ${ps}%, ${pl - 15}%, 1)`,
+    '--on-primary': pl > 70 ? '#000000' : '#ffffff',
 
-    root.style.setProperty('--on-primary', '#000000');
-    root.style.setProperty('--on-accent', '#000000');
+    '--accent': `hsla(${ah}, ${as}%, ${al}%, 1)`,
+    '--on-accent': al > 70 ? '#000000' : '#ffffff',
 
-    root.style.setProperty('--grid-fill', palette.colors['--primary']);
-    root.style.setProperty('--grid-stroke', 'rgba(255,255,255,0.1)');
-  } else {
-    root.style.setProperty('--pos-bg', '#C8E6C9');
-    root.style.setProperty('--pos-ink', '#194d23');
-    root.style.setProperty('--neg-bg', '#FFCDD2');
-    root.style.setProperty('--neg-ink', '#7a1c1c');
-    root.style.setProperty('--mul-bg', '#E1F5FE');
-    root.style.setProperty('--mul-ink', '#01579B');
-    root.style.setProperty('--div-bg', '#FFF3E0');
-    root.style.setProperty('--div-ink', '#E65100');
+    '--muted': `hsla(${mh}, ${ms}%, ${ml}%, 1)`,
 
-    root.style.setProperty('--on-primary', '#FFFFFF');
-    root.style.setProperty('--on-accent', '#000000');
+    // Operacije - prilagojene s saturacijo palete
+    '--pos-bg': `hsla(140, ${Math.min(ps, 40)}%, 90%, 1)`,
+    '--pos-ink': `hsla(140, ${Math.min(ps, 60)}%, 25%, 1)`,
+    '--neg-bg': `hsla(0, ${Math.min(ps, 50)}%, 90%, 1)`,
+    '--neg-ink': `hsla(0, ${Math.min(ps, 60)}%, 30%, 1)`,
+    '--mul-bg': `hsla(210, ${Math.min(ps, 50)}%, 90%, 1)`,
+    '--mul-ink': `hsla(210, ${Math.min(ps, 70)}%, 35%, 1)`,
+    '--div-bg': `hsla(50, ${Math.min(ps, 60)}%, 90%, 1)`,
+    '--div-ink': `hsla(50, ${Math.min(ps, 80)}%, 30%, 1)`,
 
-    root.style.setProperty('--grid-fill', '#FFE082');
-    root.style.setProperty('--grid-stroke', '#dfe7ef');
+    '--grid-fill': `hsla(${ph}, ${ps}%, ${pl}%, 0.4)`,
+    '--grid-stroke': `hsla(${mh}, ${ms}%, ${ml}%, 0.6)`,
+    '--radius': 'clamp(4px, 1vh, 10px)',
+    '--radius-sm': 'clamp(3px, 0.8vh, 7px)'
+  };
+
+  for (const [prop, val] of Object.entries(colors)) {
+    root.style.setProperty(prop, val);
   }
 
-  // Posebni popravki za določene palete za zagotavljanje kontrasta
-  if (paletteId === 'material') {
-    root.style.setProperty('--on-primary', '#000000');
-  } else if (paletteId === 'ocean_night') {
-    root.style.setProperty('--on-primary', '#FFFFFF');
-  } else if (paletteId === 'blackberry') {
-    root.style.setProperty('--on-primary', '#FFFFFF');
-  } else if (paletteId === 'dark_vibrant') {
-    root.style.setProperty('--on-primary', '#000000');
-  } else if (paletteId === 'autumn_night') {
-    root.style.setProperty('--on-primary', '#000000');
-  } else if (paletteId === 'stellar') {
-    root.style.setProperty('--on-primary', '#000000');
-  } else if (paletteId === 'cold_night') {
-    root.style.setProperty('--on-primary', '#000000');
-  } else if (paletteId === 'starry_dark') {
-    root.style.setProperty('--on-primary', '#000000');
-  }
-
-  localStorage.setItem('math-game-palette', paletteId);
+  localStorage.setItem('math-game-palette', key);
 }
+
+
+

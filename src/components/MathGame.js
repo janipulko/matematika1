@@ -3,7 +3,6 @@ import './ScoreGrid.js';
 import './StepIndicator.js';
 import './ControlsBar.js';
 import './SettingsModal.js';
-import './ColorSettingsModal.js';
 import './ResultModal.js';
 import './SessionScore.js';
 import './CountdownTimer.js';

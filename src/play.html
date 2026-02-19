@@ -4,18 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vesela matematika</title>
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#26C6DA">
   <link rel="apple-touch-icon" href="icon.svg">
   <style>
-    :root {
-      /* Initial fallback values to prevent empty vars before JS runs */
-      --bg: #f7fafc;
-      --card: #ffffff;
-      --ink: #223;
-      --primary: #26C6DA;
-      --bubble: #e5eef6;
-    }
+
+
     body {
       margin: 0;
       padding: 0;
@@ -24,94 +17,17 @@
     }
   </style>
   <script type="module">
-    import { PALETTES } from './utils/palettes.js';
-    import { initDynamicBackground } from './utils/background.js';
-    export function applyRandomPalette() {
-      const keys = Object.keys(PALETTES);
-      const randomKey = keys[Math.floor(Math.random() * keys.length)];
-      const palette = PALETTES[randomKey];
-      const root = document.documentElement;
-      for (const [prop, val] of Object.entries(palette.colors)) {
-        root.style.setProperty(prop, val);
-      }
-      if (palette.type === 'dark') {
-        root.style.setProperty('--pos-bg', '#1B5E20'); root.style.setProperty('--pos-ink', '#C8E6C9');
-        root.style.setProperty('--neg-bg', '#B71C1C'); root.style.setProperty('--neg-ink', '#FFCDD2');
-        root.style.setProperty('--mul-bg', '#01579B'); root.style.setProperty('--mul-ink', '#E1F5FE');
-        root.style.setProperty('--div-bg', '#E65100'); root.style.setProperty('--div-ink', '#FFF3E0');
-        root.style.setProperty('--on-primary', '#000000');
-        root.style.setProperty('--on-accent', '#000000');
-        root.style.setProperty('--grid-fill', palette.colors['--primary']);
-        root.style.setProperty('--grid-stroke', 'rgba(255,255,255,0.1)');
-      } else {
-        root.style.setProperty('--pos-bg', '#C8E6C9'); root.style.setProperty('--pos-ink', '#194d23');
-        root.style.setProperty('--neg-bg', '#FFCDD2'); root.style.setProperty('--neg-ink', '#7a1c1c');
-        root.style.setProperty('--mul-bg', '#E1F5FE'); root.style.setProperty('--mul-ink', '#01579B');
-        root.style.setProperty('--div-bg', '#FFF3E0'); root.style.setProperty('--div-ink', '#E65100');
-        root.style.setProperty('--on-primary', '#FFFFFF');
-        root.style.setProperty('--on-accent', '#000000');
-        root.style.setProperty('--grid-fill', '#FFE082');
-        root.style.setProperty('--grid-stroke', '#dfe7ef');
-      }
-      
-      const pId = randomKey;
-      if (pId === 'material') root.style.setProperty('--on-primary', '#000000');
-      else if (pId === 'ocean_night') root.style.setProperty('--on-primary', '#FFFFFF');
-      else if (pId === 'blackberry') root.style.setProperty('--on-primary', '#FFFFFF');
-      else if (pId === 'dark_vibrant') root.style.setProperty('--on-primary', '#000000');
-      else if (pId === 'autumn_night') root.style.setProperty('--on-primary', '#000000');
-      else if (pId === 'stellar') root.style.setProperty('--on-primary', '#000000');
-      else if (pId === 'cold_night') root.style.setProperty('--on-primary', '#000000');
-      else if (pId === 'starry_dark') root.style.setProperty('--on-primary', '#000000');
-      
-      /* window.currentPaletteId = pId; */
-    }
 
-    (function() {
+    import {initDynamicBackground} from './utils/background.js';
+    import {applyRandomPalette} from "./utils/palettes.js";
+
+    (function () {
       applyRandomPalette();
       initDynamicBackground();
     })();
     window.applyRandomPalette = applyRandomPalette;
   </script>
   <style>
-    /* ===========================
-       Globalni stili in barvna paleta
-       =========================== */
-    :root {
-      --bg: #f7fafc;
-      --card: #ffffff;
-      --ink: #223;
-      --muted: #6b7280;
-      --primary: #26C6DA; /* turkizna */
-      --primary-d: #1aa7b7;
-      --accent: #FFD54F; /* rumena */
-      --accent-d: #f4c02e;
-      --ok: #66BB6A; /* zelena */
-      --warn: #FFA726; /* oranžna */
-      --danger: #EF5350; /* rdeča */
-      --gold: #F2C94C;
-      --gold-d: #D4A017;
-      --bubble: #e5eef6;
-      --grid-stroke: #dfe7ef;
-      --grid-fill: #FFE082; /* mehka rumena */
-      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      --radius: 16px;
-      --radius-sm: 12px;
-
-      /* Dodatne barve za kontrast na gumbih */
-      --on-primary: #ffffff;
-      --on-accent: #000000;
-
-      /* Barve za gumbe operacij */
-      --pos-bg: #C8E6C9;
-      --pos-ink: #194d23;
-      --neg-bg: #FFCDD2;
-      --neg-ink: #7a1c1c;
-      --mul-bg: #E1F5FE;
-      --mul-ink: #01579B;
-      --div-bg: #FFF3E0;
-      --div-ink: #E65100;
-    }
 
     * {
       box-sizing: border-box
@@ -158,12 +74,15 @@
       z-index: 10;
       backdrop-filter: blur(4px);
     }
+
     .settings-trigger {
       right: 15px;
     }
+
     .reset-trigger {
       left: 15px;
     }
+
     session-score {
       position: absolute;
       top: 10px;
@@ -171,13 +90,16 @@
       transform: translateX(-50%);
       z-index: 10;
     }
+
     .settings-trigger:hover, .reset-trigger:hover {
       background: var(--primary);
       color: var(--on-primary, white);
     }
+
     .settings-trigger:hover {
       transform: rotate(30deg);
     }
+
     .reset-trigger:hover {
       transform: rotate(-90deg);
     }
@@ -189,9 +111,18 @@
         height: 36px;
         font-size: 18px;
       }
-      .settings-trigger { right: 10px; }
-      .reset-trigger { left: 10px; }
-      session-score { top: 5px; }
+
+      .settings-trigger {
+        right: 10px;
+      }
+
+      .reset-trigger {
+        left: 10px;
+      }
+
+      session-score {
+        top: 5px;
+      }
     }
 
 
@@ -200,8 +131,12 @@
 </head>
 <body>
 <session-score></session-score>
-<button class="reset-trigger" title="Ponastavi" onclick="document.querySelector('math-game').onReset()">↺</button>
-<button class="settings-trigger" title="Nastavitve" onclick="document.querySelector('math-game').settingsTrigger.click()">⚙️</button>
+<button class="reset-trigger" title="Ponastavi"
+        onclick="document.querySelector('math-game').onReset()">↺
+</button>
+<button class="settings-trigger" title="Nastavitve"
+        onclick="document.querySelector('math-game').settingsTrigger.click()">⚙️
+</button>
 <div class="app">
 
   <math-game></math-game>
@@ -209,53 +144,7 @@
 
 </div>
 
-<script>
-  const USE_SW = false; // Nastavi na false med razvojem
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      if (USE_SW) {
-        navigator.serviceWorker.register('sw.js')
-        .then(reg => {
-          console.log('Service Worker registriran!', reg);
-
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                window.location.reload();
-              }
-            });
-          });
-        })
-        .catch(err => console.error('Napaka pri registraciji SW:', err));
-      } else {
-        // Odstrani Service Workerje in počisti cache, če je USE_SW = false
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          for (let registration of registrations) {
-            registration.unregister().then(() => {
-              console.log('Service Worker odstranjen');
-            });
-          }
-        });
-        
-        if (window.caches) {
-          caches.keys().then(names => {
-            for (let name of names) caches.delete(name);
-          });
-        }
-      }
-    });
-
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (USE_SW && !refreshing) {
-        window.location.reload();
-        refreshing = true;
-      }
-    });
-  }
-</script>
 <script src="utils/music.js"></script>
 </body>
 </html>
